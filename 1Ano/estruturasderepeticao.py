@@ -1,4 +1,4 @@
-print(" 1 - Saída 1 \n 2 - Saída 2 \n 3 - Saída 3 \n 4 - Números Inteiros de 1 a 30 \n 5 - Números Inteiros entre [-5, 5] \n 6 - Números Pares entre [2, 10] \n 7 - Múltiplos de 3 entre [1, 20] \n 8 - Programa FizzBuzz \n 9 - Inteiro Positivo N de 1 - N \n 10 - Inteiros entre -N e N \n 11 - Múltiplos de 3 entre 1 e N \n 12 - Programa FizzBuzz 2")
+print(" 1 - Saída 1 \n 2 - Saída 2 \n 3 - Saída 3 \n 4 - Números Inteiros de 1 a 30 \n 5 - Números Inteiros entre [-5; 5] \n 6 - Números Pares entre [2; 10] \n 7 - Múltiplos de 3 entre [1; 20] \n 8 - Programa FizzBuzz \n 9 - Inteiro Positivo N de 1 - N \n 10 - Inteiros entre -N e N \n 11 - Múltiplos de 3 entre 1 e N \n 12 - Programa FizzBuzz 2 \n 13 - Saída 4 \n 14 - Inteiros de [1; n] \n 15 - Inteiros de [-n; n] \n 16 - Pares entre [2; n] \n 17 - Quantidade de Vogais em uma String \n 18 - Inteiro n e Pirâmide de Números \n 19 - Inteiro n e Pirâmide de Números Inversa")
 question: str = input()
 
 print("-" * 50)
@@ -63,5 +63,29 @@ match question:
             else:
                 print(i, end=" - ")
         print("Fim!")
+    case "13":
+        # 0, 1, 2, 3
+        print("\033[33m a) \033[m")
+        for i in range(4):
+            print(i)
+        print("\033[33m b) \033[m")
+        # 0, 3, 6, 9, 12, 15
+        for i in range(0, 17, 3):
+            print(i)
+    case "14":
+        print("\n".join(str(i) for i in range(1, int(input())+1)))
+    case "15":
+        number: int = int(input())
+        print("\n".join(str(i) for i in range(-number, number+1)))
+    case "16":
+        print("\n".join(str(i) for i in range(2, int(input())+1, 2)))
+    case "17":
+        print(sum(1 for i in input().lower() if i in {'a', 'e', 'i', 'o', 'u'}))
+    case "18":
+        for i in range(1, int(input())+1):
+            print(*range(1, i+1))
+    case "19":
+        for i in range(int(input()), 0, -1):
+            print(*range(1, i+1))
     case _:
         print("Opção Inválida/Inexistente!")
