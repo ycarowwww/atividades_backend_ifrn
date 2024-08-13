@@ -38,13 +38,3 @@ class Playlist:
     
     def __str__(self) -> str:
         return f"{self.__nome} | {self.__descricao} : {len(self.__musicas)}"
-    
-m1: Musica = Musica("teste", "Teuku Miadora", "Miadora", date(1969, 3, 29), timedelta(minutes=15))
-m2: Musica = Musica("teste2", "Rogerio da Silva", "Silvestre", date(1999, 4, 7), timedelta(minutes=7, seconds=30))
-
-playlist1: Playlist = Playlist("sla", "sla meu, musicas estranhas", [m1, m2])
-
-for i in playlist1.listar():
-    print(i)
-
-print(playlist1.tempo_total())
