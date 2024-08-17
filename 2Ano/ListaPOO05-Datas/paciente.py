@@ -1,10 +1,10 @@
-import datetime
+from datetime import datetime
 
-datetime_now: datetime.datetime = datetime.datetime.now()
-data_atual: datetime.datetime = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day)
+datetime_now: datetime = datetime.now()
+data_atual: datetime = datetime(datetime_now.year, datetime_now.month, datetime_now.day)
 
 class Paciente:
-    def __init__(self, nome: str, cpf: str, telefone: str, nascimento: datetime.datetime) -> None:
+    def __init__(self, nome: str, cpf: str, telefone: str, nascimento: datetime) -> None:
         self.__nome = nome
         self.__cpf = cpf
         self.__telefone = telefone
