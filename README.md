@@ -1,6 +1,6 @@
 # atividades_ilp_ifrn
 
-Repositório das Atividades da Matéria de **Introdução à Lógica e Programação** do IFRN-CNAT. Também possui algumas atividades da Matéria de **Programação Orientada a Objetos** do 2º ano.
+Repositório das Atividades da Matéria de **Introdução à Lógica e Programação** do IFRN-CNAT. Também possui algumas atividades da Matéria de **Programação Orientada a Objetos** do 2º ano. Você pode usá-lo para poder ver que atividades são essas e como eu as resolvi.
 
 ## Ferramentas Utilizadas
 
@@ -14,11 +14,25 @@ Pode ser instalado pelo comando **git clone**:
 git clone https://github.com/Yzakiel1390/atividades_ilp_ifrn.git
 ```
 
+## Execução
+
+Apenas explore os arquivos e rode os arquivos de Python para ver aquela atividade.
+
 ## Uso
 
 Você pode usar esse repositório para saber quais são as atividades da Matéria de **Introdução à Lógica e Programação** (e algumas de **Programação Orientada a Objetos** do 2º ano) e como eu as fiz.
 
-## Ferramentas que Pretendo Utilizar
+## Autores
+
+- Eu ([Yzakiel1390](https://github.com/Yzakiel1390/))
+
+## Licença
+
+Esse repositório não possui exatamente uma Licença, mas você pode usá-lo mesmo assim do jeito que quiser.
+
+## Algumas Anotações não do README
+
+### Ferramentas que Pretendo Utilizar
 
 - ![Static Badge](https://img.shields.io/badge/Django-%23092E20?style=for-the-badge&logo=django&logoColor=white)
 - ![Static Badge](https://img.shields.io/badge/Flask-%23000000?style=for-the-badge&logo=flask&logoColor=white)
@@ -43,6 +57,6 @@ Você pode usar esse repositório para saber quais são as atividades da Matéri
 - ![Static Badge](https://img.shields.io/badge/Unity-%23ffffff?style=for-the-badge&logo=unity&logoColor=black)
 - ![Static Badge](https://img.shields.io/badge/Gamemaker-%23000000?style=for-the-badge&logo=gamemaker&logoColor=white)
 
-## Links
+### Links
 
 Logos: https://shields.io/
