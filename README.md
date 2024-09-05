@@ -59,4 +59,5 @@ Esse repositório não possui exatamente uma Licença, mas você pode usá-lo me
 
 ### Links
 
-Logos: https://shields.io/
+- Logos: https://shields.io/
+- [README Modelo GitHub](https://gist.github.com/DomPizzie/7a5ff55ffa9081f2de27c315f5018afc)
