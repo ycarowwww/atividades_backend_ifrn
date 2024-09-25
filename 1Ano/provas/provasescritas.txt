@@ -1,3 +1,7 @@
+1º Bimestre:
+Questões sobre saídas de if-else
+
+2º Bimestre:
 Questões sobre saídas de if-else
 Questões sobre saídas de for e while
 Questões sobre converter código para fluxograma
