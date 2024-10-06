@@ -1,0 +1,41 @@
+Menu:
+- Pequena Introdução
+- Tela "Responsiva"
+
+Mecânicas Principais:
+- Dois círculos girando
+- A e D controles ou setas
+- Círculos com um "traço" atrás dele
+
+Obstáculos:
+- Retângulos que se mexem e rotacionam
+- Retângulos Invisíveis
+- Retângulos que precisam ser pressionados
+- Retângulos "falsos"/Quebráveis
+
+Modo Tutorial:
+- Bem, tutorial né
+
+Modo "Campanha":
+- Obstáculos Pré-definidos
+
+Modo Infinito:
+- Obstáculos Infinitos
+- Pontuação
+- Vidas
+-> Vidas se Restauram (talvez)
+
+Modo com 2 Players:
+- Duas Telas
+- Ou Obstáculos e Players
+
+Modo com 3 Círculos:
+- 3 círculos com + Obstáculos
+
+====================================================================================================
+
+Talvez Adicionar:
+- Power-Ups
+- Modo Daltônico
+- Coisas de menu gráficais
+- Mini-enciclopédia
