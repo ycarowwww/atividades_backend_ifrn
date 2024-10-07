@@ -6,6 +6,7 @@ Mecânicas Principais:
 - Dois círculos girando
 - A e D controles ou setas
 - Círculos com um "traço" atrás dele
+- Talvez os Círculos se afastarem do "Centro" da Órbita (Pode ter alguma mecânica de energia com isso)
 
 Obstáculos:
 - Retângulos que se mexem e rotacionam
@@ -39,3 +40,6 @@ Talvez Adicionar:
 - Modo Daltônico
 - Coisas de menu gráficais
 - Mini-enciclopédia
+- Multiplayer com Internet LAN
+- Salvar Dados com um Banco de Dados
+- "Rank" com "Contas"
