@@ -43,3 +43,5 @@ Talvez Adicionar:
 - Multiplayer com Internet LAN
 - Salvar Dados com um Banco de Dados
 - "Rank" com "Contas"
+- Traço de mouse que protege o jogador juntamente com o click (mecânica)
+- Algum tipo de tiro (mecânica)
