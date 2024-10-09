@@ -25,6 +25,7 @@ Modo Infinito:
 - Pontuação
 - Vidas
 -> Vidas se Restauram (talvez)
+- Conquistas/Achievements
 
 Modo com 2 Players:
 - Duas Telas
