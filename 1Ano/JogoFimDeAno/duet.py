@@ -28,6 +28,7 @@ class Player:
         self.angle = angle
         self.hitbox_rect = pg.Rect(0, 0, self.size, self.size)
         self.hitbox_rect.center = self.position
+        self.positions_track = []
     
     def update(self, screen: pg.Surface, point: tuple[int, int], distance: int, key: pg.key.ScancodeWrapper) -> None:
         if key[pg.K_a]: self.angle -= 5
@@ -40,10 +41,20 @@ class Player:
     def draw(self, screen: pg.Surface) -> None:
         pg.draw.circle(screen, self.color, self.position, self.size)
 
+        for line in range(1, len(self.positions_track)):
+            pg.draw.line(screen, self.color, self.positions_track[line-1], self.positions_track[line], int(-2 * self.size / len(self.positions_track) * line + 2 * self.size))
+
     def rotate_to_center(self, point: tuple[int, int], distance: int) -> None:
         self.position[0] = distance * cos(radians(self.angle)) + point[0]
         self.position[1] = distance * sin(radians(self.angle)) + point[1]
         self.hitbox_rect.center = self.position
+
+        self.positions_track.insert(0, list(self.hitbox_rect.center))
+        if len(self.positions_track) >= 30:
+            self.positions_track.pop(-1)
+
+        for line in range(1, len(self.positions_track)):
+            self.positions_track[line][1] += 5
 
 class Obstacle:
     def __init__(self, position: list[int], color: tuple[int, int, int], size: list[int]) -> None:
