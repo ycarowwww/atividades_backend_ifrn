@@ -39,10 +39,13 @@ class Player:
         self.draw(screen)
     
     def draw(self, screen: pg.Surface) -> None:
+        track_length: int = len(self.positions_track)
+        for line in range(1, track_length):
+            line_width: int = int(-2 * self.size / track_length * line + 2 * self.size)
+            line_color: list[int, int, int] = [-color / track_length * line + color for color in list(self.color)]
+            pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
+        
         pg.draw.circle(screen, self.color, self.position, self.size)
-
-        for line in range(1, len(self.positions_track)):
-            pg.draw.line(screen, self.color, self.positions_track[line-1], self.positions_track[line], int(-2 * self.size / len(self.positions_track) * line + 2 * self.size))
 
     def rotate_to_center(self, point: tuple[int, int], distance: int) -> None:
         self.position[0] = distance * cos(radians(self.angle)) + point[0]
