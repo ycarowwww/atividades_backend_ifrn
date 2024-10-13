@@ -65,9 +65,10 @@ class Obstacle:
         self.size = size
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
+        self.speed =(240 + self.size[1]) / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º)
     
     def movement_bottom(self) -> None:
-        self.position[1] += 5
+        self.position[1] += self.speed
         self.hitbox_rect.y = self.position[1]
     
     def draw(self, screen: pg.Surface) -> None:
@@ -106,7 +107,7 @@ while running:
     if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
         obstacles_list.pop(0)
         
-    if len([rect for rect in obstacles_list if rect.position[1] >= 200]) - len(obstacles_list) >= 0:
+    if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
         obstacles_list.append(Obstacle([choice(possible_obstacles_x), -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
         punctuation += 1
     
