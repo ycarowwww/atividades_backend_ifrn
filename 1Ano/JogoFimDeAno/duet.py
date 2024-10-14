@@ -65,7 +65,7 @@ class Obstacle:
         self.size = size
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
-        self.speed =(240 + self.size[1]) / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º)
+        self.speed = (240 + self.size[1]) / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º)
     
     def movement_bottom(self) -> None:
         self.position[1] += self.speed
