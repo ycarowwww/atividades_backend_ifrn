@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype
 from math import cos, sin, radians
-from random import choice
+from random import choice, randint
 
 pg.init()
 
@@ -65,7 +65,7 @@ class Obstacle:
         self.size = size
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
-        self.speed = (240 + self.size[1]) / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º)
+        self.speed = 270 / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º) | Formula Temporary Removed
     
     def movement_bottom(self) -> None:
         self.position[1] += self.speed
@@ -79,8 +79,7 @@ player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180)
 
 player_angle: int = 0
 OBSTACLE_SIZE: int = 30
-possible_obstacles_x: list[int] = [0, SCREEN_CENTER[0]]
-obstacles_list: list[Obstacle] = [Obstacle([choice(possible_obstacles_x), -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
+obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
 GAME_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 30, True, False)
 punctuation: int = 0
 
@@ -101,6 +100,7 @@ while running:
     for rect in obstacles_list:
         rect.movement_bottom()
         rect.draw(screen)
+        
         if rect.hitbox_rect.collidelist([player1.hitbox_rect, player2.hitbox_rect]) != -1:
             punctuation = 0
 
@@ -108,7 +108,16 @@ while running:
         obstacles_list.pop(0)
         
     if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
-        obstacles_list.append(Obstacle([choice(possible_obstacles_x), -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
+        rnd_num: int = randint(1, 3)
+
+        match rnd_num:
+            case 1:
+                obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
+            case 2:
+                obstacles_list.append(Obstacle([SCREEN_CENTER[0], -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
+            case 3:
+                obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
+        
         punctuation += 1
     
     GAME_FONT.render_to(screen, (SCREEN_SIZE[0]//2-15, SCREEN_SIZE[1]//2), f"{punctuation}", COLORS["WHITE"])
