@@ -40,10 +40,11 @@ class Player:
     
     def draw(self, screen: pg.Surface) -> None:
         track_length: int = len(self.positions_track)
-        for line in range(1, track_length):
+        for line in range(track_length-1, 0, -1):
             line_width: int = int(-2 * self.size / track_length * line + 2 * self.size)
             line_color: list[int, int, int] = [-color / track_length * line + color for color in list(self.color)]
             pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
+            pg.draw.circle(screen, line_color, self.positions_track[line], line_width//2)
         
         pg.draw.circle(screen, self.color, self.position, self.size)
 
@@ -52,7 +53,7 @@ class Player:
         self.position[1] = distance * sin(radians(self.angle)) + point[1]
         self.hitbox_rect.center = self.position
 
-        self.positions_track.insert(0, list(self.hitbox_rect.center))
+        self.positions_track.insert(0, list(self.hitbox_rect.center)) # Usar uma Queue depois
         if len(self.positions_track) >= 30:
             self.positions_track.pop(-1)
 
@@ -66,12 +67,23 @@ class Obstacle:
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
         self.speed = 270 / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º) | Formula Temporary Removed
+        self.positions_track = []
     
     def movement_bottom(self) -> None:
         self.position[1] += self.speed
         self.hitbox_rect.y = self.position[1]
+
+        self.positions_track.insert(0, self.hitbox_rect.top) # Usar uma Queue depois
+        if len(self.positions_track) >= 5:
+            self.positions_track.pop(-1)
     
     def draw(self, screen: pg.Surface) -> None:
+        track_length: int = len(self.positions_track)
+        for line in range(track_length-1, 0, -1):
+            line_width: int = self.size[0]
+            line_color: list[int, int, int] = [-color / track_length * line + color for color in list(self.color)]
+            pg.draw.line(screen, line_color, (self.hitbox_rect.centerx, self.positions_track[line-1]), (self.hitbox_rect.centerx, self.positions_track[line]), line_width)
+        
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20)
