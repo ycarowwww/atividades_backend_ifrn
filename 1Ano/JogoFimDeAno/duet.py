@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype
 from math import cos, sin, radians
-from random import choice, randint
+from random import randint
 
 pg.init()
 
