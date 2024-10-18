@@ -132,7 +132,9 @@ while running:
         
         punctuation += 1
     
-    GAME_FONT.render_to(screen, (SCREEN_SIZE[0]//2-15, SCREEN_SIZE[1]//2), f"{punctuation}", COLORS["WHITE"])
+    text_surface, text_rect = GAME_FONT.render(f"{punctuation}", COLORS["WHITE"])
+    text_rect.center = SCREEN_CENTER
+    screen.blit(text_surface, text_rect)
     
     pg.display.flip()
 
