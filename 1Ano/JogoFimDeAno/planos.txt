@@ -46,3 +46,9 @@ Talvez Adicionar:
 - "Rank" com "Contas"
 - Traço de mouse que protege o jogador juntamente com o click (mecânica)
 - Algum tipo de tiro (mecânica)
+- Mini Rede Social com um Banco de Dados
+-> Sistema de Amizades
+-> Maior Score
+-> Conta
+-> Online
+-> Achievements
