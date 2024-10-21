@@ -86,6 +86,11 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
+def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pygame.freetype.Font) -> None:
+    text_surface, text_rect = font.render(message, color)
+    text_rect.topleft = topleft
+    screen.blit(text_surface, text_rect)
+
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20)
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180)
 
@@ -93,7 +98,9 @@ player_angle: int = 0
 OBSTACLE_SIZE: int = 30
 obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
 GAME_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 30, True, False)
+MAX_SCORE_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 15, False, False)
 punctuation: int = 0
+max_score: int = 0
 
 running: bool = True
 while running:
@@ -131,10 +138,10 @@ while running:
                 obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
         
         punctuation += 1
+        max_score = max(max_score, punctuation)
     
-    text_surface, text_rect = GAME_FONT.render(f"{punctuation}", COLORS["WHITE"])
-    text_rect.center = SCREEN_CENTER
-    screen.blit(text_surface, text_rect)
+    blit_text(screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
+    blit_text(screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
     
     pg.display.flip()
 
