@@ -5,20 +5,20 @@ from random import randint
 
 pg.init()
 
-COLORS: dict[str, tuple[int, int, int]] = {
-    "BLACK" : (0, 0, 0),
-    "WHITE" : (255, 255, 255),
-    "RED" : (255, 0, 0),
-    "GREEN" : (0, 255, 0),
-    "BLUE" : (0, 0, 255)
-}
-
 SCREEN_SIZE: tuple[int, int] = (800, 600)
 SCREEN_CENTER: tuple[int, int] = (SCREEN_SIZE[0]//2, SCREEN_SIZE[1]//2)
 screen: pg.Surface = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("Duet PFA")
 clock: pg.time.Clock = pg.time.Clock()
 FPS: float = 60.0
+COLORS: dict[str, tuple[int, int, int]] = {
+    "BLACK" : (0, 0, 0),
+    "GRAY" : (70, 70, 70),
+    "WHITE" : (255, 255, 255),
+    "RED" : (255, 0, 0),
+    "GREEN" : (0, 255, 0),
+    "BLUE" : (0, 0, 255)
+}
 
 class Player:
     def __init__(self, position: list[int], color: tuple[int, int, int], size: int, angle: int = 0) -> None:
@@ -29,13 +29,20 @@ class Player:
         self.hitbox_rect = pg.Rect(0, 0, self.size, self.size)
         self.hitbox_rect.center = self.position
         self.positions_track = []
+        self.distance = 100
     
-    def update(self, screen: pg.Surface, point: tuple[int, int], distance: int, key: pg.key.ScancodeWrapper) -> None:
+    def update(self, screen: pg.Surface, point: tuple[int, int], key: pg.key.ScancodeWrapper) -> None:
+        if key[pg.K_LSHIFT] and self.distance > 0:
+            self.distance -= 5
+        elif key[pg.K_SPACE] or self.distance < 100:
+            self.distance += 5
+        elif self.distance > 100:
+            self.distance -= 5
         if key[pg.K_a]: self.angle -= 5
         if key[pg.K_d]: self.angle += 5
         self.angle %= 360
 
-        self.rotate_to_center(point, distance)
+        self.rotate_to_center(point)
         self.draw(screen)
     
     def draw(self, screen: pg.Surface) -> None:
@@ -48,9 +55,9 @@ class Player:
         
         pg.draw.circle(screen, self.color, self.position, self.size)
 
-    def rotate_to_center(self, point: tuple[int, int], distance: int) -> None:
-        self.position[0] = distance * cos(radians(self.angle)) + point[0]
-        self.position[1] = distance * sin(radians(self.angle)) + point[1]
+    def rotate_to_center(self, point: tuple[int, int]) -> None:
+        self.position[0] = self.distance * cos(radians(self.angle)) + point[0]
+        self.position[1] = self.distance * sin(radians(self.angle)) + point[1]
         self.hitbox_rect.center = self.position
 
         self.positions_track.insert(0, list(self.hitbox_rect.center)) # Usar uma Queue depois
@@ -111,10 +118,12 @@ while running:
     clock.tick(FPS)
     screen.fill(COLORS["BLACK"])
 
+    pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
+
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
 
-    player1.update(screen, SCREEN_CENTER, 100, key)
-    player2.update(screen, SCREEN_CENTER, 100, key)
+    player1.update(screen, SCREEN_CENTER, key)
+    player2.update(screen, SCREEN_CENTER, key)
 
     for rect in obstacles_list:
         rect.movement_bottom()
