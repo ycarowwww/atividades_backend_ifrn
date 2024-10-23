@@ -145,6 +145,7 @@ while running:
                 obstacles_list.append(Obstacle([SCREEN_CENTER[0], -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
             case 3:
                 obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
+                obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
         
         punctuation += 1
         max_score = max(max_score, punctuation)
