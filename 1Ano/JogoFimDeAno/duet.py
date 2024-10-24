@@ -136,7 +136,7 @@ while running:
         obstacles_list.pop(0)
         
     if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
-        rnd_num: int = randint(1, 4)
+        rnd_num: int = randint(1, 5)
 
         match rnd_num:
             case 1:
@@ -147,7 +147,10 @@ while running:
                 obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
                 obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
             case 4:
-                obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE - 50], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
+                obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE - 150], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
+            case 5:
+                obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
+                obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
         
         punctuation += 1
         max_score = max(max_score, punctuation)
