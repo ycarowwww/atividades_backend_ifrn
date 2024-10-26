@@ -34,7 +34,7 @@ class Player:
     def update(self, screen: pg.Surface, point: tuple[int, int], key: pg.key.ScancodeWrapper) -> None:
         if key[pg.K_LSHIFT] and self.distance > 0:
             self.distance -= 5
-        elif key[pg.K_SPACE] or self.distance < 100:
+        elif key[pg.K_SPACE] and self.distance < SCREEN_SIZE[0]//2 or self.distance < 100:
             self.distance += 5
         elif self.distance > 100:
             self.distance -= 5
