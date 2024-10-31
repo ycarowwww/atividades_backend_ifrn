@@ -42,6 +42,11 @@ def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> 
 
     return (int(r * 255), int(g * 255), int(b * 255))
 
+def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pygame.freetype.Font) -> None:
+    text_surface, text_rect = font.render(message, color)
+    text_rect.topleft = topleft
+    screen.blit(text_surface, text_rect)
+    
 class Player:
     def __init__(self, position: list[int], color: tuple[int, int, int], size: int, angle: int = 0) -> None:
         self.position = position
@@ -55,14 +60,14 @@ class Player:
         self.color_track = adjust_brightness(self.color, 0.5)
     
     def update(self, screen: pg.Surface, point: tuple[int, int], key: pg.key.ScancodeWrapper) -> None:
-        if key[pg.K_LSHIFT] and self.distance > 0:
+        if (key[pg.K_LSHIFT] or key[pg.K_DOWN]) and self.distance > 0:
             self.distance -= 5
-        elif key[pg.K_SPACE] and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not key[pg.K_LSHIFT]:
+        elif (key[pg.K_SPACE] or key[pg.K_UP]) and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not (key[pg.K_LSHIFT] or key[pg.K_DOWN]):
             self.distance += 5
-        elif self.distance > 100 and not key[pg.K_SPACE]:
+        elif self.distance > 100 and not (key[pg.K_SPACE] or key[pg.K_UP]):
             self.distance -= 5
-        if key[pg.K_a]: self.angle -= 5
-        if key[pg.K_d]: self.angle += 5
+        if key[pg.K_a] or key[pg.K_LEFT]: self.angle -= 5
+        if key[pg.K_d] or key[pg.K_RIGHT]: self.angle += 5
         self.angle %= 360
 
         self.rotate_to_center(point)
@@ -117,21 +122,14 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
-def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pygame.freetype.Font) -> None:
-    text_surface, text_rect = font.render(message, color)
-    text_rect.topleft = topleft
-    screen.blit(text_surface, text_rect)
-
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20)
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180)
 
-player_angle: int = 0
+player_angle, punctuation, max_score = 0, 0, 0
 OBSTACLE_SIZE: int = 30
 obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
 GAME_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 30, True, False)
 MAX_SCORE_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 15, False, False)
-punctuation: int = 0
-max_score: int = 0
 
 running: bool = True
 while running:

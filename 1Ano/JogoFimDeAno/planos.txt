@@ -52,3 +52,4 @@ Talvez Adicionar:
 -> Conta
 -> Online
 -> Achievements
+- Modo Clássico
