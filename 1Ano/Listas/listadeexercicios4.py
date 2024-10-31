@@ -1,6 +1,8 @@
+from ast import literal_eval
+
 print(f"{"\033[1;33mLista de Exercícios 4 - ILP\033[m":^51}")
 print("\033[30m=\033[m"*51)
-print(" 1 - Área do Quadrado \n 2 - Perímetro do Quadrado \n 3 - Área do Retângulo \n 4 - Perímetro do Retângulo \n 5 - c em [a, b] \n 6 - É Divisível \n 7 - É Par (2) \n 8 - Divisão Completa \n 9 - Quantidade de Bolos \n 10 - Lista 1 até n \n 11 - Pares de 2 até n \n 12 - n Primeiros Múltiplos de 3 \n 13 - n Primeiros Múltiplos de a")
+print(" 1 - Área do Quadrado \n 2 - Perímetro do Quadrado \n 3 - Área do Retângulo \n 4 - Perímetro do Retângulo \n 5 - c em [a, b] \n 6 - É Divisível \n 7 - É Par (2) \n 8 - Divisão Completa \n 9 - Quantidade de Bolos \n 10 - Lista 1 até n \n 11 - Pares de 2 até n \n 12 - n Primeiros Múltiplos de 3 \n 13 - n Primeiros Múltiplos de a \n 14 - Somar Lista de Inteiros \n 15 - Média Lista de Inteiros \n 16 - Soma Lista de Inteiros Pares e Ímpares \n 17 - Somas Diferentes \n 18 - Lista Pares e Ímpares \n 19 - Soma de Listas \n 20 - Elementos em ambos \n 21 - Todos os elementos em ambos \n 22 - Intercalação de Listas")
 option: str = input("\033[32m - Selecione uma das opções Acima: \033[31m\033[34m")
 
 print("\033[30m-\033[m"*51)
@@ -113,5 +115,95 @@ match option:
         amount: int = int(input("Quantidade: "))
 
         print(multiple_n_a(number, amount))
+
+    case "14":
+        def sum_list(list_num: list[int]) -> int:
+            return sum(list_num)
+        
+        list_num: list[int] = literal_eval(input("Lista de Inteiros: "))
+        print(sum_list(list_num))
+
+    case "15":
+        def mean_list(list_num: list[int]) -> int:
+            return sum(list_num) / len(list_num)
+        
+        list_num: list[int] = literal_eval(input("Lista de Inteiros: "))
+        print(mean_list(list_num))
+
+    case "16":
+        def sum_even_odd_list(list_num: list[int]) -> tuple[int]:
+            even_numbers: list[int] = [n for n in list_num if n % 2 == 0]
+            odd_numbers: list[int] = [n for n in list_num if n % 2 != 0]
+            return (sum(even_numbers), sum(odd_numbers))
+        
+        list_num: list[int] = literal_eval(input("Lista de Inteiros: "))
+        print(*sum_even_odd_list(list_num), sep="\n")
+
+    case "17":
+        def different_sums(list_num: list[int], param: int) -> int:
+            match param:
+                case 0:
+                    return sum(list_num)
+                case param if param > 0:
+                    return sum([n for n in list_num if n % 2 == 0])
+                case param if param < 0:
+                    return sum([n for n in list_num if n % 2 != 0])
+        
+        list_num: list[int] = literal_eval(input("Lista de Inteiros: "))
+        param: int = int(input("- Parâmetro: "))
+        print(different_sums(list_num, param))
+
+    case "18":
+        def even_and_pairs_list(list_num: list[int]) -> tuple[list[int]]:
+            even_list: list[int] = [n for n in list_num if n % 2 == 0]
+            odd_list: list[int] = [n for n in list_num if n % 2 != 0]
+            return (even_list, odd_list)
+        
+        list_num: list[int] = literal_eval(input("Lista de Inteiros: "))
+        print(*even_and_pairs_list(list_num), sep="\n")
+
+    case "19":
+        def sum_lists(list_num_1: list[int], list_num_2: list[int]) -> list[int]:
+            return [list_num_1[i] + list_num_2[i] for i in range(len(list_num_1))]
+
+        list_num_1: list[int] = literal_eval(input("Lista de Inteiros 1: "))
+        list_num_2: list[int] = literal_eval(input("Lista de Inteiros 2: "))
+        print(sum_lists(list_num_1, list_num_2))
+
+    case "20":
+        def same_elements(list_num_1: list[int], list_num_2: list[int]) -> list[int]:
+            set_1: set[int] = set(list_num_1)
+            set_2: set[int] = set(list_num_2)
+
+            return list(set_1 & set_2)
+
+        list_num_1: list[int] = literal_eval(input("Lista de Inteiros 1: "))
+        list_num_2: list[int] = literal_eval(input("Lista de Inteiros 2: "))
+        print(same_elements(list_num_1, list_num_2))
+    
+    case "21":
+        def both_elements(list_num_1: list[int], list_num_2: list[int]) -> list[int]:
+            set_1: set[int] = set(list_num_1)
+            set_2: set[int] = set(list_num_2)
+
+            return list(set_1 | set_2)
+
+        list_num_1: list[int] = literal_eval(input("Lista de Inteiros 1: "))
+        list_num_2: list[int] = literal_eval(input("Lista de Inteiros 2: "))
+        print(both_elements(list_num_1, list_num_2))
+    
+    case "22":
+        def intercalation_lists(list_num_1: list[int], list_num_2: list[int]) -> list[int]:
+            new_list: list[int] = []
+
+            for i in range(len(list_num_1)):
+                new_list.append(list_num_1[i])
+                new_list.append(list_num_2[i])
+
+            return new_list
+
+        list_num_1: list[int] = literal_eval(input("Lista de Inteiros 1: "))
+        list_num_2: list[int] = literal_eval(input("Lista de Inteiros 2: "))
+        print(intercalation_lists(list_num_1, list_num_2))
     
     case _: print("\033[31mOpção Inválida!\033[m")
