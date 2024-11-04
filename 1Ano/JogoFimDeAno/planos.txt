@@ -16,6 +16,7 @@ Obstáculos:
 
 Modo Tutorial:
 - Bem, tutorial né
+- Tutorial também poderia ser meio que misturado com o modo Campanha
 
 Modo "Campanha":
 - Obstáculos Pré-definidos
