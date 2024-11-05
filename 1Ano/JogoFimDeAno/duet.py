@@ -55,7 +55,7 @@ class Player:
         self.angle = angle
         self.hitbox_rect = pg.Rect(0, 0, self.size, self.size)
         self.hitbox_rect.center = self.position
-        self.positions_track = []
+        self.positions_track: list[list[int]] = []
         self.distance = 100
         self.color_track = adjust_brightness(self.color, 0.5)
     
@@ -77,7 +77,7 @@ class Player:
         track_length: int = len(self.positions_track)
         for line in range(track_length-1, 0, -1):
             line_width: int = int(-2 * self.size / track_length * line + 2 * self.size)
-            line_color: list[int, int, int] = [-color / track_length * line + color for color in list(self.color_track)]
+            line_color: list[int] = [-color / track_length * line + color for color in list(self.color_track)]
             pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
             pg.draw.circle(screen, line_color, self.positions_track[line], line_width//2)
         
@@ -102,7 +102,7 @@ class Obstacle:
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
         self.speed = 270 / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º) | Formula Temporary Removed
-        self.positions_track = []
+        self.positions_track: list[int] = []
         self.color_track = adjust_brightness(self.color, 0.5)
     
     def movement_bottom(self) -> None:
@@ -117,7 +117,7 @@ class Obstacle:
         track_length: int = len(self.positions_track)
         for line in range(track_length-1, 0, -1):
             line_width: int = self.size[0]
-            line_color: list[int, int, int] = [-color / track_length * line + color for color in list(self.color_track)]
+            line_color: list[int] = [-color / track_length * line + color for color in list(self.color_track)]
             pg.draw.line(screen, line_color, (self.hitbox_rect.centerx, self.positions_track[line-1]), (self.hitbox_rect.centerx, self.positions_track[line]), line_width)
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
@@ -173,6 +173,7 @@ while running:
             case 5:
                 obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
                 obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
+            case _: pass
         
         punctuation += 1
         max_score = max(max_score, punctuation)
