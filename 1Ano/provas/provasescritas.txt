@@ -6,3 +6,7 @@ Questões sobre saídas de if-else
 Questões sobre saídas de for e while
 Questões sobre saídas com listas
 Questões sobre converter código para fluxograma
+
+3º Bimestre:
+Prova escrita sobre saídas de código
+Trabalho de programa
