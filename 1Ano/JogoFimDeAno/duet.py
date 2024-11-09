@@ -4,6 +4,8 @@ import colorsys
 from math import cos, sin, radians
 from random import randint
 
+PLAYER_ROTATION_VELOCITY: float = float(input("- Player's Rotation Velocity: "))
+
 pg.init()
 
 SCREEN_SIZE: tuple[int, int] = (800, 600)
@@ -48,11 +50,12 @@ def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], top
     screen.blit(text_surface, text_rect)
     
 class Player:
-    def __init__(self, position: list[int], color: tuple[int, int, int], size: int, angle: int = 0) -> None:
+    def __init__(self, position: list[int], color: tuple[int, int, int], size: int, angle: int = 0, speed: float = 5) -> None:
         self.position = position
         self.color = color
         self.size = size
         self.angle = angle
+        self.speed = speed
         self.hitbox_rect = pg.Rect(0, 0, self.size, self.size)
         self.hitbox_rect.center = self.position
         self.positions_track: list[list[int]] = []
@@ -61,13 +64,13 @@ class Player:
     
     def update(self, screen: pg.Surface, point: tuple[int, int], key: pg.key.ScancodeWrapper) -> None:
         if (key[pg.K_LSHIFT] or key[pg.K_DOWN]) and self.distance > 0:
-            self.distance -= 5
+            self.distance -= self.speed
         elif (key[pg.K_SPACE] or key[pg.K_UP]) and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not (key[pg.K_LSHIFT] or key[pg.K_DOWN]):
-            self.distance += 5
+            self.distance += self.speed
         elif self.distance > 100 and not (key[pg.K_SPACE] or key[pg.K_UP]):
-            self.distance -= 5
-        if key[pg.K_a] or key[pg.K_LEFT]: self.angle -= 5
-        if key[pg.K_d] or key[pg.K_RIGHT]: self.angle += 5
+            self.distance -= self.speed
+        if key[pg.K_a] or key[pg.K_LEFT]: self.angle -= self.speed
+        if key[pg.K_d] or key[pg.K_RIGHT]: self.angle += self.speed
         self.angle %= 360
 
         self.rotate_to_center(point)
@@ -89,11 +92,11 @@ class Player:
         self.hitbox_rect.center = self.position
 
         self.positions_track.insert(0, list(self.hitbox_rect.center)) # Usar uma Queue depois
-        if len(self.positions_track) >= 30:
+        if len(self.positions_track) >= 150 / self.speed:
             self.positions_track.pop(-1)
 
         for line in range(1, len(self.positions_track)):
-            self.positions_track[line][1] += 5
+            self.positions_track[line][1] += self.speed
 
 class Obstacle:
     def __init__(self, position: list[int], color: tuple[int, int, int], size: list[int]) -> None:
@@ -101,7 +104,7 @@ class Obstacle:
         self.size = size
         self.color = color
         self.hitbox_rect = pg.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
-        self.speed = 270 / 36 # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º) | Formula Temporary Removed
+        self.speed = 270 / (180 / PLAYER_ROTATION_VELOCITY) # 200 (bigger" circle's radius) + 40 (balls' radois) + self.size = total height / time (180º / 5º) | Formula Temporary Removed
         self.positions_track: list[int] = []
         self.color_track = adjust_brightness(self.color, 0.5)
     
@@ -122,8 +125,8 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
-player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20)
-player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180)
+player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
+player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
 player_angle, punctuation, max_score = 0, 0, 0
 OBSTACLE_SIZE: int = 30
