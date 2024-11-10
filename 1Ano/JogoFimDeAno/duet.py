@@ -128,6 +128,7 @@ class Obstacle:
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
+show_borders: bool = False
 player_angle, punctuation, max_score = 0, 0, 0
 OBSTACLE_SIZE: int = 30
 obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
@@ -143,12 +144,15 @@ while running:
     clock.tick(FPS)
     screen.fill(COLORS["BLACK"])
 
-    pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
+    if show_borders:
+        pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
 
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
+
+    if key[pg.K_b]: show_borders = not show_borders
 
     for rect in obstacles_list:
         rect.movement_bottom()
