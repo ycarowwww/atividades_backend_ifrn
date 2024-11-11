@@ -129,6 +129,7 @@ player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_R
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
 show_borders: bool = False
+can_change_show_borders: bool = True
 player_angle, punctuation, max_score = 0, 0, 0
 OBSTACLE_SIZE: int = 30
 obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
@@ -152,7 +153,11 @@ while running:
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
 
-    if key[pg.K_b]: show_borders = not show_borders
+    if key[pg.K_b] and can_change_show_borders:
+        show_borders = not show_borders
+        can_change_show_borders = False
+    elif not key[pg.K_b]:
+        can_change_show_borders = True
 
     for rect in obstacles_list:
         rect.movement_bottom()
