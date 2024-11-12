@@ -128,6 +128,8 @@ class Obstacle:
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
+pause_game: bool = False
+can_change_pause_game: bool = False
 show_borders: bool = False
 can_change_show_borders: bool = True
 player_angle, punctuation, max_score = 0, 0, 0
@@ -149,6 +151,25 @@ while running:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
+
+    if key[pg.K_ESCAPE] and can_change_pause_game:
+        pause_game = not pause_game
+        can_change_pause_game = False
+    elif not key[pg.K_ESCAPE]:
+        can_change_pause_game = True
+    
+    if pause_game:
+        player1.draw(screen)
+        player2.draw(screen)
+
+        for rect in obstacles_list:
+            rect.draw(screen)
+        
+        blit_text(screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
+        blit_text(screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
+        
+        pg.display.flip()
+        continue
 
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
