@@ -143,6 +143,9 @@ player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAY
 
 pause_button: pg.Rect = pg.Rect(0, 0, 50, 50)
 pause_button.topright = (SCREEN_SIZE[0] - 10, 10)
+pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
+pause_button_rects[0].topright = pause_button.topright
+pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
 pause_game = some_key_pressed(pg.K_ESCAPE, False, False)
 show_borders = some_key_pressed(pg.K_b, False, False)
 player_angle, punctuation, max_score = 0, 0, 0
@@ -163,7 +166,8 @@ while running:
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
     mouse: tuple[bool, bool, bool] = pg.mouse.get_pressed()
 
-    pg.draw.rect(screen, COLORS["WHITE"], pause_button)
+    for bt in pause_button_rects:
+        pg.draw.rect(screen, COLORS["WHITE"], bt)
 
     if show_borders.do:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
@@ -174,8 +178,6 @@ while running:
         pause_game.do = not pause_game.do
     elif not mouse[0]:
         pause_game.can_do = True
-    
-    print(mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()) and pause_game.can_do, not mouse[0])
     
     if pause_game.do:
         player1.draw(screen)
