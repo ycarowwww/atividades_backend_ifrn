@@ -35,6 +35,9 @@ Modo com 2 Players:
 Modo com 3 Círculos:
 - 3 círculos com + Obstáculos
 
+Editor de Fases
+- Criador de Fases e "Mapas"
+
 ====================================================================================================
 
 Talvez Adicionar:

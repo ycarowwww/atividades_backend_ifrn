@@ -141,6 +141,8 @@ class Obstacle:
 player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
 player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
+pause_button: pg.Rect = pg.Rect(0, 0, 50, 50)
+pause_button.topright = (SCREEN_SIZE[0] - 10, 10)
 pause_game = some_key_pressed(pg.K_ESCAPE, False, False)
 show_borders = some_key_pressed(pg.K_b, False, False)
 player_angle, punctuation, max_score = 0, 0, 0
@@ -158,12 +160,22 @@ while running:
     clock.tick(FPS)
     screen.fill(COLORS["BLACK"])
 
+    key: pg.key.ScancodeWrapper = pg.key.get_pressed()
+    mouse: tuple[bool, bool, bool] = pg.mouse.get_pressed()
+
+    pg.draw.rect(screen, COLORS["WHITE"], pause_button)
+
     if show_borders.do:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
-    key: pg.key.ScancodeWrapper = pg.key.get_pressed()
-
     pause_game.press_check(key)
+    if mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()) and pause_game.can_do:
+        pause_game.can_do = False
+        pause_game.do = not pause_game.do
+    elif not mouse[0]:
+        pause_game.can_do = True
+    
+    print(mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()) and pause_game.can_do, not mouse[0])
     
     if pause_game.do:
         player1.draw(screen)
