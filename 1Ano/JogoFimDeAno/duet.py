@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype
 import colorsys
-from math import cos, sin, radians
+from math import cos, sin, radians, sqrt
 from random import randint
 
 PLAYER_ROTATION_VELOCITY: float = float(input("- Player's Rotation Velocity: "))
@@ -20,7 +20,7 @@ COLORS: dict[str, tuple[int, int, int]] = {
     "WHITE" : (255, 255, 255),
     "RED" : (255, 0, 0),
     "GREEN" : (0, 255, 0),
-    "BLUE" : (0, 0, 255)
+    "BLUE" : (35, 172, 255)
 }
 
 def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> tuple[int, int, int]:
@@ -48,7 +48,18 @@ def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], top
     text_surface, text_rect = font.render(message, color)
     text_rect.topleft = topleft
     screen.blit(text_surface, text_rect)
-    
+
+def collision_circle_rect(circle_center: tuple[float, float], radius: float, rect: pg.Rect) -> bool:
+    """
+        Detecta a colisão de um círculo com um Retângulo.
+    """
+    closest_x: float = max(rect.left, min(circle_center[0], rect.right))
+    closest_y: float = max(rect.top, min(circle_center[1], rect.bottom))
+
+    distance: float = sqrt((circle_center[0] - closest_x) ** 2 + (circle_center[1] - closest_y) ** 2)
+
+    return distance <= radius
+
 class some_key_pressed:
     def __init__(self, key: int, can_do: bool, do: bool) -> None:
         self.key = key
@@ -63,14 +74,12 @@ class some_key_pressed:
             self.can_do = True
 
 class Player:
-    def __init__(self, position: list[int], color: tuple[int, int, int], size: int, angle: int = 0, speed: float = 5) -> None:
+    def __init__(self, position: list[int], color: tuple[int, int, int], radius: int, angle: int = 0, speed: float = 5) -> None:
         self.position = position
         self.color = color
-        self.size = size
+        self.radius = radius
         self.angle = angle
         self.speed = speed
-        self.hitbox_rect = pg.Rect(0, 0, self.size, self.size)
-        self.hitbox_rect.center = self.position
         self.positions_track: list[list[int]] = []
         self.distance = 100
         self.color_track = adjust_brightness(self.color, 0.5)
@@ -92,19 +101,18 @@ class Player:
     def draw(self, screen: pg.Surface) -> None:
         track_length: int = len(self.positions_track)
         for line in range(track_length-1, 0, -1):
-            line_width: int = int(-2 * self.size / track_length * line + 2 * self.size)
+            line_width: int = int(-4 * self.radius / track_length * line + 4 * self.radius)
             line_color: list[int] = [-color / track_length * line + color for color in list(self.color_track)]
             pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
             pg.draw.circle(screen, line_color, self.positions_track[line], line_width//2)
         
-        pg.draw.circle(screen, self.color, self.position, self.size)
+        pg.draw.circle(screen, self.color, self.position, self.radius * 2)
 
     def rotate_to_center(self, point: tuple[int, int]) -> None:
         self.position[0] = self.distance * cos(radians(self.angle)) + point[0]
         self.position[1] = self.distance * sin(radians(self.angle)) + point[1]
-        self.hitbox_rect.center = self.position
 
-        self.positions_track.insert(0, list(self.hitbox_rect.center)) # Usar uma Queue depois
+        self.positions_track.insert(0, self.position.copy()) # Usar uma Queue depois
         if len(self.positions_track) >= 150 / self.speed:
             self.positions_track.pop(-1)
 
@@ -138,8 +146,8 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
-player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
-player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
+player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 10, speed=PLAYER_ROTATION_VELOCITY)
+player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 10, 180, speed=PLAYER_ROTATION_VELOCITY)
 
 pause_button: pg.Rect = pg.Rect(0, 0, 50, 50)
 pause_button.topright = (SCREEN_SIZE[0] - 10, 10)
@@ -200,8 +208,8 @@ while running:
     for rect in obstacles_list:
         rect.movement_bottom()
         rect.draw(screen)
-        
-        if rect.hitbox_rect.collidelist([player1.hitbox_rect, player2.hitbox_rect]) != -1:
+        # Check Collision with players
+        if collision_circle_rect(player1.position, player1.radius, rect.hitbox_rect) or collision_circle_rect(player2.position, player2.radius, rect.hitbox_rect):
             punctuation = 0
 
     if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
