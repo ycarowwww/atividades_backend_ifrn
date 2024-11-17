@@ -174,8 +174,11 @@ while running:
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
     mouse: tuple[bool, bool, bool] = pg.mouse.get_pressed()
 
-    for bt in pause_button_rects:
-        pg.draw.rect(screen, COLORS["WHITE"], bt)
+    if pause_game.do:
+        pg.draw.polygon(screen, COLORS["WHITE"], (pause_button.topleft, pause_button.bottomleft, (pause_button.right, pause_button.centery)))
+    else:
+        for bt in pause_button_rects:
+            pg.draw.rect(screen, COLORS["WHITE"], bt)
 
     if show_borders.do:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
