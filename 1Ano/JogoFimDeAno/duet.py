@@ -66,11 +66,11 @@ class some_key_pressed:
         self.can_do = can_do
         self.do = do
 
-    def press_check(self, keys: pg.key.ScancodeWrapper) -> None:
-        if keys[self.key] and self.can_do:
+    def press_check(self, keys: pg.key.ScancodeWrapper, mouse: bool = False) -> None:
+        if (keys[self.key] or mouse) and self.can_do:
             self.do = not self.do
             self.can_do = False
-        elif not keys[self.key]:
+        elif not (keys[self.key] or mouse):
             self.can_do = True
 
 class Player:
@@ -183,12 +183,7 @@ while running:
     if show_borders.do:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
-    pause_game.press_check(key)
-    if mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()) and pause_game.can_do:
-        pause_game.can_do = False
-        pause_game.do = not pause_game.do
-    elif not mouse[0]:
-        pause_game.can_do = True
+    pause_game.press_check(key, mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()))
     
     if pause_game.do:
         player1.draw(screen)
