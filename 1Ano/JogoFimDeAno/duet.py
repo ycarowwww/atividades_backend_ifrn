@@ -180,6 +180,8 @@ while running:
         for bt in pause_button_rects:
             pg.draw.rect(screen, COLORS["WHITE"], bt)
 
+    show_borders.press_check(key)
+
     if show_borders.do:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
@@ -200,8 +202,6 @@ while running:
 
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
-
-    show_borders.press_check(key)
 
     for rect in obstacles_list:
         rect.movement_bottom()
