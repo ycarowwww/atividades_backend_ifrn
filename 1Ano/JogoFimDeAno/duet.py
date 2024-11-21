@@ -20,7 +20,8 @@ COLORS: dict[str, tuple[int, int, int]] = {
     "WHITE" : (255, 255, 255),
     "RED" : (255, 0, 0),
     "GREEN" : (0, 255, 0),
-    "BLUE" : (35, 172, 255)
+    "BLUE" : (35, 172, 255),
+    "BLANK" : (0, 0, 0, 0)
 }
 
 def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> tuple[int, int, int]:
@@ -59,6 +60,49 @@ def collision_circle_rect(circle_center: tuple[float, float], radius: float, rec
     distance: float = sqrt((circle_center[0] - closest_x) ** 2 + (circle_center[1] - closest_y) ** 2)
 
     return distance <= radius
+
+def collision_circles(center1: tuple[int, int], center2: tuple[int, int], radius1: int, radius2: int) -> bool:
+    return sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) < radius1 + radius2
+
+def circles_intersection(screen: pg.Surface, player1: tuple[pg.Surface, tuple[int, int], int], player2: tuple[pg.Surface, tuple[int, int], int], color: tuple[int, int, int]) -> None:
+    """
+        Desenha a Intersecção de dois círculos na surface (*screen*) principal.
+        
+        Args:
+            screen: Surface principal.
+            players: Uma tupla com a surface do círculo, coordenadas do centro e o raio.
+    """
+
+    surf1 = player1[0]
+    surf2 = player2[0]
+    player1center = player1[1]
+    player2center = player2[1]
+    player1radius = player1[2]
+    player2radius = player2[2]
+
+    surf1.fill(COLORS["BLANK"])
+    surf2.fill(COLORS["BLANK"])
+
+    pg.draw.circle(surf1, color, (player1radius, player1radius), player1radius)
+    pg.draw.circle(surf2, color, (player2radius, player2radius), player2radius)
+
+    player1_topleft = (player1center[0] - player1radius, player1center[1] - player1radius)
+    player2_topleft = (player2center[0] - player2radius, player2center[1] - player2radius)
+
+    rel_pos_1_2 = (player2_topleft[0] - player1_topleft[0], player2_topleft[1] - player1_topleft[1])
+
+    surf1.blit(surf2, rel_pos_1_2, special_flags=pg.BLEND_RGBA_MIN)
+
+    if rel_pos_1_2[1] > 0:
+        surf1.fill(COLORS["BLANK"], pg.Rect(0, 0, player1radius * 2, rel_pos_1_2[1]))
+    if rel_pos_1_2[0] > 0:
+        surf1.fill(COLORS["BLANK"], pg.Rect(0, rel_pos_1_2[1], rel_pos_1_2[0], player1radius * 2 - rel_pos_1_2[1]))
+    if player1radius * 2 - (rel_pos_1_2[0] + player2radius * 2) > 0:
+        surf1.fill(COLORS["BLANK"], pg.Rect(rel_pos_1_2[0] + player2radius * 2, rel_pos_1_2[1], player1radius * 2 - (rel_pos_1_2[0] + player2radius * 2), player1radius * 2 - rel_pos_1_2[1]))
+    if player1radius * 2 - (rel_pos_1_2[1] + player2radius * 2) > 0:
+        surf1.fill(COLORS["BLANK"], pg.Rect(rel_pos_1_2[0], rel_pos_1_2[1] + player2radius * 2, player2radius * 2, player1radius * 2 - (rel_pos_1_2[1] + player2radius * 2)))
+
+    screen.blit(surf1, player1_topleft)
 
 class some_key_pressed:
     def __init__(self, key: int, can_do: bool, do: bool) -> None:
@@ -101,12 +145,12 @@ class Player:
     def draw(self, screen: pg.Surface) -> None:
         track_length: int = len(self.positions_track)
         for line in range(track_length-1, 0, -1):
-            line_width: int = int(-4 * self.radius / track_length * line + 4 * self.radius)
+            line_width: int = int(-2 * self.radius / track_length * line + 2 * self.radius)
             line_color: list[int] = [-color / track_length * line + color for color in list(self.color_track)]
             pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
             pg.draw.circle(screen, line_color, self.positions_track[line], line_width//2)
         
-        pg.draw.circle(screen, self.color, self.position, self.radius * 2)
+        pg.draw.circle(screen, self.color, self.position, self.radius)
 
     def rotate_to_center(self, point: tuple[int, int]) -> None:
         self.position[0] = self.distance * cos(radians(self.angle)) + point[0]
@@ -146,8 +190,11 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
-player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 10, speed=PLAYER_ROTATION_VELOCITY)
-player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 10, 180, speed=PLAYER_ROTATION_VELOCITY)
+player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
+player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
+
+surf_player1: pg.Surface = pg.Surface((player1.radius * 2, player1.radius * 2), pg.SRCALPHA)
+surf_player2: pg.Surface = pg.Surface((player2.radius * 2, player2.radius * 2), pg.SRCALPHA)
 
 pause_button: pg.Rect = pg.Rect(0, 0, 50, 50)
 pause_button.topright = (SCREEN_SIZE[0] - 10, 10)
@@ -191,6 +238,9 @@ while running:
         player1.draw(screen)
         player2.draw(screen)
 
+        if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
+            circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
+
         for rect in obstacles_list:
             rect.draw(screen)
         
@@ -202,6 +252,9 @@ while running:
 
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
+
+    if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
+        circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
 
     for rect in obstacles_list:
         rect.movement_bottom()
