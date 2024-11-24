@@ -153,8 +153,8 @@ class Player:
         pg.draw.circle(screen, self.color, self.position, self.radius)
 
     def rotate_to_center(self, point: tuple[int, int]) -> None:
-        self.position[0] = self.distance * cos(radians(self.angle)) + point[0]
-        self.position[1] = self.distance * sin(radians(self.angle)) + point[1]
+        self.position[0] = int(self.distance * cos(radians(self.angle)) + point[0])
+        self.position[1] = int(self.distance * sin(radians(self.angle)) + point[1])
 
         self.positions_track.insert(0, self.position.copy()) # Usar uma Queue depois
         if len(self.positions_track) >= 150 / self.speed:

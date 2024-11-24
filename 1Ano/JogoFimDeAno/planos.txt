@@ -57,3 +57,4 @@ Talvez Adicionar:
 -> Online
 -> Achievements
 - Modo Clássico
+- Modo com Aceleração
