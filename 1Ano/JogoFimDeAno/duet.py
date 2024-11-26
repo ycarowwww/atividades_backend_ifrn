@@ -104,19 +104,6 @@ def circles_intersection(screen: pg.Surface, player1: tuple[pg.Surface, tuple[in
 
     screen.blit(surf1, player1_topleft)
 
-class some_key_pressed:
-    def __init__(self, key: int, can_do: bool, do: bool) -> None:
-        self.key = key
-        self.can_do = can_do
-        self.do = do
-
-    def press_check(self, keys: pg.key.ScancodeWrapper, mouse: bool = False) -> None:
-        if (keys[self.key] or mouse) and self.can_do:
-            self.do = not self.do
-            self.can_do = False
-        elif not (keys[self.key] or mouse):
-            self.can_do = True
-
 class Player:
     def __init__(self, position: list[int], color: tuple[int, int, int], radius: int, angle: int = 0, speed: float = 5) -> None:
         self.position = position
@@ -196,13 +183,14 @@ player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAY
 surf_player1: pg.Surface = pg.Surface((player1.radius * 2, player1.radius * 2), pg.SRCALPHA)
 surf_player2: pg.Surface = pg.Surface((player2.radius * 2, player2.radius * 2), pg.SRCALPHA)
 
-pause_button: pg.Rect = pg.Rect(0, 0, 50, 50)
-pause_button.topright = (SCREEN_SIZE[0] - 10, 10)
+paused: bool = False
+show_borders: bool = False
+pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
+pause_button_rect.topright = (SCREEN_SIZE[0] - 10, 10)
+pause_button_triangle: list[tuple[int, int]] = (pause_button_rect.topleft, pause_button_rect.bottomleft, (pause_button_rect.right, pause_button_rect.centery))
 pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
-pause_button_rects[0].topright = pause_button.topright
+pause_button_rects[0].topright = pause_button_rect.topright
 pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
-pause_game = some_key_pressed(pg.K_ESCAPE, False, False)
-show_borders = some_key_pressed(pg.K_b, False, False)
 player_angle, punctuation, max_score = 0, 0, 0
 OBSTACLE_SIZE: int = 30
 obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
@@ -215,26 +203,30 @@ while running:
         if event.type == pg.QUIT:
             running = False
 
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                paused = not paused
+            if event.key == pg.K_b:
+                show_borders = not show_borders
+
+        if event.type == pg.MOUSEBUTTONDOWN:
+            mx, my = event.pos
+
+            if pause_button_rect.collidepoint(mx, my):
+                paused = not paused
+
     clock.tick(FPS)
     screen.fill(COLORS["BLACK"])
 
     key: pg.key.ScancodeWrapper = pg.key.get_pressed()
     mouse: tuple[bool, bool, bool] = pg.mouse.get_pressed()
 
-    if pause_game.do:
-        pg.draw.polygon(screen, COLORS["WHITE"], (pause_button.topleft, pause_button.bottomleft, (pause_button.right, pause_button.centery)))
-    else:
-        for bt in pause_button_rects:
-            pg.draw.rect(screen, COLORS["WHITE"], bt)
-
-    show_borders.press_check(key)
-
-    if show_borders.do:
+    if show_borders:
         pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
-    pause_game.press_check(key, mouse[0] and pause_button.collidepoint(pg.mouse.get_pos()))
-    
-    if pause_game.do:
+    if paused:
+        pg.draw.polygon(screen, COLORS["WHITE"], pause_button_triangle)
+
         player1.draw(screen)
         player2.draw(screen)
 
@@ -249,6 +241,9 @@ while running:
         
         pg.display.flip()
         continue
+    else:
+        for rt in pause_button_rects:
+            pg.draw.rect(screen, COLORS["WHITE"], rt)
 
     player1.update(screen, SCREEN_CENTER, key)
     player2.update(screen, SCREEN_CENTER, key)
