@@ -1,5 +1,5 @@
 import pygame as pg
-import pygame.freetype
+import pygame.freetype as pgft
 import colorsys
 from math import cos, sin, radians, sqrt
 from random import randint
@@ -23,6 +23,8 @@ COLORS: dict[str, tuple[int, int, int]] = {
     "BLUE" : (35, 172, 255),
     "BLANK" : (0, 0, 0, 0)
 }
+GAME_FONT: pgft.Font = pgft.SysFont("Arial", 30, True, False)
+MAX_SCORE_FONT: pgft.Font = pgft.SysFont("Arial", 15, False, False)
 
 def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> tuple[int, int, int]:
     """
@@ -45,7 +47,7 @@ def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> 
 
     return (int(r * 255), int(g * 255), int(b * 255))
 
-def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pygame.freetype.Font) -> None:
+def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pgft.Font) -> None:
     text_surface, text_rect = font.render(message, color)
     text_rect.topleft = topleft
     screen.blit(text_surface, text_rect)
@@ -177,114 +179,141 @@ class Obstacle:
         
         pg.draw.rect(screen, self.color, self.hitbox_rect)
 
-player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
-player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
+def game() -> None:
+    player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
+    player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
-surf_player1: pg.Surface = pg.Surface((player1.radius * 2, player1.radius * 2), pg.SRCALPHA)
-surf_player2: pg.Surface = pg.Surface((player2.radius * 2, player2.radius * 2), pg.SRCALPHA)
+    surf_player1: pg.Surface = pg.Surface((player1.radius * 2, player1.radius * 2), pg.SRCALPHA)
+    surf_player2: pg.Surface = pg.Surface((player2.radius * 2, player2.radius * 2), pg.SRCALPHA)
 
-paused: bool = False
-show_borders: bool = False
-pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
-pause_button_rect.topright = (SCREEN_SIZE[0] - 10, 10)
-pause_button_triangle: list[tuple[int, int]] = (pause_button_rect.topleft, pause_button_rect.bottomleft, (pause_button_rect.right, pause_button_rect.centery))
-pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
-pause_button_rects[0].topright = pause_button_rect.topright
-pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
-player_angle, punctuation, max_score = 0, 0, 0
-OBSTACLE_SIZE: int = 30
-obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
-GAME_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 30, True, False)
-MAX_SCORE_FONT: pygame.freetype.Font = pygame.freetype.SysFont("Arial", 15, False, False)
+    paused: bool = False
+    show_borders: bool = False
+    pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
+    pause_button_rect.topright = (SCREEN_SIZE[0] - 10, 10)
+    pause_button_triangle: list[tuple[int, int]] = (pause_button_rect.topleft, pause_button_rect.bottomleft, (pause_button_rect.right, pause_button_rect.centery))
+    pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
+    pause_button_rects[0].topright = pause_button_rect.topright
+    pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
+    punctuation, max_score = 0, 0
+    OBSTACLE_SIZE: int = 30
+    obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
 
-running: bool = True
-while running:
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
+    running: bool = True
+    while running:
+        key: pg.key.ScancodeWrapper = pg.key.get_pressed()
 
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                paused = not paused
-            if event.key == pg.K_b:
-                show_borders = not show_borders
+        for event in pg.event.get():
+            if event.type == pg.QUIT or (key[pg.K_LSHIFT] and key[pg.K_ESCAPE]):
+                running = False
 
-        if event.type == pg.MOUSEBUTTONDOWN:
-            mx, my = event.pos
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    paused = not paused
+                if event.key == pg.K_b:
+                    show_borders = not show_borders
 
-            if pause_button_rect.collidepoint(mx, my):
-                paused = not paused
+            if event.type == pg.MOUSEBUTTONDOWN:
+                mx, my = event.pos
 
-    clock.tick(FPS)
-    screen.fill(COLORS["BLACK"])
+                if pause_button_rect.collidepoint(mx, my):
+                    paused = not paused
 
-    key: pg.key.ScancodeWrapper = pg.key.get_pressed()
-    mouse: tuple[bool, bool, bool] = pg.mouse.get_pressed()
+        clock.tick(FPS)
+        screen.fill(COLORS["BLACK"])
 
-    if show_borders:
-        pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
+        if show_borders:
+            pg.draw.circle(screen, COLORS["GRAY"], SCREEN_CENTER, player1.distance, 5)
 
-    if paused:
-        pg.draw.polygon(screen, COLORS["WHITE"], pause_button_triangle)
+        if paused:
+            pg.draw.polygon(screen, COLORS["WHITE"], pause_button_triangle)
 
-        player1.draw(screen)
-        player2.draw(screen)
+            player1.draw(screen)
+            player2.draw(screen)
+
+            if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
+                circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
+
+            for rect in obstacles_list:
+                rect.draw(screen)
+            
+            blit_text(screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
+            blit_text(screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
+            
+            pg.display.flip()
+            continue
+        else:
+            for rt in pause_button_rects:
+                pg.draw.rect(screen, COLORS["WHITE"], rt)
+
+        player1.update(screen, SCREEN_CENTER, key)
+        player2.update(screen, SCREEN_CENTER, key)
 
         if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
             circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
 
         for rect in obstacles_list:
+            rect.movement_bottom()
             rect.draw(screen)
+            # Check Collision with players
+            if collision_circle_rect(player1.position, player1.radius, rect.hitbox_rect) or collision_circle_rect(player2.position, player2.radius, rect.hitbox_rect):
+                punctuation = 0
+
+        if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
+            obstacles_list.pop(0)
+            
+        if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
+            rnd_num: int = randint(1, 5)
+
+            match rnd_num:
+                case 1:
+                    obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
+                case 2:
+                    obstacles_list.append(Obstacle([SCREEN_CENTER[0], -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
+                case 3:
+                    obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
+                    obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
+                case 4:
+                    obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE - 150], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
+                case 5:
+                    obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
+                    obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
+                case _: pass
+            
+            punctuation += 1
+            max_score = max(max_score, punctuation)
         
         blit_text(screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
         blit_text(screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
         
         pg.display.flip()
-        continue
-    else:
-        for rt in pause_button_rects:
-            pg.draw.rect(screen, COLORS["WHITE"], rt)
 
-    player1.update(screen, SCREEN_CENTER, key)
-    player2.update(screen, SCREEN_CENTER, key)
+def main_menu() -> None:
+    title_surf, title_rect = GAME_FONT.render("DUET", COLORS["WHITE"], style=pgft.STYLE_STRONG)
+    title_rect.center = (SCREEN_CENTER[0], 100)
+    game_surf, game_rect = GAME_FONT.render("Game", COLORS["WHITE"], COLORS["BLUE"])
+    game_rect.center = SCREEN_CENTER
 
-    if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
-        circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
+    running: bool = True
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            
+            if event.type == pg.MOUSEBUTTONDOWN:
+                mpos = event.pos
+                
+                if game_rect.collidepoint(mpos):
+                    game()
 
-    for rect in obstacles_list:
-        rect.movement_bottom()
-        rect.draw(screen)
-        # Check Collision with players
-        if collision_circle_rect(player1.position, player1.radius, rect.hitbox_rect) or collision_circle_rect(player2.position, player2.radius, rect.hitbox_rect):
-            punctuation = 0
+        clock.tick(FPS)
+        screen.fill(COLORS["BLACK"])
 
-    if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
-        obstacles_list.pop(0)
+        screen.blit(title_surf, title_rect)
+        screen.blit(game_surf, game_rect)
         
-    if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
-        rnd_num: int = randint(1, 5)
+        pg.display.flip()
 
-        match rnd_num:
-            case 1:
-                obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
-            case 2:
-                obstacles_list.append(Obstacle([SCREEN_CENTER[0], -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
-            case 3:
-                obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
-                obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
-            case 4:
-                obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE - 150], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
-            case 5:
-                obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
-                obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
-            case _: pass
-        
-        punctuation += 1
-        max_score = max(max_score, punctuation)
-    
-    blit_text(screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
-    blit_text(screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
-    
-    pg.display.flip()
+if __name__ == "__main__":
+    main_menu()
 
 pg.quit()

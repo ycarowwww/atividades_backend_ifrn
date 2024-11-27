@@ -58,3 +58,5 @@ Talvez Adicionar:
 -> Achievements
 - Modo Clássico
 - Modo com Aceleração
+- Cada jogador controla um Círculo (Modo)
+- Pontuação
