@@ -1,10 +1,8 @@
 from random import randint
 
-# Falta ainda algumas coisas, além de melhorar essa porcaria
-
 size = int(input("Size: "))
 matrix = [[0 for _ in range(size)] for _ in range(size)]
-bombs = 3
+bombs = int(input("Bombs: "))
 
 def increase_adjacents(matrix: list[list[int]], bomb: tuple[int, int]) -> None:
     for i in range(-1, 2):
@@ -38,7 +36,7 @@ def check_empty_spaces(matrix: list[list[str]]) -> int:
     amount = 0
     for i in matrix:
         for j in i:
-            if j == " ":
+            if j == " " or j == "f":
                 amount += 1
     return amount
 
@@ -53,6 +51,12 @@ def check_defeat(matrix: list[list[str]], indexes: list[int], game_matrix: list[
     value = matrix[indexes[0]][indexes[1]]
 
     if value < 0:
+        if len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == " ":
+            game_matrix[indexes[0]][indexes[1]] = "f"
+            return False
+        elif len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == "f":
+            game_matrix[indexes[0]][indexes[1]] = " "
+            return False
         game_matrix[indexes[0]][indexes[1]] = str(-1)
         return True
     elif value > 0:
@@ -75,12 +79,18 @@ def game() -> None:
 
     while check_empty_spaces(game_matrix) > bombs:
         print_matrix(game_matrix)
-        indexes: list[int] = [int(i)-1 for i in input("- Indexes to check: ").split()]
+        indexes: list[int | str] = [i for i in input("- Indexes to check: ").split()]
+        indexes[0] = int(indexes[0]) - 1
+        indexes[1] = int(indexes[1]) - 1
         if check_defeat(matrix, indexes, game_matrix):
-            print("Game Ended!")
+            print("Game Defeated!")
             break
+    else:
+        print("Game Won!")
 
     print_matrix(game_matrix)
+    print("----------------")
+    print_matrix(matrix)
 
 if __name__ == '__main__':
     game()
