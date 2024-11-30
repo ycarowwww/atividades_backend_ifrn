@@ -50,13 +50,14 @@ def valid_adjacents(matrix: list[list[str]], indexes: list[list[int]], game_matr
 def check_defeat(matrix: list[list[str]], indexes: list[int], game_matrix: list[list[str]]) -> bool:
     value = matrix[indexes[0]][indexes[1]]
 
-    if value < 0:
-        if len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == " ":
+    if len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == " ":
             game_matrix[indexes[0]][indexes[1]] = "f"
             return False
-        elif len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == "f":
-            game_matrix[indexes[0]][indexes[1]] = " "
-            return False
+    elif len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == "f":
+        game_matrix[indexes[0]][indexes[1]] = " "
+        return False
+
+    if value < 0:
         game_matrix[indexes[0]][indexes[1]] = str(-1)
         return True
     elif value > 0:
@@ -80,8 +81,18 @@ def game() -> None:
     while check_empty_spaces(game_matrix) > bombs:
         print_matrix(game_matrix)
         indexes: list[int | str] = [i for i in input("- Indexes to check: ").split()]
-        indexes[0] = int(indexes[0]) - 1
-        indexes[1] = int(indexes[1]) - 1
+        
+        try:
+            if indexes[0] == "r":
+                print("Game Draw!")
+                break
+
+            indexes[0] = int(indexes[0]) - 1
+            indexes[1] = int(indexes[1]) - 1
+        except (ValueError, IndexError):
+            print("Provide valid Indexes!")
+            continue
+            
         if check_defeat(matrix, indexes, game_matrix):
             print("Game Defeated!")
             break
