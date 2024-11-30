@@ -1,107 +1,89 @@
 from random import randint
 
-size = int(input("Size: "))
-matrix = [[0 for _ in range(size)] for _ in range(size)]
-bombs = int(input("Bombs: "))
+def menu() -> int:
+    """Mostra o Menu do Jogo para selecionar o nível de dificuldade e retorna quantidade de bombas."""
+    option: str = ""
+    while option not in ["1", "2", "3"]:
+        print("Informe o Nível de Dificuldade:")
+        print(" 1 - Fácil (uma bomba) \n 2 - Médio (duas bombas) \n 3 - Difícil (três bombas)")
+        option = input()
+    return int(option)
 
-def increase_adjacents(matrix: list[list[int]], bomb: tuple[int, int]) -> None:
+def add_bomb(board: list[list[str]]) -> None:
+    """Adiciona uma bomba em uma posição aleatória do Tabuleiro e aumenta os valores das posições adjacentes."""
+    lines: int = len(board)
+    columns: int = len(board[0])
+    pos: list[int] = [randint(0, lines-1), randint(0, columns-1)]
+    board[pos[0]][pos[1]] = "*"
+
+    adjacent_pos: list[list[int]] = []
     for i in range(-1, 2):
         for j in range(-1, 2):
-            pos: tuple[int, int] = (i + bomb[0], j + bomb[1])
-            if 0 <= pos[0] < size and 0 <= pos[1] < size and matrix[pos[0]][pos[1]] != -1:
-                matrix[pos[0]][pos[1]] += 1
+            if 0 <= pos[0] + i < lines and  0 <= pos[1] + j < columns and not (i == 0 and j == 0):
+                adjacent_pos.append([pos[0] + i, pos[1] + j])
+    
+    for p in adjacent_pos:
+        if board[p[0]][p[1]] != "*":
+            board[p[0]][p[1]] = str(int(board[p[0]][p[1]]) + 1)
 
-for _ in range(bombs):
-    pos = (randint(0, size-1), randint(0, size-1))
-    while matrix[pos[0]][pos[1]] == -1:
-        pos = (randint(0, size-1), randint(0, size-1))
-    matrix[pos[0]][pos[1]] = -1
-    increase_adjacents(matrix, pos)
+def print_board(game_board: list[list[str]]) -> None:
+    """Mostra o Tabuleiro"""
+    lines: int = len(game_board)
+    columns: int = len(game_board[0])
+    print(f"  {' '.join([str(i) for i in range(columns)])}")
+    for i in range(lines):
+        print(f"{i}|{'|'.join([str(i) for i in game_board[i]])}|")
 
-def print_matrix(matrix: list[list[int]]) -> None:
-    print(f" {'-':<{len(str(len(matrix)))}} ", end="|")
-
-    for i in range(1, len(matrix[0])+1):
-        print(f" {i:<{len(str(i))+1}} ", end="|")
-    print()
-
-    for il, l in enumerate(matrix):
-        print(f" {str(il+1):<{len(str(len(matrix)))}} ", end="|")
-
-        for ic, c in enumerate(l):
-            print(f" {c:<{len(str(ic+1))+1}} ", end="|")
-        print()
-
-def check_empty_spaces(matrix: list[list[str]]) -> int:
-    amount = 0
-    for i in matrix:
+def check_win(game_board: list[list[str]], bombs: int) -> bool:
+    """Verifica se a quantidade de espaços não verificados é igual a quantidade de bombas (verifica a vitória)."""
+    unchecked_spaces: int = 0
+    for i in game_board:
         for j in i:
-            if j == " " or j == "f":
-                amount += 1
-    return amount
+            if j == "?":
+                unchecked_spaces += 1
+    return unchecked_spaces == bombs
 
-def valid_adjacents(matrix: list[list[str]], indexes: list[list[int]], game_matrix: list[list[str]]) -> list[list[int]]:
-    valids = []
-    for i in indexes:
-        if 0 <= i[0] < len(matrix) and 0 <= i[1] < len(matrix[i[0]]) and game_matrix[i[0]][i[1]] == " ":
-            valids.append(i)
-    return valids
+def show_position(game_board: list[list[str]], board: list[list[str]], pos: list[int]) -> str:
+    """Mostra a Posição Marcada do Tabuleiro."""
+    game_board[pos[0]][pos[1]] = board[pos[0]][pos[1]]
+    return game_board[pos[0]][pos[1]]
 
-def check_defeat(matrix: list[list[str]], indexes: list[int], game_matrix: list[list[str]]) -> bool:
-    value = matrix[indexes[0]][indexes[1]]
-
-    if len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == " ":
-            game_matrix[indexes[0]][indexes[1]] = "f"
-            return False
-    elif len(indexes) == 3 and game_matrix[indexes[0]][indexes[1]] == "f":
-        game_matrix[indexes[0]][indexes[1]] = " "
-        return False
-
-    if value < 0:
-        game_matrix[indexes[0]][indexes[1]] = str(-1)
-        return True
-    elif value > 0:
-        game_matrix[indexes[0]][indexes[1]] = str(value)
-        return False
-    else:
-        game_matrix[indexes[0]][indexes[1]] = str(value)
-        adjacents = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if not (i == 0 and j == 0):
-                    adjacents.append([indexes[0]+i, indexes[1]+j])
-        adjacents = valid_adjacents(matrix, adjacents, game_matrix)
-        for i in adjacents:
-            check_defeat(matrix, i, game_matrix)
-        return False
+def show_bombs(game_board: list[list[str]], board: list[list[str]]) -> None:
+    """Revela todas as bombas."""
+    for iind, i in enumerate(board):
+        for jind, j in enumerate(i):
+            if j == "*":
+                game_board[iind][jind] = "*"
 
 def game() -> None:
-    game_matrix: list[list[str]] = [[" " for _ in range(size)] for _ in range(size)]
+    """Função principal do Jogo."""
+    bombs: int = menu()
+    board: list[list[str]] = [["0" for _ in range(4)] for _ in range(3)]
+    game_board: list[list[str]] = [["?" for _ in range(4)] for _ in range(3)]
+    for _ in range(bombs):
+        add_bomb(board)
 
-    while check_empty_spaces(game_matrix) > bombs:
-        print_matrix(game_matrix)
-        indexes: list[int | str] = [i for i in input("- Indexes to check: ").split()]
-        
+    check_position: list[int] = [0, 0]
+    while not check_win(game_board, bombs):
+        print_board(game_board)
+
         try:
-            if indexes[0] == "r":
-                print("Game Draw!")
-                break
-
-            indexes[0] = int(indexes[0]) - 1
-            indexes[1] = int(indexes[1]) - 1
+            check_position[0] = int(input(" Informe a linha:\n"))
+            check_position[1] = int(input(" Informe a coluna:\n"))
+            if not (0 <= check_position[0] < len(game_board) and 0 <= check_position[1] < len(game_board[0])):
+                raise IndexError()
         except (ValueError, IndexError):
-            print("Provide valid Indexes!")
+            print("Jogada Inválida")
             continue
             
-        if check_defeat(matrix, indexes, game_matrix):
-            print("Game Defeated!")
+        if show_position(game_board, board, check_position) == "*":
+            show_bombs(game_board, board)
+            print_board(game_board)
+            print("BUM! Você perdeu :(")
             break
     else:
-        print("Game Won!")
-
-    print_matrix(game_matrix)
-    print("----------------")
-    print_matrix(matrix)
+        print_board(game_board)
+        print("Você sobreviveu! \\o/")
 
 if __name__ == '__main__':
     game()
