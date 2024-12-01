@@ -25,6 +25,7 @@ COLORS: dict[str, tuple[int, int, int]] = {
 }
 GAME_FONT: pgft.Font = pgft.SysFont("Arial", 30, True, False)
 MAX_SCORE_FONT: pgft.Font = pgft.SysFont("Arial", 15, False, False)
+GAME_STATE: int = 1
 
 def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> tuple[int, int, int]:
     """
@@ -202,9 +203,14 @@ def game() -> None:
     while running:
         key: pg.key.ScancodeWrapper = pg.key.get_pressed()
 
+        if key[pg.K_LSHIFT] and key[pg.K_ESCAPE]:
+            running = False
+
         for event in pg.event.get():
-            if event.type == pg.QUIT or (key[pg.K_LSHIFT] and key[pg.K_ESCAPE]):
+            if event.type == pg.QUIT:
                 running = False
+                global GAME_STATE
+                GAME_STATE = 0
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
@@ -295,6 +301,9 @@ def main_menu() -> None:
 
     running: bool = True
     while running:
+        if GAME_STATE == 0:
+            running = False
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -315,5 +324,3 @@ def main_menu() -> None:
 
 if __name__ == "__main__":
     main_menu()
-
-pg.quit()
