@@ -313,6 +313,11 @@ def main_menu() -> None:
             if event.type == pg.QUIT:
                 running = False
             
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    # Abrir opção Selecionada
+                    game()
+            
             if event.type == pg.MOUSEBUTTONDOWN:
                 mpos = event.pos
                 
