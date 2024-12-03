@@ -195,6 +195,8 @@ def game() -> None:
     pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
     pause_button_rects[0].topright = pause_button_rect.topright
     pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
+    return_menu_button: pg.Rect = pg.Rect(0, 0, 50, 50)
+    return_menu_button.topright = (pause_button_rect.left - 10, pause_button_rect.top)
     punctuation, max_score = 0, 0
     OBSTACLE_SIZE: int = 30
     obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
@@ -223,6 +225,8 @@ def game() -> None:
 
                 if pause_button_rect.collidepoint(mx, my):
                     paused = not paused
+                elif paused and return_menu_button.collidepoint(mx, my):
+                    running = False
 
         clock.tick(FPS)
         screen.fill(COLORS["BLACK"])
@@ -232,6 +236,7 @@ def game() -> None:
 
         if paused:
             pg.draw.polygon(screen, COLORS["WHITE"], pause_button_triangle)
+            pg.draw.polygon(screen, COLORS["WHITE"], (return_menu_button.topright, return_menu_button.bottomright, (return_menu_button.left, return_menu_button.centery)))
 
             player1.draw(screen)
             player2.draw(screen)
