@@ -53,17 +53,6 @@ def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], top
     text_rect.topleft = topleft
     screen.blit(text_surface, text_rect)
 
-def collision_circle_rect(circle_center: tuple[float, float], radius: float, rect: pg.Rect) -> bool:
-    """
-        Detecta a colisão de um círculo com um Retângulo.
-    """
-    closest_x: float = max(rect.left, min(circle_center[0], rect.right))
-    closest_y: float = max(rect.top, min(circle_center[1], rect.bottom))
-
-    distance: float = sqrt((circle_center[0] - closest_x) ** 2 + (circle_center[1] - closest_y) ** 2)
-
-    return distance <= radius
-
 def collision_circles(center1: tuple[int, int], center2: tuple[int, int], radius1: int, radius2: int) -> bool:
     return sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) < radius1 + radius2
 
@@ -196,9 +185,23 @@ class Player:
     
     def toggle_border(self) -> None:
         self.show_border = not self.show_border
+    
+    def check_collision_rect(self, hitbox_rect: pg.Rect) -> bool:
+        if hitbox_rect.bottom < self.center[1] - self.distance or hitbox_rect.top > self.center[1] + self.distance: 
+            return False
+        
+        for i in range(self.amount):
+            closest_x: float = max(hitbox_rect.left, min(self.positions[i][0], hitbox_rect.right))
+            closest_y: float = max(hitbox_rect.top, min(self.positions[i][1], hitbox_rect.bottom))
+
+            distance: float = sqrt((self.positions[i][0] - closest_x) ** 2 + (self.positions[i][1] - closest_y) ** 2)
+
+            if distance <= self.radius: return True
+        
+        return False
 
 def game() -> None:
-    player: Player = Player(list(SCREEN_CENTER), [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20, speed=PLAYER_ROTATION_VELOCITY)
+    player: Player = Player(list(SCREEN_CENTER), [COLORS["BLUE"], COLORS["RED"], COLORS["GREEN"]], COLORS["GRAY"], 20, speed=PLAYER_ROTATION_VELOCITY)
     # player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
     # player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
 
@@ -281,8 +284,8 @@ def game() -> None:
             rect.movement_bottom()
             rect.draw(screen)
             # Check Collision with players
-            # if collision_circle_rect(player1.position, player1.radius, rect.hitbox_rect) or collision_circle_rect(player2.position, player2.radius, rect.hitbox_rect):
-            #     punctuation = 0
+            if player.check_collision_rect(rect.hitbox_rect):
+                punctuation = 0
 
         if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
             obstacles_list.pop(0)
