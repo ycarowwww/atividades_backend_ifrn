@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
 import colorsys
-from math import cos, sin, radians, sqrt
+from math import cos, sin, radians, atan2, pi, sqrt
 from random import randint
 
 PLAYER_ROTATION_VELOCITY: float = float(input("- Player's Rotation Velocity: "))
@@ -28,8 +28,7 @@ MAX_SCORE_FONT: pgft.Font = pgft.SysFont("Arial", 15, False, False)
 GAME_STATE: int = 1
 
 def adjust_brightness(color: tuple[int, int, int], brightness_factor: float) -> tuple[int, int, int]:
-    """
-        Ajusta o brilho de uma cor RGB convertendo-a para HSV.
+    """Ajusta o brilho de uma cor RGB convertendo-a para HSV.
 
         Args:
             color (tuple): Cor RGB original.
@@ -57,8 +56,7 @@ def collision_circles(center1: tuple[int, int], center2: tuple[int, int], radius
     return sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) < radius1 + radius2
 
 def circles_intersection(screen: pg.Surface, player1: tuple[pg.Surface, tuple[int, int], int], player2: tuple[pg.Surface, tuple[int, int], int], color: tuple[int, int, int]) -> None:
-    """
-        Desenha a Intersecção de dois círculos na surface (*screen*) principal.
+    """Desenha a Intersecção de dois círculos na surface (*screen*) principal.
         
         Args:
             screen: Surface principal.
@@ -95,6 +93,86 @@ def circles_intersection(screen: pg.Surface, player1: tuple[pg.Surface, tuple[in
         surf1.fill(COLORS["BLANK"], pg.Rect(rel_pos_1_2[0], rel_pos_1_2[1] + player2radius * 2, player2radius * 2, player1radius * 2 - (rel_pos_1_2[1] + player2radius * 2)))
 
     screen.blit(surf1, player1_topleft)
+
+def get_diagonal_line(point1: tuple[int, int], radius1: int, point2: tuple[int, int], radius2: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]]:
+    """Returns the 4 points of a 'quadrilateral' for a 'diagonal' line from circle1 to circle2
+
+        Pygame can only draw lines with 90º ends, creating a 'shrinking' effect when drawing a line between two circles.
+        This function returns 4 points between the circles to draw in the 'pg.draw.polygon' function for a line with a 'diagonal' ending.
+
+        Args:
+            point1 (tuple): Circle1's center.
+            radius1 (tuple): Circle1's radius.
+            point2 (int): Circle2's center.
+            radius1 (int): Circle2's radius.
+
+        Returns:
+            tuple: A tuple with 4 points positions.
+    """
+    pos1: tuple[int, int] = (point1[0], -point1[1]) # Flipping the y-axis because of Pygame
+    pos2: tuple[int, int] = (point2[0], -point2[1]) # Flipping the y-axis because of Pygame
+    angle: float = atan2(point1[0] - point2[0], point1[1] - point2[1])
+
+    def get_point(rad: int, ang: float, x: int, y: int) -> tuple[int, int]:
+        """Returns the point position in the circle."""
+        return (int(rad * cos(ang) + x), int(rad * sin(ang) + y))
+    
+    points = (get_point(radius1, angle, pos1[0], pos1[1]), 
+              get_point(radius1, angle + pi, pos1[0], pos1[1]), 
+              get_point(radius2, angle + pi, pos2[0], pos2[1]), 
+              get_point(radius2, angle, pos2[0], pos2[1]))
+    
+    return tuple([(p[0], -p[1]) for p in points]) # Unflipping the y-axis because of Pygame
+
+def get_line_surface(points: list[tuple[int, int]], initial_radius: int, initial_color: tuple[int, int, int], initial_alpha: int) -> tuple[pg.Surface, tuple[int, int]]:
+    """Returns the line Surface and topleft position.
+
+        Returns a Surface with a line of the circle's previous positions becoming increasingly transparent. 
+        It also uses diagonal lines to connect the positions.
+
+        Args:
+            points (list[tuple]): Previous positions of the circle's center.
+            initial_radius (int): Initial radius of the line.
+            initial_color (tuple): Line color.
+            initial_alpha (int): Initial alpha of the line.
+
+        Returns:
+            tuple: A tuple with the Surface and Topleft position.
+        
+        Raises:
+            ValueError: If 'points' has less than 2 elements.
+    """
+    l = len(points)
+    if l < 2: raise ValueError("At least 2 points are required.")
+    
+    radius: list[int] = [int(-initial_radius / l * i + initial_radius) for i in range(l)]
+    
+    point_tl = [points[0][0] - radius[0], points[0][1] - radius[0]]
+    point_br = [points[0][0] + radius[0], points[0][1] + radius[0]]
+
+    for i in range(1, len(points)):
+        point_tl[0] = min(point_tl[0], points[i][0] - radius[i])
+        point_tl[1] = min(point_tl[1], points[i][1] - radius[i])
+        point_br[0] = max(point_br[0], points[i][0] + radius[i])
+        point_br[1] = max(point_br[1], points[i][1] + radius[i])
+    
+    offset = (point_br[0] - point_tl[0], point_br[1] - point_tl[1])
+    surf = pg.Surface(offset, flags=pg.SRCALPHA)
+    surf2 = pg.Surface(offset, flags=pg.SRCALPHA) # Another surface to prevent a darker line from being on top of a lighter one.
+
+    points_offset = [[p[0] - point_tl[0], p[1] - point_tl[1]] for p in points]
+
+    for i in range(len(points_offset)):
+        surf2.fill(COLORS["BLANK"])
+        color = (*initial_color, int(-initial_alpha / len(points_offset) * i + initial_alpha))
+
+        pg.draw.circle(surf2, color, points_offset[i], radius[i])
+        if i != 0:
+            pg.draw.polygon(surf2, color, get_diagonal_line(points_offset[i-1], radius[i-1], points_offset[i], radius[i]))
+
+        surf.blit(surf2, (0, 0), special_flags=pg.BLEND_RGBA_MAX) # Pick the "strongest" color in the line
+    
+    return (surf, point_tl)
 
 class Obstacle:
     def __init__(self, position: list[int], color: tuple[int, int, int], size: list[int]) -> None:
@@ -137,9 +215,9 @@ class Player:
         self.show_border = False
         self.border_size = 5
         self.border_color = border_color
-        # Falta as linhas das posições, colisão e intersecção
-        # self.positions_track: list[list[int]] = []
-        # self.colors_track = [adjust_brightness(self.colors[i]) for i in range(len(self.colors) - 1)]
+        self.positions_tracker: list[list[tuple[int, int]]] = [[] for _ in range(self.amount)]
+        self.max_tracker = 24
+        # Falta a intersecção dos círculos
     
     def update(self) -> None:
         key: pg.key.ScancodeWrapper = pg.key.get_pressed()
@@ -156,17 +234,17 @@ class Player:
         self.angle %= 360
 
         self.rotate_to_center()
+        self.update_tracker()
     
     def draw(self, screen: pg.Surface) -> None:
         if self.show_border:
             pg.draw.circle(screen, self.border_color, self.center, self.distance, self.border_size)
-        
-        # track_length: int = len(self.positions_track)
-        # for line in range(track_length-1, 0, -1):
-        #     line_width: int = int(-2 * self.radius / track_length * line + 2 * self.radius)
-        #     line_color: list[int] = [-color / track_length * line + color for color in list(self.color_track)]
-        #     pg.draw.line(screen, line_color, self.positions_track[line-1], self.positions_track[line], line_width)
-        #     pg.draw.circle(screen, line_color, self.positions_track[line], line_width//2)
+
+        if len(self.positions_tracker[0]) > 2:
+            for i in range(self.amount):
+                surf, topleft = get_line_surface(self.positions_tracker[i], self.radius, self.colors[i], 127)
+
+                screen.blit(surf, topleft)
         
         for i in range(self.amount):
             pg.draw.circle(screen, self.colors[i], self.positions[i], self.radius)
@@ -176,12 +254,15 @@ class Player:
             self.positions[i][0] = int(self.distance * cos(radians(self.angle) + radians(self.d_angle * i)) + self.center[0])
             self.positions[i][1] = int(self.distance * sin(radians(self.angle) + radians(self.d_angle * i)) + self.center[1])
 
-        # self.positions_track.insert(0, pos.copy()) # Usar uma Queue depois
-        # if len(self.positions_track) >= 150 / self.speed:
-        #     self.positions_track.pop(-1)
+    def update_tracker(self) -> None:
+        for i in range(self.amount):
+            for j in self.positions_tracker[i]:
+                j[1] += self.speed
+            
+            self.positions_tracker[i].insert(0, self.positions[i].copy())
 
-        # for line in range(1, len(self.positions_track)):
-        #     self.positions_track[line][1] += self.speed
+            while len(self.positions_tracker[i]) > self.max_tracker:
+                self.positions_tracker[i].pop()
     
     def toggle_border(self) -> None:
         self.show_border = not self.show_border
@@ -201,12 +282,7 @@ class Player:
         return False
 
 def game() -> None:
-    player: Player = Player(list(SCREEN_CENTER), [COLORS["BLUE"], COLORS["RED"], COLORS["GREEN"]], COLORS["GRAY"], 20, speed=PLAYER_ROTATION_VELOCITY)
-    # player1: Player = Player(list(SCREEN_CENTER), COLORS["BLUE"], 20, speed=PLAYER_ROTATION_VELOCITY)
-    # player2: Player = Player(list(SCREEN_CENTER), COLORS["RED"], 20, 180, speed=PLAYER_ROTATION_VELOCITY)
-
-    # surf_player1: pg.Surface = pg.Surface((player1.radius * 2, player1.radius * 2), pg.SRCALPHA)
-    # surf_player2: pg.Surface = pg.Surface((player2.radius * 2, player2.radius * 2), pg.SRCALPHA)
+    player: Player = Player(list(SCREEN_CENTER), [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20, speed=PLAYER_ROTATION_VELOCITY)
 
     paused: bool = False
     pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
@@ -256,8 +332,6 @@ def game() -> None:
             pg.draw.polygon(screen, COLORS["WHITE"], (return_menu_button.topright, return_menu_button.bottomright, (return_menu_button.left, return_menu_button.centery)))
 
             player.draw(screen)
-            # player1.draw(screen)
-            # player2.draw(screen)
 
             # if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
             #     circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
