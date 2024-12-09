@@ -249,6 +249,8 @@ class Player:
         for i in range(self.amount):
             pg.draw.circle(screen, self.colors[i], self.positions[i], self.radius)
 
+        self.draw_intersection(screen)
+
     def rotate_to_center(self) -> None:
         for i in range(self.amount):
             self.positions[i][0] = int(self.distance * cos(radians(self.angle) + radians(self.d_angle * i)) + self.center[0])
@@ -263,6 +265,23 @@ class Player:
 
             while len(self.positions_tracker[i]) > self.max_tracker:
                 self.positions_tracker[i].pop()
+            
+    def draw_intersection(self, screen: pg.Surface) -> None:
+        if self.amount >= 2 and self.__check_circles_collided():
+            surf_player = pg.Surface((self.distance * 2 + self.radius * 2, self.distance * 2 + self.radius * 2))
+            surf_player.fill(COLORS["BLACK"])
+            surf_player.set_colorkey(COLORS["BLACK"])
+
+            topleft_offset = (self.center[0] - self.distance, self.center[1] - self.distance)
+            offset_positions = [[i[0] - topleft_offset[0], i[1] - topleft_offset[1]] for i in self.positions]
+
+            for i in range(self.amount):
+                surf = pg.Surface((self.radius * 2, self.radius * 2))
+                surf.fill(COLORS["BLACK"])
+                pg.draw.circle(surf, self.colors[i], (self.radius, self.radius), self.radius)
+                surf_player.blit(surf, offset_positions[i], special_flags=pg.BLEND_ADD)
+            
+            screen.blit(surf_player, (topleft_offset[0] - self.radius, topleft_offset[1] - self.radius))
     
     def toggle_border(self) -> None:
         self.show_border = not self.show_border
@@ -280,6 +299,9 @@ class Player:
             if distance <= self.radius: return True
         
         return False
+
+    def __check_circles_collided(self) -> bool:
+        return sqrt((self.positions[0][0] - self.positions[1][0]) ** 2 + (self.positions[0][1] - self.positions[1][1]) ** 2) < self.radius * 2
 
 def game() -> None:
     player: Player = Player(list(SCREEN_CENTER), [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20, speed=PLAYER_ROTATION_VELOCITY)
