@@ -52,48 +52,6 @@ def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], top
     text_rect.topleft = topleft
     screen.blit(text_surface, text_rect)
 
-def collision_circles(center1: tuple[int, int], center2: tuple[int, int], radius1: int, radius2: int) -> bool:
-    return sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) < radius1 + radius2
-
-def circles_intersection(screen: pg.Surface, player1: tuple[pg.Surface, tuple[int, int], int], player2: tuple[pg.Surface, tuple[int, int], int], color: tuple[int, int, int]) -> None:
-    """Desenha a Intersecção de dois círculos na surface (*screen*) principal.
-        
-        Args:
-            screen: Surface principal.
-            players: Uma tupla com a surface do círculo, coordenadas do centro e o raio.
-    """
-
-    surf1 = player1[0]
-    surf2 = player2[0]
-    player1center = player1[1]
-    player2center = player2[1]
-    player1radius = player1[2]
-    player2radius = player2[2]
-
-    surf1.fill(COLORS["BLANK"])
-    surf2.fill(COLORS["BLANK"])
-
-    pg.draw.circle(surf1, color, (player1radius, player1radius), player1radius)
-    pg.draw.circle(surf2, color, (player2radius, player2radius), player2radius)
-
-    player1_topleft = (player1center[0] - player1radius, player1center[1] - player1radius)
-    player2_topleft = (player2center[0] - player2radius, player2center[1] - player2radius)
-
-    rel_pos_1_2 = (player2_topleft[0] - player1_topleft[0], player2_topleft[1] - player1_topleft[1])
-
-    surf1.blit(surf2, rel_pos_1_2, special_flags=pg.BLEND_RGBA_MIN)
-
-    if rel_pos_1_2[1] > 0:
-        surf1.fill(COLORS["BLANK"], pg.Rect(0, 0, player1radius * 2, rel_pos_1_2[1]))
-    if rel_pos_1_2[0] > 0:
-        surf1.fill(COLORS["BLANK"], pg.Rect(0, rel_pos_1_2[1], rel_pos_1_2[0], player1radius * 2 - rel_pos_1_2[1]))
-    if player1radius * 2 - (rel_pos_1_2[0] + player2radius * 2) > 0:
-        surf1.fill(COLORS["BLANK"], pg.Rect(rel_pos_1_2[0] + player2radius * 2, rel_pos_1_2[1], player1radius * 2 - (rel_pos_1_2[0] + player2radius * 2), player1radius * 2 - rel_pos_1_2[1]))
-    if player1radius * 2 - (rel_pos_1_2[1] + player2radius * 2) > 0:
-        surf1.fill(COLORS["BLANK"], pg.Rect(rel_pos_1_2[0], rel_pos_1_2[1] + player2radius * 2, player2radius * 2, player1radius * 2 - (rel_pos_1_2[1] + player2radius * 2)))
-
-    screen.blit(surf1, player1_topleft)
-
 def get_diagonal_line(point1: tuple[int, int], radius1: int, point2: tuple[int, int], radius2: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]]:
     """Returns the 4 points of a 'quadrilateral' for a 'diagonal' line from circle1 to circle2
 
@@ -188,7 +146,7 @@ class Obstacle:
         self.position[1] += self.speed
         self.hitbox_rect.y = self.position[1]
 
-        self.positions_track.insert(0, self.hitbox_rect.top) # Usar uma Queue depois
+        self.positions_track.insert(0, self.hitbox_rect.top) # Change to a Queue after
         if len(self.positions_track) >= 5:
             self.positions_track.pop(-1)
     
@@ -217,14 +175,13 @@ class Player:
         self.border_color = border_color
         self.positions_tracker: list[list[tuple[int, int]]] = [[] for _ in range(self.amount)]
         self.max_tracker = 24
-        # Falta a intersecção dos círculos
     
     def update(self) -> None:
         key: pg.key.ScancodeWrapper = pg.key.get_pressed()
         
         if key[pg.K_LSHIFT] and self.distance > 0:
             self.distance -= self.speed
-        elif key[pg.K_SPACE] and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not key[pg.K_LSHIFT]:
+        if key[pg.K_SPACE] and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not key[pg.K_LSHIFT]:
             self.distance += self.speed
         elif self.distance > 100 and not key[pg.K_SPACE]:
             self.distance -= self.speed
@@ -261,7 +218,7 @@ class Player:
             for j in self.positions_tracker[i]:
                 j[1] += self.speed
             
-            self.positions_tracker[i].insert(0, self.positions[i].copy())
+            self.positions_tracker[i].insert(0, self.positions[i].copy()) # Change to a Queue after
 
             while len(self.positions_tracker[i]) > self.max_tracker:
                 self.positions_tracker[i].pop()
@@ -355,9 +312,6 @@ def game() -> None:
 
             player.draw(screen)
 
-            # if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
-            #     circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
-
             for rect in obstacles_list:
                 rect.draw(screen)
             
@@ -372,9 +326,6 @@ def game() -> None:
 
         player.update()
         player.draw(screen)
-
-        # if collision_circles(player1.position, player2.position, player1.radius, player2.radius):
-        #     circles_intersection(screen, (surf_player1, player1.position, player1.radius), (surf_player2, player2.position, player2.radius), COLORS["WHITE"])
 
         for rect in obstacles_list:
             rect.movement_bottom()
@@ -398,7 +349,7 @@ def game() -> None:
                     obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
                     obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
                 case 4:
-                    obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE - 150], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
+                    obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
                 case 5:
                     obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
                     obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
