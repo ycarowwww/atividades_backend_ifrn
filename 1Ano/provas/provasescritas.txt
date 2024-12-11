@@ -6,10 +6,10 @@ Questões sobre saídas de if-else
 Questões sobre saídas de for e while
 Questões sobre saídas com listas
 Questões sobre converter código para fluxograma
+Recriar alguma saída de programa
 
 3º Bimestre:
 Questões sobre saídas de matrizes
 Questões sobre saídas de tuplas
-Questões sobre saídas de conjuntos
 Questões sobre saídas de dicionários
 Trabalho de Recriar o Campo Minado
