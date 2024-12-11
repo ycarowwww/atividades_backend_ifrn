@@ -8,5 +8,8 @@ Questões sobre saídas com listas
 Questões sobre converter código para fluxograma
 
 3º Bimestre:
-Prova escrita sobre saídas de código
-Trabalho de programa
+Questões sobre saídas de matrizes
+Questões sobre saídas de tuplas
+Questões sobre saídas de conjuntos
+Questões sobre saídas de dicionários
+Trabalho de Recriar o Campo Minado
