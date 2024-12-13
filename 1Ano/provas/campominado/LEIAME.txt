@@ -1,0 +1,17 @@
+Professor, o arquivo principal do jogo é o "campominado.py", nele, além do Campo Minado, eu também tentei colocar algumas cores no Terminal e também uma função em que o jogador escolhe uma pequena imagem e o jogo gera um tabuleiro a partir dela.
+
+Entretanto, para isso ocorrer é necessário 2 módulos do Python: TKinter e o Pillow, então se der algum erro, será necessário instalá-los na sua máquina. Eu até tentei fazer uma implementação no programa para ele tentar detectar e instalar automaticamente, mas não sei se funcionará.
+
+O TKinter eu acredito que já vem instalado no Python automaticamente, já o Pillow não vem, então é necessário instalá-lo pelo pip:
+
+pip install pillow
+
+O TKinter eu não sei se funciona, mas eu acho que deve ser algo + ou - assim:
+
+pip install tkinter
+
+Mas mesmo se nada funcionar, eu coloquei um outro arquivo chamado "cm_semaditivos.py", em que há apenas o Campo Minado em Python, sem cores no terminal e nem a função personalizada das imagens.
+
+Também enviei uma pasta com uma pequena imagem para poder usar na função de imagens. Ao abrir a função de imagens no programa, ele perguntará se quer prosseguir e então ele abrirá o Explorador de Arquivos, talvez ele não apareça diretamente (ficando "atrás" do VSCode, por exemplo), mas acho que é só procurar e abrir a imagem que ele gera o tabuleiro.
+
+Obrigado por ler, Professor!
