@@ -114,7 +114,7 @@ def play(board: Board) -> None:
         print("-" * 30)
 
         try:
-            is_flag = input("- Colocar uma bandeira? (s/n): ").lower()
+            is_flag = input("- Colocar/Retirar uma bandeira? (s/n): ").lower()
 
             if is_flag not in ["s", "n"]:
                 raise ValueError("")

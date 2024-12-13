@@ -241,7 +241,7 @@ def play(board: Board | CustomBoard) -> None:
         print("-" * 30)
 
         try:
-            is_flag = input(f"- Colocar uma {Colors.RED.value}bandeira{Colors.END.value}? (s/n): ").lower()
+            is_flag = input(f"- Colocar/Retirar uma {Colors.RED.value}bandeira{Colors.END.value}? (s/n): ").lower()
 
             if is_flag not in ["s", "n"]:
                 raise ValueError("")
