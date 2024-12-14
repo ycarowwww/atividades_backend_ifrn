@@ -116,19 +116,15 @@ def get_line_surface(points: list[tuple[int, int]], initial_radius: int, initial
     
     offset = (point_br[0] - point_tl[0], point_br[1] - point_tl[1])
     surf = pg.Surface(offset, flags=pg.SRCALPHA)
-    surf2 = pg.Surface(offset, flags=pg.SRCALPHA) # Another surface to prevent a darker line from being on top of a lighter one.
 
     points_offset = [[p[0] - point_tl[0], p[1] - point_tl[1]] for p in points]
 
-    for i in range(len(points_offset)):
-        surf2.fill(COLORS["BLANK"])
+    for i in range(len(points_offset) - 1, -1, -1):
         color = (*initial_color, int(-initial_alpha / len(points_offset) * i + initial_alpha))
 
-        pg.draw.circle(surf2, color, points_offset[i], radius[i])
+        pg.draw.circle(surf, color, points_offset[i], radius[i])
         if i != 0:
-            pg.draw.polygon(surf2, color, get_diagonal_line(points_offset[i-1], radius[i-1], points_offset[i], radius[i]))
-
-        surf.blit(surf2, (0, 0), special_flags=pg.BLEND_RGBA_MAX) # Pick the "strongest" color in the line
+            pg.draw.polygon(surf, color, get_diagonal_line(points_offset[i-1], radius[i-1], points_offset[i], radius[i]))
     
     return (surf, point_tl)
 
