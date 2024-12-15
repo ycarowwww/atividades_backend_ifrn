@@ -1,10 +1,12 @@
+# OLD FILE
+
 import pygame as pg
 import pygame.freetype as pgft
 import colorsys
 from math import cos, sin, radians, atan2, pi, sqrt
 from random import randint
 
-PLAYER_ROTATION_VELOCITY: float = float(input("- Player's Rotation Velocity: "))
+PLAYER_ROTATION_VELOCITY: float = 5
 
 pg.init()
 
