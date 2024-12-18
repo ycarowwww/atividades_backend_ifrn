@@ -73,7 +73,7 @@ class Game:
         obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
 
         while self.current_window == 2:
-            key: pg.key.ScancodeWrapper = pg.key.get_pressed()
+            key = pg.key.get_pressed()
 
             if key[pg.K_LSHIFT] and key[pg.K_ESCAPE]:
                 self.current_window = 1
