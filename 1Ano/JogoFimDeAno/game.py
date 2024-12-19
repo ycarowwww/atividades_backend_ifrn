@@ -1,134 +1,115 @@
 import pygame as pg
 import pygame.freetype as pgft
 from entities.player import Player
+from entities.buttons.pause_button import PauseButton
+from entities.buttons.return_button import ReturnButton
+from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
 
-# Create buttons classes and Framerate Independence
+# Create Framerate Independence
 
 class Game:
     def __init__(self):
         pg.init()
 
-        self.SCREEN_SIZE = SCREEN_SIZE
-        self.screen: pg.Surface = pg.display.set_mode(self.SCREEN_SIZE)
+        self.__SCREEN_SIZE = SCREEN_SIZE
+        self.__screen: pg.Surface = pg.display.set_mode(self.__SCREEN_SIZE)
         pg.display.set_caption("Pygame Game")
-        self.clock: pg.time.Clock = pg.time.Clock()
-        self.FPS = FPS
-        self.current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary after
-        self.GAME_FONT = GAME_FONT
-        self.MAX_SCORE_FONT = MAX_SCORE_FONT
-        self.player = Player([i // 2 for i in self.SCREEN_SIZE], [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20)
+        self.__clock: pg.time.Clock = pg.time.Clock()
+        self.__FPS = FPS
+        self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary after
+        self.__GAME_FONT = GAME_FONT
+        self.__MAX_SCORE_FONT = MAX_SCORE_FONT
 
     def run(self):
-        while self.current_window != 0:
-            match self.current_window:
+        while self.__current_window != 0:
+            match self.__current_window:
                 case 1: self.main_menu()
                 case 2: self.main_game()
         
         pg.quit()
 
     def main_menu(self):
-        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.SCREEN_SIZE])
-        title_surf, title_rect = self.GAME_FONT.render("DUET", COLORS["WHITE"], style=pgft.STYLE_STRONG)
-        title_rect.center = (SCREEN_CENTER[0], 100)
-        game_surf, game_rect = self.GAME_FONT.render("Game", COLORS["WHITE"], COLORS["BLUE"])
-        game_rect.center = SCREEN_CENTER
+        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.__SCREEN_SIZE])
 
-        while self.current_window == 1:
+        def game_bt_func(): self.__current_window = 2
+        game_button = TextButton((0, 0), game_bt_func, "Game", self.__GAME_FONT, COLORS["WHITE"], COLORS["BLUE"], padding=15)
+        game_button.set_position_attr("center", SCREEN_CENTER)
+
+        while self.__current_window == 1:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    self.current_window = 0
+                    self.__current_window = 0
                 
-                if event.type == pg.KEYDOWN:
+                if event.type == pg.KEYDOWN: # Change Later
                     if event.key == pg.K_RETURN:
-                        self.current_window = 2 # Open Selected Option
-                
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    mpos = event.pos
-                    
-                    if game_rect.collidepoint(mpos):
-                        self.current_window = 2
+                        self.__current_window = 2 # Open Selected Option
 
-            self.clock.tick(self.FPS)
-            self.screen.fill(COLORS["BLACK"])
+                game_button.update_by_event(event)
 
-            self.screen.blit(title_surf, title_rect)
-            self.screen.blit(game_surf, game_rect)
+            self.__clock.tick(self.__FPS)
+            self.__screen.fill(COLORS["BLACK"])
+
+            game_button.draw(self.__screen)
+            blit_text(self.__screen, "DUET", COLORS["WHITE"], self.__GAME_FONT, (SCREEN_CENTER[0], 100), "center", style=pgft.STYLE_STRONG)
             
             pg.display.flip()
 
     def main_game(self):
-        paused: bool = False
-        pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
-        pause_button_rect.topright = (SCREEN_SIZE[0] - 10, 10)
-        pause_button_triangle: list[tuple[int, int]] = (pause_button_rect.topleft, pause_button_rect.bottomleft, (pause_button_rect.right, pause_button_rect.centery))
-        pause_button_rects: list[pg.Rect] = [pg.Rect(0, 0, 20, 50), pg.Rect(0, 0, 20, 50)]
-        pause_button_rects[0].topright = pause_button_rect.topright
-        pause_button_rects[1].topright = (pause_button_rects[0].right - 30, pause_button_rects[0].top)
-        return_menu_button: pg.Rect = pg.Rect(0, 0, 50, 50)
-        return_menu_button.topright = (pause_button_rect.left - 10, pause_button_rect.top)
+        def return_menu_func():
+            if pause_button.is_paused:
+                self.__current_window = 1
+        player = Player([i // 2 for i in self.__SCREEN_SIZE], [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20)
+        pause_button = PauseButton((50, 50), (SCREEN_SIZE[0] - 60, 10), lambda: None, (255, 255, 255), 15)
+        return_menu_button = ReturnButton((50, 50), (SCREEN_SIZE[0] - 120, 10), return_menu_func, (255, 255, 255))
         punctuation, max_score = 0, 0
         obstacle_manager = ObstaclesManager()
 
-        while self.current_window == 2:
+        while self.__current_window == 2:
             key = pg.key.get_pressed()
 
             if key[pg.K_LSHIFT] and key[pg.K_ESCAPE]:
-                self.current_window = 1
+                self.__current_window = 1
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    self.current_window = 0
-
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
-                        paused = not paused
-                    if event.key == pg.K_b:
-                        self.player.toggle_border()
-
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    mx, my = event.pos
-
-                    if pause_button_rect.collidepoint(mx, my):
-                        paused = not paused
-                    elif paused and return_menu_button.collidepoint(mx, my):
-                        self.current_window = 1
-
-            self.clock.tick(FPS)
-            self.screen.fill(COLORS["BLACK"])
-
-            if paused:
-                pg.draw.polygon(self.screen, COLORS["WHITE"], pause_button_triangle)
-                pg.draw.polygon(self.screen, COLORS["WHITE"], (return_menu_button.topright, return_menu_button.bottomright, (return_menu_button.left, return_menu_button.centery)))
-
-                self.player.draw(self.screen)
-
-                obstacle_manager.draw(self.screen)
+                    self.__current_window = 0
                 
-                blit_text(self.screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
-                blit_text(self.screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
+                pause_button.update_by_event(event)
+                player.update_by_event(event)
+                return_menu_button.update_by_event(event)
+
+            self.__clock.tick(self.__FPS)
+            self.__screen.fill(COLORS["BLACK"])
+
+            pause_button.draw(self.__screen)
+
+            if pause_button.is_paused:
+                player.draw(self.__screen)
+                obstacle_manager.draw(self.__screen)
+                return_menu_button.draw(self.__screen)
+                
+                blit_text(self.__screen, f"Score: {punctuation}", COLORS["WHITE"], self.__GAME_FONT, (10, 10), "topleft")
+                blit_text(self.__screen, f"Max: {max_score}", COLORS["GREEN"], self.__MAX_SCORE_FONT, (10, 40), "topleft")
                 
                 pg.display.flip()
                 continue
-            else:
-                for rt in pause_button_rects:
-                    pg.draw.rect(self.screen, COLORS["WHITE"], rt)
 
-            self.player.update()
-            self.player.draw(self.screen)
+            player.update()
+            player.draw(self.__screen)
 
             obstacle_manager.update()
-            obstacle_manager.draw(self.screen)
+            obstacle_manager.draw(self.__screen)
             
-            if obstacle_manager.check_collision(self.player):
+            if obstacle_manager.check_collision(player):
                 punctuation = 0
             elif obstacle_manager.get_obstacle_removed():
                 punctuation += 1
                 max_score = max(max_score, punctuation)
             
-            blit_text(self.screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
-            blit_text(self.screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
+            blit_text(self.__screen, f"Score: {punctuation}", COLORS["WHITE"], self.__GAME_FONT, (10, 10), "topleft")
+            blit_text(self.__screen, f"Max: {max_score}", COLORS["GREEN"], self.__MAX_SCORE_FONT, (10, 40), "topleft")
             
             pg.display.flip()
 

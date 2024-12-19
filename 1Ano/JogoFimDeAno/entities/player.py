@@ -51,22 +51,13 @@ class Player:
 
         self.__draw_intersection(screen)
     
-    def toggle_border(self) -> None:
-        self.show_border = not self.show_border
+    def update_by_event(self, event: pg.event.Event) -> None:
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_b:
+                self.__toggle_border()
     
-    def check_collision_rect(self, hitbox_rect: pg.Rect) -> bool:
-        if hitbox_rect.bottom < self.center[1] - self.distance or hitbox_rect.top > self.center[1] + self.distance: 
-            return False
-        
-        for i in range(self.amount):
-            closest_x: float = max(hitbox_rect.left, min(self.positions[i][0], hitbox_rect.right))
-            closest_y: float = max(hitbox_rect.top, min(self.positions[i][1], hitbox_rect.bottom))
-
-            distance: float = sqrt((self.positions[i][0] - closest_x) ** 2 + (self.positions[i][1] - closest_y) ** 2)
-
-            if distance <= self.radius: return True
-        
-        return False
+    def __toggle_border(self) -> None:
+        self.show_border = not self.show_border
 
     def __rotate_to_center(self) -> None:
         for i in range(self.amount):
