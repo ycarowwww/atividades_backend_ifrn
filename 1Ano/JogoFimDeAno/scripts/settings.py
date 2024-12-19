@@ -17,6 +17,10 @@ COLORS: dict[str, tuple[int, int, int, int | None]] = {
 }
 GAME_FONT: pgft.Font = pgft.SysFont("Arial", 30, True, False)
 MAX_SCORE_FONT: pgft.Font = pgft.SysFont("Arial", 15, False, False)
+OBSTACLES_HEIGHT: int = 40
+OBSTACLES_SPEED: int = int((240 + OBSTACLES_HEIGHT * 2) / (180 / PLAYER_ROTATION_VELOCITY)) # 240 is the distance + radius of the balls
+MAX_POSITIONS_TRACKER: int = 5
+INITIAL_ALPHA_TRACKER: int = 50
 
 def blit_text(screen: pg.Surface, message: str, color: tuple[int, int, int], topleft: tuple[int, int], font: pgft.Font) -> None:
     text_surface, text_rect = font.render(message, color)

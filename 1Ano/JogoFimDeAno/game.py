@@ -1,9 +1,10 @@
 import pygame as pg
 import pygame.freetype as pgft
-from random import randint
 from entities.player import Player
-from entities.obstacle import Obstacle
+from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
+
+# Create buttons classes and Framerate Independence
 
 class Game:
     def __init__(self):
@@ -58,7 +59,6 @@ class Game:
             pg.display.flip()
 
     def main_game(self):
-        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.SCREEN_SIZE])
         paused: bool = False
         pause_button_rect: pg.Rect = pg.Rect(0, 0, 50, 50)
         pause_button_rect.topright = (SCREEN_SIZE[0] - 10, 10)
@@ -69,8 +69,7 @@ class Game:
         return_menu_button: pg.Rect = pg.Rect(0, 0, 50, 50)
         return_menu_button.topright = (pause_button_rect.left - 10, pause_button_rect.top)
         punctuation, max_score = 0, 0
-        OBSTACLE_SIZE: int = 30
-        obstacles_list: list[Obstacle] = [Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE])]
+        obstacle_manager = ObstaclesManager()
 
         while self.current_window == 2:
             key = pg.key.get_pressed()
@@ -105,8 +104,7 @@ class Game:
 
                 self.player.draw(self.screen)
 
-                for rect in obstacles_list:
-                    rect.draw(self.screen)
+                obstacle_manager.draw(self.screen)
                 
                 blit_text(self.screen, f"Score: {punctuation}", COLORS["WHITE"], (10, 10), GAME_FONT)
                 blit_text(self.screen, f"Max: {max_score}", COLORS["GREEN"], (10, 40), MAX_SCORE_FONT)
@@ -120,34 +118,12 @@ class Game:
             self.player.update()
             self.player.draw(self.screen)
 
-            for rect in obstacles_list:
-                rect.movement_bottom()
-                rect.draw(self.screen)
-                # Check Collision with players
-                if self.player.check_collision_rect(rect.hitbox_rect):
-                    punctuation = 0
-
-            if obstacles_list[0].position[1] >= SCREEN_SIZE[1]:
-                obstacles_list.pop(0)
-                
-            if len([rect for rect in obstacles_list if rect.position[1] >= 240]) - len(obstacles_list) >= 0:
-                rnd_num: int = randint(1, 5)
-
-                match rnd_num:
-                    case 1:
-                        obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
-                    case 2:
-                        obstacles_list.append(Obstacle([SCREEN_CENTER[0], -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2, OBSTACLE_SIZE]))
-                    case 3:
-                        obstacles_list.append(Obstacle([SCREEN_CENTER[0], -SCREEN_CENTER[0]], COLORS["WHITE"], [OBSTACLE_SIZE, SCREEN_SIZE[0]//2]))
-                        obstacles_list[-1].hitbox_rect.centerx = SCREEN_CENTER[0]
-                    case 4:
-                        obstacles_list.append(Obstacle([SCREEN_CENTER[0] - SCREEN_SIZE[0]//8, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//4, OBSTACLE_SIZE]))
-                    case 5:
-                        obstacles_list.append(Obstacle([0, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
-                        obstacles_list.append(Obstacle([SCREEN_CENTER[0] + 100, -OBSTACLE_SIZE], COLORS["WHITE"], [SCREEN_SIZE[0]//2 - 100, OBSTACLE_SIZE]))
-                    case _: pass
-                
+            obstacle_manager.update()
+            obstacle_manager.draw(self.screen)
+            
+            if obstacle_manager.check_collision(self.player):
+                punctuation = 0
+            elif obstacle_manager.get_obstacle_removed():
                 punctuation += 1
                 max_score = max(max_score, punctuation)
             
