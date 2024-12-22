@@ -4,6 +4,7 @@ from entities.obstacles.obstacle import Obstacle
 from math import sqrt
 
 class StationaryObstacle(Obstacle):
+    """An obstacle that just stands still and does not move or becomes invisible."""
     def __init__(self, x: int, y: int, width: int, height: int, speed: int, color: tuple[int, int, int]):
         super().__init__(x, y, width, height, speed, color)
         self._rect = pg.Rect(self._x, self._y, self._width, self._height)

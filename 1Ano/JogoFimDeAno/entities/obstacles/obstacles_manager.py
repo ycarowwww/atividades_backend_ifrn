@@ -8,6 +8,7 @@ from copy import deepcopy
 from random import choice
 
 class ObstaclesManager:
+    """An Obstacle Manager that randomly generates certain obstacles."""
     def __init__(self) -> None:
         self._obstacles: list[Obstacle] = []
         self._centerx = SCREEN_SIZE[0] // 2

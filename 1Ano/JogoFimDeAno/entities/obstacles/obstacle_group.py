@@ -3,6 +3,7 @@ from entities.player import Player
 from entities.obstacles.obstacle import Obstacle
 
 class ObstacleGroup:
+    """A group of obstacles acting as one."""
     def __init__(self, start_obstacles: list[Obstacle] = []):
         self._amount = len(start_obstacles)
         self._obstacles = start_obstacles
