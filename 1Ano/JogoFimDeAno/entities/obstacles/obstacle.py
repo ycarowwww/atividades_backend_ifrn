@@ -22,7 +22,7 @@ class Obstacle:
     
     def draw(self, screen: pg.Surface) -> None: pass
     
-    def check_collision(self, player: Player) -> None: pass
+    def check_collision(self, player: Player) -> bool: pass
 
     def _draw_tracker(self, screen: pg.Surface) -> None: pass
 
