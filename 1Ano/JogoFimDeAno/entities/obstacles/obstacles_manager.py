@@ -2,6 +2,7 @@ import pygame as pg
 from entities.player import Player
 from entities.obstacles.obstacle import Obstacle
 from entities.obstacles.stationary_obstacle import StationaryObstacle
+from entities.obstacles.rotating_obstacle import RotatingObstacle
 from entities.obstacles.obstacle_group import ObstacleGroup
 from scripts.settings import OBSTACLES_HEIGHT, OBSTACLES_SPEED, SCREEN_SIZE, COLORS
 from copy import deepcopy
@@ -20,7 +21,9 @@ class ObstaclesManager:
             StationaryObstacle(self._centerx - 300, -self._height, 300, self._height, self._speed, self._color),
             StationaryObstacle(self._centerx, -self._height, 300, self._height, self._speed, self._color),
             StationaryObstacle(self._centerx - 100, -self._height, 200, self._height, self._speed, self._color),
-            ObstacleGroup([StationaryObstacle(self._centerx - 300, -self._height, 200, self._height, self._speed, self._color), StationaryObstacle(self._centerx + 100, -self._height, 200, self._height, self._speed, self._color)])
+            ObstacleGroup([StationaryObstacle(self._centerx - 300, -self._height, 200, self._height, self._speed, self._color), StationaryObstacle(self._centerx + 100, -self._height, 200, self._height, self._speed, self._color)]),
+            RotatingObstacle(self._centerx, -self._height, 200, self._height, self._speed, self._color),
+            RotatingObstacle(self._centerx, -self._height, 200, self._height, self._speed, self._color, rotating_to_right=False)
         ]
         self._obstacle_removed = False
     

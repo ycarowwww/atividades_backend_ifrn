@@ -1,12 +1,13 @@
 import pygame as pg
+from scripts.settings import ROTATING_OBSTACLE_ANGULAR_SPEED
 from entities.player import Player
 from entities.obstacles.obstacle import Obstacle
 from math import sqrt, pi, radians, cos, sin, asin
 
 class RotatingObstacle(Obstacle):
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, color: tuple[int, int, int], rotating_to_right: bool = True, initial_angle: int = 0):
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0):
         super().__init__(x, y, width, height, speed, color)
-        self._angular_speed = radians(self._speed) * (1 if rotating_to_right else -1)
+        self._angular_speed = radians(angular_speed) * (1 if rotating_to_right else -1)
         self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
         self._d_angle = 2 * asin((self._height / 2) / self._circumscribed_circle_radius)
         self._angle = radians(initial_angle) - self._d_angle / 2
@@ -27,7 +28,31 @@ class RotatingObstacle(Obstacle):
         
         pg.draw.polygon(screen, self._color, self._points)
     
-    def check_collision(self, player: Player) -> bool: # Need to be implemented
+    def check_collision(self, player: Player) -> bool:
+        """Check Collision between the Player and the Obstacle.
+        
+            First, it'll rotate each position of the circles relative to the center of the rectangle, then calculate the nearest point and check the distance.
+        """
+        if sqrt((self._x - player.center[0]) ** 2 + (self._y - player.center[1]) ** 2) > player.distance + player.radius + self._circumscribed_circle_radius: 
+            return False
+
+        angle = self._angle + self._d_angle / 2
+    
+        for i in range(player.amount):
+            player_relative_center = player.positions[i].copy()
+            player_relative_center[0] -= self._x
+            player_relative_center[1] -= self._y
+
+            new_x = player_relative_center[0] * cos(-angle) - player_relative_center[1] * sin(-angle)
+            new_y = player_relative_center[1] * cos(-angle) + player_relative_center[0] * sin(-angle)
+            player_relative_center = [new_x, new_y]
+
+            nearest_x = min(self._width / 2, max(-self._width / 2, player_relative_center[0]))
+            nearest_y = min(self._height / 2, max(-self._height / 2, player_relative_center[1]))
+            distance = sqrt((player_relative_center[0] - nearest_x) ** 2 + (player_relative_center[1] - nearest_y) ** 2)
+
+            if distance < player.radius: return True
+        
         return False
 
     def _draw_tracker(self, screen: pg.Surface) -> None:

@@ -21,6 +21,7 @@ OBSTACLES_HEIGHT: int = 30
 OBSTACLES_SPEED: int = int((240 + OBSTACLES_HEIGHT * 2) / (180 / PLAYER_ROTATION_VELOCITY)) # 240 is the distance + radius of the balls
 MAX_POSITIONS_TRACKER: int = 5
 INITIAL_ALPHA_TRACKER: int = 50
+ROTATING_OBSTACLE_ANGULAR_SPEED: float = 180 / (240 / OBSTACLES_SPEED) # Implement Better
 
 def blit_text(screen: pg.Surface, text: str, color: tuple[int, int, int], font: pgft.Font, position: tuple[int, int], attr_pos: str, *args, **kwargs) -> None:
     text_surface, text_rect = font.render(text, color, **kwargs)
