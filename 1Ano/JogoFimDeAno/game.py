@@ -7,7 +7,7 @@ from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
 
-# Create Framerate Independence
+# Create Framerate Independence, Fix obstacles movement, Menu and Custom Screen Size
 
 class Game:
     def __init__(self):
@@ -15,10 +15,10 @@ class Game:
 
         self.__SCREEN_SIZE = SCREEN_SIZE
         self.__screen: pg.Surface = pg.display.set_mode(self.__SCREEN_SIZE)
-        pg.display.set_caption("Pygame Game")
+        pg.display.set_caption("Duet")
         self.__clock: pg.time.Clock = pg.time.Clock()
         self.__FPS = FPS
-        self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary after
+        self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
         self.__GAME_FONT = GAME_FONT
         self.__MAX_SCORE_FONT = MAX_SCORE_FONT
 
