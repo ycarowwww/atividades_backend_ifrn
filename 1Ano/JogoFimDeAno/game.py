@@ -1,13 +1,13 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities.player import Player
+from entities.player import Player # Use Packages
 from entities.buttons.pause_button import PauseButton
 from entities.buttons.return_button import ReturnButton
 from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
 
-# Create Framerate Independence, Fix obstacles movement, Menu and Custom Screen Size
+# Create Framerate Independence, Fix obstacles movement, Menu, Custom Screen Size and obstacles levels
 
 class Game:
     def __init__(self):

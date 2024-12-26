@@ -27,3 +27,13 @@ def blit_text(screen: pg.Surface, text: str, color: tuple[int, int, int], font: 
     text_surface, text_rect = font.render(text, color, **kwargs)
     setattr(text_rect, attr_pos, position)
     screen.blit(text_surface, text_rect)
+
+def scale_dimension(value: float, base_res: tuple[int, int], current_res: tuple[int, int]) -> int:
+    width_factor = current_res[0] / base_res[0]
+    height_factor = current_res[1] / base_res[1]
+    return round(value * min(width_factor, height_factor))
+
+def scale_position(pos: tuple[int, int], base_res: tuple[int, int], current_res: tuple[int, int]) -> tuple[int, int]:
+    width_factor = current_res[0] / base_res[0]
+    height_factor = current_res[1] / base_res[1]
+    return (round(pos[0] * width_factor), round(pos[1] * height_factor))
