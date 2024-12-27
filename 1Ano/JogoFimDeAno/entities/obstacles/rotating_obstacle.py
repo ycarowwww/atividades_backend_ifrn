@@ -33,13 +33,13 @@ class RotatingObstacle(Obstacle):
         
             First, it'll rotate each position of the circles relative to the center of the rectangle, then calculate the nearest point and check the distance.
         """
-        if sqrt((self._x - player.center[0]) ** 2 + (self._y - player.center[1]) ** 2) > player.distance + player.radius + self._circumscribed_circle_radius: 
+        if sqrt((self._x - player.get_center()[0]) ** 2 + (self._y - player.get_center()[1]) ** 2) > player.get_distance() + player.get_radius() + self._circumscribed_circle_radius: 
             return False
 
         angle = self._angle + self._d_angle / 2
     
-        for i in range(player.amount):
-            player_relative_center = player.positions[i].copy()
+        for i in range(player.get_amount()):
+            player_relative_center = player.get_positions()[i].copy()
             player_relative_center[0] -= self._x
             player_relative_center[1] -= self._y
 
@@ -51,7 +51,7 @@ class RotatingObstacle(Obstacle):
             nearest_y = min(self._height / 2, max(-self._height / 2, player_relative_center[1]))
             distance = sqrt((player_relative_center[0] - nearest_x) ** 2 + (player_relative_center[1] - nearest_y) ** 2)
 
-            if distance < player.radius: return True
+            if distance < player.get_radius(): return True
         
         return False
 

@@ -1,133 +1,120 @@
 import pygame as pg
-from math import sin, cos, atan2, pi, radians, sqrt
-from scripts.settings import *
+from scripts.settings import scale_dimension, unscale_dimension, scale_position, BASE_RSLT
+from collections import deque
+from enum import IntFlag
+from math import sqrt, pi, radians, sin, cos, atan2
+
+class Keys(IntFlag):
+    """Enum with the Keyboard Keys to the Player's movements."""
+    MOREDISTANCE = pg.K_SPACE
+    LESSDISTANCE = pg.K_LSHIFT
+    ROTATELEFT = pg.K_a
+    ROTATERIGHT = pg.K_d
+    TOGGLEBORDER = pg.K_b
 
 class Player:
-    def __init__(self, center: tuple[int, int], colors_circles: list[tuple[int, int, int]], border_color: tuple[int, int, int], radius: int, distance: int = 100, speed: float = PLAYER_ROTATION_VELOCITY) -> None:
-        self.center = center
-        self.colors = colors_circles
-        self.radius = radius
-        self.amount = len(self.colors)
-        self.positions = [[0, 0] for _ in range(self.amount)]
-        self.angle = 0
-        self.d_angle = 360 // self.amount
-        self.speed = speed
-        self.distance = distance
-        self.show_border = False
-        self.border_size = 5
-        self.border_color = border_color
-        self.positions_tracker: list[list[tuple[int, int]]] = [[] for _ in range(self.amount)]
-        self.max_tracker = 24
+    def __init__(self, center: tuple[int, int], amount_circles: int, circle_radius: int, initial_angle: float = 0, angular_speed: float = 180, distance: float = 100, linear_speed: float = 100, max_distance_multiplier: float = 3, border_size: float = 5) -> None:
+        self._center = center
+        self._radius = circle_radius
+        self._amount = amount_circles
+        self._colors = [(255, 255, 255) for _ in range(self._amount)]
+        self._angle = initial_angle
+        self._d_angle = 360 / self._amount
+        self._angular_speed = angular_speed
+        self._normal_distance = distance
+        self._distance = self._normal_distance
+        self._max_distance_multiplier = max_distance_multiplier
+        self._max_distance = self._normal_distance * self._max_distance_multiplier
+        self._linear_speed = linear_speed
+        self._positions = [[0, 0] for _ in range(self._amount)]
+        self._rotate_to_center() # defines the starting positions
+        self._show_border = False
+        self._border_size = border_size
+        self._border_color = (30, 30, 30)
+        self._positions_tracker: list[deque[tuple[float, float]]] = [deque() for _ in range(self._amount)]
+        self._positions_tracker_times: list[deque[float]] = [deque() for _ in range(self._amount)]
+        self._positions_tracker_lifetime: float = 0.5 # seconds
+        self._initial_tracker_alpha = 127
+        self._base_resolution = BASE_RSLT
+        self._actual_resolution = self._base_resolution
     
-    def update(self) -> None:
-        key: pg.key.ScancodeWrapper = pg.key.get_pressed()
+    def update(self, dt: float) -> None:
+        key = pg.key.get_pressed()
+
+        linear_speed = self._linear_speed * dt
         
-        if key[pg.K_LSHIFT] and self.distance > 0:
-            self.distance -= self.speed
-        if key[pg.K_SPACE] and self.distance < SCREEN_SIZE[0]//3 or self.distance < 100 and not key[pg.K_LSHIFT]: # Change this Screen_Size after probably
-            self.distance += self.speed
-        elif self.distance > 100 and not key[pg.K_SPACE]:
-            self.distance -= self.speed
+        if key[Keys.LESSDISTANCE] or key[Keys.MOREDISTANCE]:
+            if key[Keys.LESSDISTANCE]:
+                self._distance -= linear_speed
+            if key[Keys.MOREDISTANCE]:
+                self._distance += linear_speed
+        else:
+            if abs(self._normal_distance - self._distance) <= linear_speed:
+                self._distance = self._normal_distance
+            elif self._distance < self._normal_distance:
+                self._distance += linear_speed
+            else:
+                self._distance -= linear_speed
+            
+        if self._distance > self._max_distance:
+            self._distance = self._max_distance
+        elif self._distance < 0:
+            self._distance = 0
 
-        if key[pg.K_a]: self.angle -= self.speed
-        if key[pg.K_d]: self.angle += self.speed
-        self.angle %= 360
+        if key[Keys.ROTATELEFT]: self._angle -= self._angular_speed * dt
+        if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
+        self._angle %= 360
 
-        self.__rotate_to_center()
-        self.__update_tracker()
+        self._rotate_to_center()
+        self._update_tracker(dt)
     
     def draw(self, screen: pg.Surface) -> None:
-        if self.show_border:
-            pg.draw.circle(screen, self.border_color, self.center, self.distance, self.border_size)
+        if self._show_border:
+            pg.draw.circle(screen, self._border_color, self._center, self._distance, self._border_size)
 
-        if len(self.positions_tracker[0]) > 2:
-            for i in range(self.amount):
-                surf, topleft = self.__get_line_surface(self.positions_tracker[i], self.radius, self.colors[i], 127)
-
-                screen.blit(surf, topleft)
+        self._draw_tracker(screen)
         
-        for i in range(self.amount):
-            pg.draw.circle(screen, self.colors[i], self.positions[i], self.radius)
+        for i in range(self._amount):
+            pos = [ round(j) for j in self._positions[i] ]
+            pg.draw.circle(screen, self._colors[i], pos, self._radius)
 
-        self.__draw_intersection(screen)
+        self._draw_intersection(screen)
     
     def update_by_event(self, event: pg.event.Event) -> None:
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_b:
-                self.__toggle_border()
+        match event.type:
+            case pg.KEYDOWN:
+                if event.key == Keys.TOGGLEBORDER:
+                    self._toggle_border()
+            case pg.VIDEORESIZE:
+                self._set_new_resolution(event.size)
     
-    def __toggle_border(self) -> None:
-        self.show_border = not self.show_border
+    def _toggle_border(self) -> None:
+        self._show_border = not self._show_border
 
-    def __rotate_to_center(self) -> None:
-        for i in range(self.amount):
-            self.positions[i][0] = int(self.distance * cos(radians(self.angle) + radians(self.d_angle * i)) + self.center[0])
-            self.positions[i][1] = int(self.distance * sin(radians(self.angle) + radians(self.d_angle * i)) + self.center[1])
+    def _rotate_to_center(self) -> None:
+        for i in range(self._amount):
+            self._positions[i][0] = self._distance * cos(radians(self._angle) + radians(self._d_angle * i)) + self._center[0]
+            self._positions[i][1] = self._distance * sin(radians(self._angle) + radians(self._d_angle * i)) + self._center[1]
 
-    def __update_tracker(self) -> None:
-        for i in range(self.amount):
-            for j in self.positions_tracker[i]:
-                j[1] += self.speed
+    def _update_tracker(self, dt: float) -> None:
+        for i in range(self._amount):
+            len_pos = len(self._positions_tracker[i])
+            for j in range(len_pos):
+                self._positions_tracker[i][j][1] += self._linear_speed * dt
+                self._positions_tracker_times[i][j] -= dt
             
-            self.positions_tracker[i].insert(0, self.positions[i].copy()) # Change to a Queue after
-
-            while len(self.positions_tracker[i]) > self.max_tracker:
-                self.positions_tracker[i].pop()
+            self._positions_tracker[i].append(self._positions[i].copy())
+            self._positions_tracker_times[i].append(self._positions_tracker_lifetime)
             
-    def __draw_intersection(self, screen: pg.Surface) -> None:
-        if self.amount >= 2 and self.__check_circles_collided():
-            surf_player = pg.Surface((self.distance * 2 + self.radius * 2, self.distance * 2 + self.radius * 2))
-            surf_player.fill(COLORS["BLACK"])
-            surf_player.set_colorkey(COLORS["BLACK"])
-
-            topleft_offset = (self.center[0] - self.distance, self.center[1] - self.distance)
-            offset_positions = [[i[0] - topleft_offset[0], i[1] - topleft_offset[1]] for i in self.positions]
-
-            for i in range(self.amount):
-                surf = pg.Surface((self.radius * 2, self.radius * 2))
-                surf.fill(COLORS["BLACK"])
-                pg.draw.circle(surf, self.colors[i], (self.radius, self.radius), self.radius)
-                surf_player.blit(surf, offset_positions[i], special_flags=pg.BLEND_ADD)
-            
-            screen.blit(surf_player, (topleft_offset[0] - self.radius, topleft_offset[1] - self.radius))
-
-    def __check_circles_collided(self) -> bool:
-        return sqrt((self.positions[0][0] - self.positions[1][0]) ** 2 + (self.positions[0][1] - self.positions[1][1]) ** 2) < self.radius * 2
-    
-    def __get_diagonal_line(self, point1: tuple[int, int], radius1: int, point2: tuple[int, int], radius2: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]]:
-        """Returns the 4 points of a 'quadrilateral' for a 'diagonal' line from circle1 to circle2
-
-            Pygame can only draw lines with 90º ends, creating a 'shrinking' effect when drawing a line between two circles.
-            This function returns 4 points between the circles to draw in the 'pg.draw.polygon' function for a line with a 'diagonal' ending.
-
-            Args:
-                point1 (tuple): Circle1's center.
-                radius1 (tuple): Circle1's radius.
-                point2 (int): Circle2's center.
-                radius1 (int): Circle2's radius.
-
-            Returns:
-                tuple: A tuple with 4 points positions.
-        """
-        pos1: tuple[int, int] = (point1[0], -point1[1]) # Flipping the y-axis because of Pygame
-        pos2: tuple[int, int] = (point2[0], -point2[1]) # Flipping the y-axis because of Pygame
-        angle: float = atan2(point1[0] - point2[0], point1[1] - point2[1])
-
-        def get_point(rad: int, ang: float, x: int, y: int) -> tuple[int, int]:
-            """Returns the point position in the circle."""
-            return (int(rad * cos(ang) + x), int(rad * sin(ang) + y))
+            remove_to = next((j for j, e in enumerate(self._positions_tracker_times[i]) if e > 0), len_pos)
+            for _ in range(remove_to):
+                self._positions_tracker[i].popleft()
+                self._positions_tracker_times[i].popleft()
         
-        points = (get_point(radius1, angle, pos1[0], pos1[1]), 
-                get_point(radius1, angle + pi, pos1[0], pos1[1]), 
-                get_point(radius2, angle + pi, pos2[0], pos2[1]), 
-                get_point(radius2, angle, pos2[0], pos2[1]))
-        
-        return tuple([(p[0], -p[1]) for p in points]) # Unflipping the y-axis because of Pygame
-    
-    def __get_line_surface(self, points: list[tuple[int, int]], initial_radius: int, initial_color: tuple[int, int, int], initial_alpha: int) -> tuple[pg.Surface, tuple[int, int]]:
-        """Returns the line Surface and topleft position.
+    def _draw_tracker(self, screen: pg.Surface) -> None:
+        """Draws the Tracker on the screen.
 
-            Returns a Surface with a line of the circle's previous positions becoming increasingly transparent. 
+            Draws the Tracker on the screen with a line of the circle's previous positions becoming increasingly transparent. 
             It also uses diagonal lines to connect the positions.
 
             Args:
@@ -135,37 +122,136 @@ class Player:
                 initial_radius (int): Initial radius of the line.
                 initial_color (tuple): Line color.
                 initial_alpha (int): Initial alpha of the line.
-
-            Returns:
-                tuple: A tuple with the Surface and Topleft position.
-            
-            Raises:
-                ValueError: If 'points' has less than 2 elements.
         """
-        l = len(points)
-        if l < 2: raise ValueError("At least 2 points are required.")
-        
-        radius: list[int] = [int(-initial_radius / l * i + initial_radius) for i in range(l)]
-        
-        point_tl = [points[0][0] - radius[0], points[0][1] - radius[0]]
-        point_br = [points[0][0] + radius[0], points[0][1] + radius[0]]
+        if len(self._positions_tracker[0]) < 2: return
 
-        for i in range(1, len(points)):
-            point_tl[0] = min(point_tl[0], points[i][0] - radius[i])
-            point_tl[1] = min(point_tl[1], points[i][1] - radius[i])
-            point_br[0] = max(point_br[0], points[i][0] + radius[i])
-            point_br[1] = max(point_br[1], points[i][1] + radius[i])
+        def get_diagonal_line(point1: tuple[int, int], radius1: int, point2: tuple[int, int], radius2: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]]:
+            """Returns the 4 points of a 'quadrilateral' for a 'diagonal' line from circle1 to circle2
+
+                Pygame can only draw lines with 90º ends, creating a 'shrinking' effect when drawing a line between two circles.
+                This function returns 4 points between the circles to draw in the 'pg.draw.polygon' function for a line with a 'diagonal' ending.
+
+                Args:
+                    point1 (tuple): Circle1's center.
+                    radius1 (tuple): Circle1's radius.
+                    point2 (int): Circle2's center.
+                    radius1 (int): Circle2's radius.
+
+                Returns:
+                    tuple: A tuple with 4 points positions.
+            """
+            pos1: tuple[int, int] = (point1[0], -point1[1]) # Flipping the y-axis because of Pygame
+            pos2: tuple[int, int] = (point2[0], -point2[1]) # Flipping the y-axis because of Pygame
+            angle: float = atan2(point1[0] - point2[0], point1[1] - point2[1])
+
+            def rotate_point(rad: int, ang: float, x: int, y: int) -> tuple[int, int]:
+                """Returns the point position in the circle."""
+                return (int(rad * cos(ang) + x), int(rad * sin(ang) + y))
+            
+            points = (rotate_point(radius1, angle, pos1[0], pos1[1]), 
+                      rotate_point(radius1, angle + pi, pos1[0], pos1[1]), 
+                      rotate_point(radius2, angle + pi, pos2[0], pos2[1]), 
+                      rotate_point(radius2, angle, pos2[0], pos2[1]))
         
-        offset = (point_br[0] - point_tl[0], point_br[1] - point_tl[1])
-        surf = pg.Surface(offset, flags=pg.SRCALPHA)
+            return tuple([(p[0], -p[1]) for p in points]) # Unflipping the y-axis because of Pygame
 
-        points_offset = [[p[0] - point_tl[0], p[1] - point_tl[1]] for p in points]
+        for i in range(len(self._positions_tracker)):
+            topleft_extreme = [0, 0]
+            bottomright_extreme = [0, 0]
+            for j, coords in zip(range(2), zip(*self._positions_tracker[i])):
+                topleft_extreme[j] = round(min(coords) - self._radius)
+                bottomright_extreme[j] = round(max(coords) + self._radius)
 
-        for i in range(len(points_offset) - 1, -1, -1):
-            color = (*initial_color, int(-initial_alpha / len(points_offset) * i + initial_alpha))
+            offset = [ k - j for j, k in zip(topleft_extreme, bottomright_extreme) ]
+            surf_tracker = pg.Surface(offset, flags=pg.SRCALPHA)
 
-            pg.draw.circle(surf, color, points_offset[i], radius[i])
-            if i != 0:
-                pg.draw.polygon(surf, color, self.__get_diagonal_line(points_offset[i-1], radius[i-1], points_offset[i], radius[i]))
+            points = [ (round(j[0] - topleft_extreme[0]), round(j[1] - topleft_extreme[1])) for j in self._positions_tracker[i] ]
+            len_points = len(points)
+            points_radii = [ round(self._radius / len_points * j) for j in range(len_points) ]
+            
+            for j in range(len_points):
+                color_alpha = round(self._initial_tracker_alpha / len_points * j)
+                color = (*self._colors[i], color_alpha)
+
+                pg.draw.circle(surf_tracker, color, points[j], points_radii[j])
+                if j != 0:
+                    pg.draw.polygon(surf_tracker, color, get_diagonal_line(points[j-1], points_radii[j-1], points[j], points_radii[j]))
+            
+            screen.blit(surf_tracker, topleft_extreme)
+            
+    def _draw_intersection(self, screen: pg.Surface) -> None:
+        if self._amount < 2 or not self._check_circles_collided(): return
         
-        return (surf, point_tl)
+        radius = round(self._radius)
+        distance = round(self._distance)
+        
+        surf_player = pg.Surface([(distance + radius) * 2] * 2)
+        surf_player.fill((0, 0, 0))
+        surf_player.set_colorkey((0, 0, 0))
+
+        topleft_offset = [ round(i - distance) for i in self._center ]
+        offset_positions = [ [ round(i[j] - topleft_offset[j]) for j in range(2) ] for i in self._positions ]
+
+        for i in range(self._amount):
+            surf = pg.Surface([radius * 2] * 2)
+            surf.fill((0, 0, 0))
+            pg.draw.circle(surf, self._colors[i], (radius, radius), radius)
+            surf_player.blit(surf, offset_positions[i], special_flags=pg.BLEND_ADD)
+        
+        screen.blit(surf_player, (topleft_offset[0] - radius, topleft_offset[1] - radius))
+
+    def _check_circles_collided(self) -> bool:
+        return sqrt((self._positions[0][0] - self._positions[1][0]) ** 2 + (self._positions[0][1] - self._positions[1][1]) ** 2) < self._radius * 2
+
+    def _set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+        self._center = scale_position(self._center, self._actual_resolution, self._base_resolution)
+        self._radius = unscale_dimension(self._radius, self._actual_resolution, self._base_resolution)
+        self._normal_distance = unscale_dimension(self._normal_distance, self._actual_resolution, self._base_resolution)
+        self._distance = unscale_dimension(self._distance, self._actual_resolution, self._base_resolution)
+        self._max_distance = self._normal_distance * self._max_distance_multiplier
+        self._border_size = unscale_dimension(self._border_size, self._actual_resolution, self._base_resolution)
+
+        acc_dt_pos_tracker = [[] for _ in range(self._amount)]
+
+        for i in range(len(self._positions_tracker_times)):
+            for j in range(len(self._positions_tracker_times[i])):
+                acc_dt_pos_tracker[i].append(self._positions_tracker_lifetime - self._positions_tracker_times[i][j])
+        
+        for i in range(len(self._positions_tracker)):
+            for j in range(len(self._positions_tracker[i])):
+                self._positions_tracker[i][j][1] -= self._linear_speed * acc_dt_pos_tracker[i][j]
+                self._positions_tracker[i][j] = list(scale_position(self._positions_tracker[i][j], self._actual_resolution, self._base_resolution))
+
+        self._linear_speed = unscale_dimension(self._linear_speed, self._actual_resolution, self._base_resolution)
+
+        self._actual_resolution = new_resolution
+        self._center = scale_position(self._center, self._base_resolution, self._actual_resolution)
+        self._radius = scale_dimension(self._radius, self._base_resolution, self._actual_resolution)
+        self._normal_distance = scale_dimension(self._normal_distance, self._base_resolution, self._actual_resolution)
+        self._distance = scale_dimension(self._distance, self._base_resolution, self._actual_resolution)
+        self._max_distance = self._normal_distance * self._max_distance_multiplier
+        self._linear_speed = scale_dimension(self._linear_speed, self._base_resolution, self._actual_resolution)
+        self._rotate_to_center()
+        self._border_size = scale_dimension(self._border_size, self._base_resolution, self._actual_resolution)
+
+        for i in range(len(self._positions_tracker)):
+            for j in range(len(self._positions_tracker[i])): # Maybe we can save the ANGLE and the deltatimes + linear speed...
+                self._positions_tracker[i][j][1] += self._linear_speed * acc_dt_pos_tracker[i][j]
+                self._positions_tracker[i][j] = list(scale_position(self._positions_tracker[i][j], self._base_resolution, self._actual_resolution))
+
+    def set_circle_colors(self, new_colors: list[tuple[int, int, int]]) -> None:
+        for i in range(min(len(new_colors), self._amount)):
+            self._colors[i] = new_colors[i]
+    
+    def set_border_color(self, color: tuple[int, int, int]) -> None:
+        self._border_color = color
+
+    def get_amount(self) -> int: return self._amount
+    
+    def get_radius(self) -> int: return round(self._radius)
+
+    def get_center(self) -> tuple[int, int]: return (round(self._center[0]), round(self._center[1]))
+
+    def get_distance(self) -> int: return round(self._distance)
+
+    def get_positions(self) -> list[tuple[int, int]]: return self._positions

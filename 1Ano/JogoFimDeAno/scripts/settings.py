@@ -3,8 +3,9 @@ import pygame.freetype as pgft
 
 pg.init()
 
+BASE_RSLT = (800, 600) # Base Resolution of the screen
 PLAYER_ROTATION_VELOCITY: float = 5
-SCREEN_SIZE: tuple[int, int] = (800, 600)
+SCREEN_SIZE: tuple[int, int] = BASE_RSLT
 FPS: float = 60.0
 COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "BLACK" : (0, 0, 0),
@@ -28,12 +29,17 @@ def blit_text(screen: pg.Surface, text: str, color: tuple[int, int, int], font: 
     setattr(text_rect, attr_pos, position)
     screen.blit(text_surface, text_rect)
 
-def scale_dimension(value: float, base_res: tuple[int, int], current_res: tuple[int, int]) -> int:
-    width_factor = current_res[0] / base_res[0]
-    height_factor = current_res[1] / base_res[1]
-    return round(value * min(width_factor, height_factor))
+def scale_dimension(value: float, base_rslt: tuple[int, int], current_res: tuple[int, int]) -> int:
+    width_factor = current_res[0] / base_rslt[0]
+    height_factor = current_res[1] / base_rslt[1]
+    return value * min(width_factor, height_factor)
 
-def scale_position(pos: tuple[int, int], base_res: tuple[int, int], current_res: tuple[int, int]) -> tuple[int, int]:
-    width_factor = current_res[0] / base_res[0]
-    height_factor = current_res[1] / base_res[1]
-    return (round(pos[0] * width_factor), round(pos[1] * height_factor))
+def unscale_dimension(value: float, base_rslt: tuple[int, int], current_res: tuple[int, int]) -> int:
+    width_factor = current_res[0] / base_rslt[0]
+    height_factor = current_res[1] / base_rslt[1]
+    return value * max(width_factor, height_factor)
+
+def scale_position(pos: tuple[int, int], base_rslt: tuple[int, int], current_res: tuple[int, int]) -> tuple[int, int]:
+    width_factor = current_res[0] / base_rslt[0]
+    height_factor = current_res[1] / base_rslt[1]
+    return (pos[0] * width_factor, pos[1] * height_factor)

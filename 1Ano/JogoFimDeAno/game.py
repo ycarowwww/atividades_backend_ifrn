@@ -7,7 +7,7 @@ from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
 
-# Create Framerate Independence, Fix obstacles movement, Menu, Custom Screen Size and obstacles levels
+# Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu
 
 class Game:
     def __init__(self):
@@ -60,7 +60,8 @@ class Game:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = 1
-        player = Player([i // 2 for i in self.__SCREEN_SIZE], [COLORS["BLUE"], COLORS["RED"]], COLORS["GRAY"], 20)
+        player = Player([i // 2 for i in self.__SCREEN_SIZE], 2, 20, angular_speed=432, linear_speed=300)
+        player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         pause_button = PauseButton((50, 50), (SCREEN_SIZE[0] - 60, 10), lambda: None, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (SCREEN_SIZE[0] - 120, 10), return_menu_func, (255, 255, 255))
         punctuation, max_score = 0, 0
@@ -96,7 +97,7 @@ class Game:
                 pg.display.flip()
                 continue
 
-            player.update()
+            player.update(1 / self.__clock.get_fps())
             player.draw(self.__screen)
 
             obstacle_manager.update()
