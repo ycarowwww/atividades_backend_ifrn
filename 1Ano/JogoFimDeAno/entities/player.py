@@ -1,5 +1,5 @@
 import pygame as pg
-from scripts.settings import scale_dimension, unscale_dimension, scale_position, BASE_RSLT
+from scripts.settings import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
 from enum import IntFlag
 from math import sqrt, pi, radians, sin, cos, atan2
@@ -33,9 +33,15 @@ class Player:
         self._border_color = (30, 30, 30)
         self._positions_tracker: list[deque[tuple[float, float]]] = [deque() for _ in range(self._amount)]
         self._positions_tracker_times: list[deque[float]] = [deque() for _ in range(self._amount)]
-        self._positions_tracker_lifetime: float = 0.5 # seconds
+        self._positions_tracker_formulas: list[deque[list[float]]] = [deque() for _ in range(self._amount)] # Tuple with: angle, distance proportion and time
+        self._positions_tracker_lifetime: float = 1 # seconds
+        self._tracker_speed_multipler = 6 # radii of the circles
+        self._tracker_speed = self._tracker_speed_multipler * self._radius
         self._initial_tracker_alpha = 127
-        self._base_resolution = BASE_RSLT
+        self._base_distance = self._normal_distance
+        self._base_radius_distance_proportion = self._radius / self._base_distance
+        self._base_border_size = self._border_size
+        self._base_resolution = BASE_RESOLUTION
         self._actual_resolution = self._base_resolution
     
     def update(self, dt: float) -> None:
@@ -70,7 +76,7 @@ class Player:
     
     def draw(self, screen: pg.Surface) -> None:
         if self._show_border:
-            pg.draw.circle(screen, self._border_color, self._center, self._distance, self._border_size)
+            pg.draw.circle(screen, self._border_color, self._center, self._distance, round(self._border_size))
 
         self._draw_tracker(screen)
         
@@ -93,23 +99,26 @@ class Player:
 
     def _rotate_to_center(self) -> None:
         for i in range(self._amount):
-            self._positions[i][0] = self._distance * cos(radians(self._angle) + radians(self._d_angle * i)) + self._center[0]
-            self._positions[i][1] = self._distance * sin(radians(self._angle) + radians(self._d_angle * i)) + self._center[1]
+            self._positions[i][0] = self._distance * cos(radians(self._angle + self._d_angle * i)) + self._center[0]
+            self._positions[i][1] = self._distance * sin(radians(self._angle + self._d_angle * i)) + self._center[1]
 
     def _update_tracker(self, dt: float) -> None:
         for i in range(self._amount):
             len_pos = len(self._positions_tracker[i])
             for j in range(len_pos):
-                self._positions_tracker[i][j][1] += self._linear_speed * dt
+                self._positions_tracker[i][j][1] += self._tracker_speed * dt
                 self._positions_tracker_times[i][j] -= dt
+                self._positions_tracker_formulas[i][j][2] += dt
             
             self._positions_tracker[i].append(self._positions[i].copy())
             self._positions_tracker_times[i].append(self._positions_tracker_lifetime)
+            self._positions_tracker_formulas[i].append([radians(self._angle + self._d_angle * i), self._distance / self._normal_distance, 0])
             
             remove_to = next((j for j, e in enumerate(self._positions_tracker_times[i]) if e > 0), len_pos)
             for _ in range(remove_to):
                 self._positions_tracker[i].popleft()
                 self._positions_tracker_times[i].popleft()
+                self._positions_tracker_formulas[i].popleft()
         
     def _draw_tracker(self, screen: pg.Surface) -> None:
         """Draws the Tracker on the screen.
@@ -204,40 +213,28 @@ class Player:
         return sqrt((self._positions[0][0] - self._positions[1][0]) ** 2 + (self._positions[0][1] - self._positions[1][1]) ** 2) < self._radius * 2
 
     def _set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
-        self._center = scale_position(self._center, self._actual_resolution, self._base_resolution)
-        self._radius = unscale_dimension(self._radius, self._actual_resolution, self._base_resolution)
-        self._normal_distance = unscale_dimension(self._normal_distance, self._actual_resolution, self._base_resolution)
-        self._distance = unscale_dimension(self._distance, self._actual_resolution, self._base_resolution)
+        self._center = scale_position(self._center, self._actual_resolution, new_resolution)
+        self._distance /= self._normal_distance
+        self._linear_speed /= self._normal_distance
+        self._normal_distance = scale_dimension(self._base_distance, self._base_resolution, new_resolution)
+        self._distance *= self._normal_distance
         self._max_distance = self._normal_distance * self._max_distance_multiplier
-        self._border_size = unscale_dimension(self._border_size, self._actual_resolution, self._base_resolution)
-
-        acc_dt_pos_tracker = [[] for _ in range(self._amount)]
-
-        for i in range(len(self._positions_tracker_times)):
-            for j in range(len(self._positions_tracker_times[i])):
-                acc_dt_pos_tracker[i].append(self._positions_tracker_lifetime - self._positions_tracker_times[i][j])
-        
-        for i in range(len(self._positions_tracker)):
-            for j in range(len(self._positions_tracker[i])):
-                self._positions_tracker[i][j][1] -= self._linear_speed * acc_dt_pos_tracker[i][j]
-                self._positions_tracker[i][j] = list(scale_position(self._positions_tracker[i][j], self._actual_resolution, self._base_resolution))
-
-        self._linear_speed = unscale_dimension(self._linear_speed, self._actual_resolution, self._base_resolution)
-
-        self._actual_resolution = new_resolution
-        self._center = scale_position(self._center, self._base_resolution, self._actual_resolution)
-        self._radius = scale_dimension(self._radius, self._base_resolution, self._actual_resolution)
-        self._normal_distance = scale_dimension(self._normal_distance, self._base_resolution, self._actual_resolution)
-        self._distance = scale_dimension(self._distance, self._base_resolution, self._actual_resolution)
-        self._max_distance = self._normal_distance * self._max_distance_multiplier
-        self._linear_speed = scale_dimension(self._linear_speed, self._base_resolution, self._actual_resolution)
+        self._radius = self._normal_distance * self._base_radius_distance_proportion
+        self._linear_speed *= self._normal_distance
+        self._tracker_speed = self._tracker_speed_multipler * self._radius
+        self._border_size = scale_dimension(self._base_border_size, self._base_resolution, new_resolution)
         self._rotate_to_center()
-        self._border_size = scale_dimension(self._border_size, self._base_resolution, self._actual_resolution)
-
-        for i in range(len(self._positions_tracker)):
-            for j in range(len(self._positions_tracker[i])): # Maybe we can save the ANGLE and the deltatimes + linear speed...
-                self._positions_tracker[i][j][1] += self._linear_speed * acc_dt_pos_tracker[i][j]
-                self._positions_tracker[i][j] = list(scale_position(self._positions_tracker[i][j], self._base_resolution, self._actual_resolution))
+        self._reposition_tracker()
+        self._actual_resolution = new_resolution
+    
+    def _reposition_tracker(self) -> None:
+        for i in range(self._amount):
+            for j in range(len(self._positions_tracker[i])):
+                ang = self._positions_tracker_formulas[i][j][0]
+                dist = self._positions_tracker_formulas[i][j][1] * self._normal_distance
+                dt = self._positions_tracker_formulas[i][j][2]
+                self._positions_tracker[i][j][0] = round(dist * cos(ang) + self._center[0])
+                self._positions_tracker[i][j][1] = round(dist * sin(ang) + self._center[1] + self._tracker_speed * dt)
 
     def set_circle_colors(self, new_colors: list[tuple[int, int, int]]) -> None:
         for i in range(min(len(new_colors), self._amount)):
