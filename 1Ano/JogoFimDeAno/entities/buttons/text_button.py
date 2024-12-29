@@ -15,7 +15,6 @@ class TextButton(Button):
         super().__init__(self._box_surf.get_size(), topleft, action)
     
     def update(self) -> None:
-        print("Clickado")
         self._action()
     
     def draw(self, screen: pg.Surface) -> None:

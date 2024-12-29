@@ -1,27 +1,25 @@
 import pygame as pg
-from scripts.settings import ROTATING_OBSTACLE_ANGULAR_SPEED
+from scripts.settings import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
 from entities.player import Player
 from entities.obstacles.obstacle import Obstacle
 from math import sqrt, pi, radians, cos, sin, asin
 
 class RotatingObstacle(Obstacle):
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0):
-        super().__init__(x, y, width, height, speed, color)
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0):
+        super().__init__(x, y, width, height, speed, spacing_mult, color)
         self._angular_speed = radians(angular_speed) * (1 if rotating_to_right else -1)
         self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
         self._d_angle = 2 * asin((self._height / 2) / self._circumscribed_circle_radius)
         self._angle = radians(initial_angle) - self._d_angle / 2
-        self._calculate_rotating_points()
+        self._points = self._calculate_rotating_points(self._angle)
     
-    def update(self) -> None:
-        self._y += self._speed
-        self._angle += self._angular_speed
+    def update(self, dt: float) -> None:
+        self._y += self._speed * dt
+        self._angle += self._angular_speed * dt
 
-        self._calculate_rotating_points()
+        self._points = self._calculate_rotating_points(self._angle)
 
-        self._position_tracker.append(self._points.copy())
-        while len(self._position_tracker) >= self._max_positions_tracker:
-            self._position_tracker.popleft()
+        self._update_tracker(dt)
     
     def draw(self, screen: pg.Surface) -> None:
         self._draw_tracker(screen)
@@ -55,6 +53,28 @@ class RotatingObstacle(Obstacle):
         
         return False
 
+    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+        self._width = scale_dimension(self._base_width, new_resolution)
+        self._height = scale_dimension(self._base_height, new_resolution)
+        self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
+        self._points = self._calculate_rotating_points(self._angle)
+
+        for i in range(len(self._position_tracker)):
+            time = self._position_tracker_lifetime - self._position_tracker_times[i]
+            self._position_tracker[i] = self._calculate_rotating_points(self._angle - self._angular_speed * time)
+
+    def _update_tracker(self, dt: float) -> None:
+        for i in range(len(self._position_tracker_times)):
+            self._position_tracker_times[i] -= dt
+        
+        self._position_tracker.append(self._points.copy())
+        self._position_tracker_times.append(self._position_tracker_lifetime)
+
+        remove_to = next((j for j, e in enumerate(self._position_tracker_times) if e > 0), len(self._position_tracker_times))
+        for _ in range(remove_to):
+            self._position_tracker.popleft()
+            self._position_tracker_times.popleft()
+
     def _draw_tracker(self, screen: pg.Surface) -> None:
         len_tracker: int = len(self._position_tracker)
         if len_tracker < 1: return
@@ -79,10 +99,22 @@ class RotatingObstacle(Obstacle):
         
         screen.blit(surf, ext_topleft)
     
-    def _calculate_rotating_points(self) -> None:
-        self._points = [
-            [cos(self._angle) * self._circumscribed_circle_radius + self._x, sin(self._angle) * self._circumscribed_circle_radius + self._y], # topright
-            [cos(self._angle + self._d_angle) * self._circumscribed_circle_radius + self._x, sin(self._angle + self._d_angle) * self._circumscribed_circle_radius + self._y], # bottomright
-            [cos(self._angle + pi) * self._circumscribed_circle_radius + self._x, sin(self._angle + pi) * self._circumscribed_circle_radius + self._y],
-            [cos(self._angle + self._d_angle + pi) * self._circumscribed_circle_radius + self._x, sin(self._angle + self._d_angle + pi) * self._circumscribed_circle_radius + self._y]
+    def _calculate_rotating_points(self, ang: float) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
+        return [
+            [cos(ang) * self._circumscribed_circle_radius + self._x, sin(ang) * self._circumscribed_circle_radius + self._y], # topright
+            [cos(ang + self._d_angle) * self._circumscribed_circle_radius + self._x, sin(ang + self._d_angle) * self._circumscribed_circle_radius + self._y], # bottomright
+            [cos(ang + pi) * self._circumscribed_circle_radius + self._x, sin(ang + pi) * self._circumscribed_circle_radius + self._y],
+            [cos(ang + self._d_angle + pi) * self._circumscribed_circle_radius + self._x, sin(ang + self._d_angle + pi) * self._circumscribed_circle_radius + self._y]
         ]
+    
+    def set_angle(self, angle: float) -> None:
+        self._angle = radians(angle) - self._d_angle / 2
+        self._points = self._calculate_rotating_points(self._angle)
+
+    def set_x(self, new_x: float) -> None: 
+        self._x = new_x
+        self._points = self._calculate_rotating_points(self._angle)
+    
+    def set_y(self, new_y: float) -> None:
+        self._y = new_y
+        self._points = self._calculate_rotating_points(self._angle)

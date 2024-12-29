@@ -34,15 +34,14 @@ class Player:
         self._positions_tracker: list[deque[tuple[float, float]]] = [deque() for _ in range(self._amount)]
         self._positions_tracker_times: list[deque[float]] = [deque() for _ in range(self._amount)]
         self._positions_tracker_formulas: list[deque[list[float]]] = [deque() for _ in range(self._amount)] # Tuple with: angle, distance proportion and time
-        self._positions_tracker_lifetime: float = 1 # seconds
+        self._positions_tracker_lifetime: float = 0.5 # seconds
         self._tracker_speed_multipler = 6 # radii of the circles
-        self._tracker_speed = self._tracker_speed_multipler * self._radius
+        self._tracker_speed = self._tracker_speed_multipler * self._radius / self._positions_tracker_lifetime
         self._initial_tracker_alpha = 127
         self._base_distance = self._normal_distance
         self._base_radius_distance_proportion = self._radius / self._base_distance
         self._base_border_size = self._border_size
-        self._base_resolution = BASE_RESOLUTION
-        self._actual_resolution = self._base_resolution
+        self._actual_resolution = BASE_RESOLUTION
     
     def update(self, dt: float) -> None:
         key = pg.key.get_pressed()
@@ -216,13 +215,13 @@ class Player:
         self._center = scale_position(self._center, self._actual_resolution, new_resolution)
         self._distance /= self._normal_distance
         self._linear_speed /= self._normal_distance
-        self._normal_distance = scale_dimension(self._base_distance, self._base_resolution, new_resolution)
+        self._normal_distance = scale_dimension(self._base_distance, new_resolution)
         self._distance *= self._normal_distance
         self._max_distance = self._normal_distance * self._max_distance_multiplier
         self._radius = self._normal_distance * self._base_radius_distance_proportion
         self._linear_speed *= self._normal_distance
         self._tracker_speed = self._tracker_speed_multipler * self._radius
-        self._border_size = scale_dimension(self._base_border_size, self._base_resolution, new_resolution)
+        self._border_size = scale_dimension(self._base_border_size, new_resolution)
         self._rotate_to_center()
         self._reposition_tracker()
         self._actual_resolution = new_resolution
@@ -247,8 +246,14 @@ class Player:
     
     def get_radius(self) -> int: return round(self._radius)
 
-    def get_center(self) -> tuple[int, int]: return (round(self._center[0]), round(self._center[1]))
-
     def get_distance(self) -> int: return round(self._distance)
+
+    def get_normal_distance(self) -> int: return round(self._normal_distance)
+
+    def get_base_distance(self) -> int: return round(self._base_distance)
+
+    def get_angular_speed(self) -> float: return self._angular_speed
+
+    def get_center(self) -> tuple[int, int]: return (round(self._center[0]), round(self._center[1]))
 
     def get_positions(self) -> list[tuple[int, int]]: return self._positions

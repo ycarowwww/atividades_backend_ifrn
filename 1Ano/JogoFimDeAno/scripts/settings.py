@@ -5,7 +5,6 @@ pg.init()
 
 BASE_RESOLUTION: tuple[int, int] = (800, 600) # Base Resolution of the screen
 PLAYER_ROTATION_VELOCITY: float = 5
-SCREEN_SIZE: tuple[int, int] = BASE_RESOLUTION
 FPS: float = 60.0
 COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "BLACK" : (0, 0, 0),
@@ -32,5 +31,5 @@ def blit_text(screen: pg.Surface, text: str, color: tuple[int, int, int], font: 
 def scale_position(position: tuple[int, int], actual_resolution: tuple[int, int], new_resolution: tuple[int, int]) -> tuple[int, int]:
     return (round(position[0] / actual_resolution[0] * new_resolution[0]), round(position[1] / actual_resolution[1] * new_resolution[1]))
 
-def scale_dimension(original_dimension: int, base_resolution: tuple[int, int], new_resolution: tuple[int, int]) -> int:
-    return round(original_dimension * min(new_resolution[0] / base_resolution[0], new_resolution[1] / base_resolution[1]))
+def scale_dimension(original_dimension: int, new_resolution: tuple[int, int]) -> int:
+    return round(original_dimension * min(new_resolution[0] / BASE_RESOLUTION[0], new_resolution[1] / BASE_RESOLUTION[1]))

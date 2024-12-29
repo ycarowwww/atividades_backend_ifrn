@@ -1,21 +1,21 @@
 import pygame as pg
 from entities.player import Player
 from entities.obstacles.obstacle import Obstacle
+from scripts.settings import scale_dimension
 from math import sqrt
 
 class StationaryObstacle(Obstacle):
     """An obstacle that just stands still and does not move or becomes invisible."""
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, color: tuple[int, int, int]):
-        super().__init__(x, y, width, height, speed, color)
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int]):
+        super().__init__(x, y, width, height, speed, spacing_mult, color)
         self._rect = pg.Rect(self._x, self._y, self._width, self._height)
+        self._rect.center = (self._x, self._y)
     
-    def update(self) -> None:
-        self._y += self._speed
-        self._rect.y = self._y
+    def update(self, dt: float) -> None:
+        self._y += self._speed * dt
+        self._rect.centery = round(self._y)
 
-        self._position_tracker.append(list(self._rect.topleft))
-        while len(self._position_tracker) >= self._max_positions_tracker:
-            self._position_tracker.popleft()
+        self._update_tracker(dt)
     
     def draw(self, screen: pg.Surface) -> None:
         self._draw_tracker(screen)
@@ -35,6 +35,28 @@ class StationaryObstacle(Obstacle):
             if distance < player.get_radius(): return True
         
         return False
+
+    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+        self._width = round(scale_dimension(self._base_width, new_resolution))
+        self._height = round(scale_dimension(self._base_height, new_resolution))
+        self._rect.width = self._width
+        self._rect.height = self._height
+
+        for i in range(len(self._position_tracker)):
+            time = self._position_tracker_lifetime - self._position_tracker_times[i]
+            self._position_tracker[i] = (round(self._x), round(self._y - self._speed * time))
+
+    def _update_tracker(self, dt: float) -> None:
+        for i in range(len(self._position_tracker_times)):
+            self._position_tracker_times[i] -= dt
+        
+        self._position_tracker.append(self._rect.center)
+        self._position_tracker_times.append(self._position_tracker_lifetime)
+
+        remove_to = next((j for j, e in enumerate(self._position_tracker_times) if e > 0), len(self._position_tracker_times))
+        for _ in range(remove_to):
+            self._position_tracker.popleft()
+            self._position_tracker_times.popleft()
     
     def _draw_tracker(self, screen: pg.Surface) -> None:
         """Draw the Obstacle's tracker on the screen.
@@ -43,34 +65,39 @@ class StationaryObstacle(Obstacle):
         """
         len_tracker: int = len(self._position_tracker)
         if len_tracker <= 1: return
-        
-        ext_topleft, ext_bottomright = list(self._position_tracker[0]), list(self._position_tracker[0])
 
-        for i in range(1, len_tracker): # Calculate the Extreme Points
-            ext_topleft[0] = min(ext_topleft[0], self._position_tracker[i][0])
-            ext_topleft[1] = min(ext_topleft[1], self._position_tracker[i][1])
-            ext_bottomright[0] = max(ext_bottomright[0], self._position_tracker[i][0])
-            ext_bottomright[1] = max(ext_bottomright[1], self._position_tracker[i][1])
-        
-        ext_bottomright = [ ext_bottomright[i] + self._rect.size[i] for i in range(2) ]
+        topleft_extreme, bottomright_extreme = [0, 0], [0, 0]
+        for i, coords in zip(range(2), zip(*self._position_tracker)):
+            topleft_extreme[i] = round(min(coords) - self._rect.size[i] / 2)
+            bottomright_extreme[i] = round(max(coords) + self._rect.size[i] / 2)
 
-        surf_size = (ext_bottomright[0] - ext_topleft[0], ext_bottomright[1] - ext_topleft[1])
+        surf_size = (bottomright_extreme[0] - topleft_extreme[0], bottomright_extreme[1] - topleft_extreme[1])
         surf = pg.Surface(surf_size, flags=pg.SRCALPHA)
         surf.fill((0, 0, 0, 0)) # Fill the surface with "Blank" color
         # Inverts the points and calculate the offset to won't draw previous tracks in the front of the new ones.
-        offset_points: list[tuple[int, int]] = [ (self._position_tracker[i][0] - ext_topleft[0], self._position_tracker[i][1] - ext_topleft[1]) for i in range(len_tracker) ]
+        offset_points: list[tuple[int, int]] = [ [self._position_tracker[i][j] - topleft_extreme[j] for j in range(2)] for i in range(len_tracker) ]
 
         for i in range(len(offset_points)):
             col = (*self._color, int(self._initial_alpha_tracker / len(offset_points) * (i + 1)))
-            rect = pg.Rect(offset_points[i][0], offset_points[i][1], self._width, self._height)
+            rect = pg.Rect(0, 0, self._width, self._height)
+            rect.center = (offset_points[i][0], offset_points[i][1])
 
             pg.draw.rect(surf, col, rect)
 
             if i > 0: # Draw the "Connection lines" between the rects
-                prev_rect = pg.Rect(offset_points[i-1][0], offset_points[i-1][1], self._width, self._height)
+                prev_rect = pg.Rect(0, 0, self._width, self._height)
+                prev_rect.center = (offset_points[i-1][0], offset_points[i-1][1])
                 pg.draw.polygon(surf, col, (prev_rect.topright, rect.topright, rect.topleft, prev_rect.topleft))
                 pg.draw.polygon(surf, col, (prev_rect.topleft, rect.topleft, rect.bottomleft, prev_rect.bottomleft))
                 pg.draw.polygon(surf, col, (prev_rect.topright, rect.topright, rect.bottomright, prev_rect.bottomright))
                 pg.draw.polygon(surf, col, (prev_rect.bottomleft, rect.bottomleft, rect.bottomright, prev_rect.bottomright))
 
-        screen.blit(surf, ext_topleft)
+        screen.blit(surf, topleft_extreme)
+
+    def set_x(self, new_x: float) -> None: 
+        self._x = new_x
+        self._rect.centerx = round(self._x)
+
+    def set_y(self, new_y: float) -> None: 
+        self._y = new_y
+        self._rect.centery = round(self._y)

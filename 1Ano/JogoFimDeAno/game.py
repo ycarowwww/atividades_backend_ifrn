@@ -6,6 +6,7 @@ from entities.buttons.return_button import ReturnButton
 from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
+from time import time
 
 # Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu
 
@@ -13,11 +14,10 @@ class Game:
     def __init__(self):
         pg.init()
 
-        self.__SCREEN_SIZE = SCREEN_SIZE
-        self.__screen: pg.Surface = pg.display.set_mode(self.__SCREEN_SIZE)
+        self.__screen: pg.Surface = pg.display.set_mode(BASE_RESOLUTION, pg.RESIZABLE)
         pg.display.set_caption("Duet")
         self.__clock: pg.time.Clock = pg.time.Clock()
-        self.__FPS = FPS
+        self.__MAX_FPS = FPS
         self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
         self.__GAME_FONT = GAME_FONT
         self.__MAX_SCORE_FONT = MAX_SCORE_FONT
@@ -31,7 +31,7 @@ class Game:
         pg.quit()
 
     def main_menu(self):
-        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.__SCREEN_SIZE])
+        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.__screen.get_size()])
 
         def game_bt_func(): self.__current_window = 2
         game_button = TextButton((0, 0), game_bt_func, "Game", self.__GAME_FONT, COLORS["WHITE"], COLORS["BLUE"], padding=15)
@@ -48,7 +48,7 @@ class Game:
 
                 game_button.update_by_event(event)
 
-            self.__clock.tick(self.__FPS)
+            self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
             game_button.draw(self.__screen)
@@ -60,12 +60,14 @@ class Game:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = 1
-        player = Player([i // 2 for i in self.__SCREEN_SIZE], 2, 20, angular_speed=432, linear_speed=300)
+        player = Player([i // 2 for i in self.__screen.get_size()], 2, 20)
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
-        pause_button = PauseButton((50, 50), (SCREEN_SIZE[0] - 60, 10), lambda: None, (255, 255, 255), 15)
-        return_menu_button = ReturnButton((50, 50), (SCREEN_SIZE[0] - 120, 10), return_menu_func, (255, 255, 255))
+        pause_button = PauseButton((50, 50), (self.__screen.get_size()[0] - 60, 10), lambda: None, (255, 255, 255), 15)
+        return_menu_button = ReturnButton((50, 50), (self.__screen.get_size()[0] - 120, 10), return_menu_func, (255, 255, 255))
         punctuation, max_score = 0, 0
-        obstacle_manager = ObstaclesManager()
+        obstacle_manager = ObstaclesManager(player)
+
+        last_time = time()
 
         while self.__current_window == 2:
             key = pg.key.get_pressed()
@@ -81,8 +83,14 @@ class Game:
                 player.update_by_event(event)
                 return_menu_button.update_by_event(event)
 
-            self.__clock.tick(self.__FPS)
+                if event.type == pg.VIDEORESIZE:
+                    obstacle_manager.set_new_resolution(event.size, player)
+
+            self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
+
+            dt = time() - last_time
+            last_time = time()
 
             pause_button.draw(self.__screen)
 
@@ -97,16 +105,16 @@ class Game:
                 pg.display.flip()
                 continue
 
-            player.update(1 / self.__clock.get_fps())
+            player.update(dt)
             player.draw(self.__screen)
 
-            obstacle_manager.update()
+            obstacle_manager.update(dt)
             obstacle_manager.draw(self.__screen)
             
             if obstacle_manager.check_collision(player):
                 punctuation = 0
-            elif obstacle_manager.get_obstacle_removed():
-                punctuation += 1
+            elif obstacle_manager.get_obstacles_passed() > 0:
+                punctuation += obstacle_manager.get_obstacles_passed()
                 max_score = max(max_score, punctuation)
             
             blit_text(self.__screen, f"Score: {punctuation}", COLORS["WHITE"], self.__GAME_FONT, (10, 10), "topleft")
