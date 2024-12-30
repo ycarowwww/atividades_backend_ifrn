@@ -4,13 +4,13 @@ from entities.obstacles.obstacle import Obstacle
 
 class ObstacleGroup:
     """A group of obstacles acting as one."""
-    def __init__(self, start_obstacles: list[Obstacle] = []):
-        self._amount = len(start_obstacles)
-        self._obstacles = start_obstacles
-    
-    def add_obstacle(self, obstacle: Obstacle) -> None:
-        self._amount += 1
-        self._obstacles.append(obstacle)
+    def __init__(self, obstacles: list[Obstacle] = []):
+        self._amount = len(obstacles)
+        self._obstacles = obstacles
+        self._obstacles.sort(key=lambda obst: obst.get_y(), reverse=True)
+        yobst0 = self._obstacles[0].get_y()
+        for i in self._obstacles:
+            i.set_y(i.get_y() - yobst0)
 
     def update(self, dt: float) -> None:
         for obstacle in self._obstacles:
@@ -33,22 +33,32 @@ class ObstacleGroup:
 
     def set_x(self, new_x: float) -> None: 
         if self._amount <= 0: return
-        difference_xs = [self._obstacles[i-1].get_x() - self._obstacles[i].get_x() for i in range(1, self._amount)]
-        self._obstacles[0].set_x(new_x)
-        for i in range(1, self._amount):
-            self._obstacles[i].set_x(new_x + difference_xs[i-1])
+        centerx = self.get_x()
+        ratio = new_x / centerx
+        for i in range(self._amount):
+            dist = self._obstacles[i].get_x() - centerx
+            self._obstacles[i].set_x(dist * ratio)
 
     def set_y(self, new_y: float) -> None: 
         if self._amount <= 0: return
-        difference_ys = [self._obstacles[i-1].get_y() - self._obstacles[i].get_y() for i in range(1, self._amount)]
+        dists = [self._obstacles[i-1].get_y() - self._obstacles[i].get_y() for i in range(1, self._amount)]
         self._obstacles[0].set_y(new_y)
         for i in range(1, self._amount):
-            self._obstacles[i].set_y(new_y + difference_ys[i-1])
+            self._obstacles[i].set_y(self._obstacles[i-1].get_y() + dists[i-1])
+
+    def set_speed(self, new_speed: float) -> None:
+        for obst in self._obstacles:
+            obst.set_speed(new_speed)
+
+    def get_x(self) -> int: 
+        if self._amount == 0: return -1
+
+        return sum(obst.get_x() for obst in self._obstacles) / self._amount
 
     def get_y(self) -> int: 
         if self._amount == 0: return -1
 
-        return min(self._obstacles, key=lambda obst: obst.get_y()).get_y()
+        return self._obstacles[self._amount-1].get_y()
 
     def get_spacing_mult(self) -> float: 
         return max(self._obstacles, key=lambda obst: obst.get_spacing_mult()).get_spacing_mult()

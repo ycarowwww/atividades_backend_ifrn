@@ -19,7 +19,7 @@ class ObstaclesManager:
         self._start_distance_mult = 8
         self._player_center = player.get_center()
         self._player_normal_distance = player.get_normal_distance()
-        self._possibles_obstacles: list[Obstacle] = [
+        self._possibles_obstacles: list[Obstacle] = [ # What do we do if the resolution change?
             StationaryObstacle(self._player_center[0] + self._player_normal_distance, 0, self._player_normal_distance * 2, self._height, self._speed, 2, self._color),
             StationaryObstacle(self._player_center[0] - self._player_normal_distance, 0, self._player_normal_distance * 2, self._height, self._speed, 2, self._color),
             StationaryObstacle(self._player_center[0], 0, self._player_normal_distance, self._height, self._speed, 2, self._color),
@@ -55,11 +55,12 @@ class ObstaclesManager:
     
     def set_new_resolution(self, new_resolution: tuple[int, int], player: Player) -> None: # IT'S REALLY INCOMPLETE
         self._speed = self._speed / self._player_normal_distance * player.get_normal_distance()
-        
+        # How do we do if is an obstacle group???
         self._generate_new_y(player) # Maybe we could integrate with the bottom loop
         
         for i in range(self._amount_obstacles):
-            new_x = player.get_center()[0] - (self._player_center[0] - self._obstacles[i].get_x()) / self._player_normal_distance * player.get_normal_distance()
+            x_ratio = (self._obstacles[i].get_x() - self._player_center[0]) / self._player_normal_distance
+            new_x = player.get_center()[0] + x_ratio * player.get_normal_distance()
             self._obstacles[i].set_x(new_x)
             self._obstacles[i].set_speed(self._speed)
             self._obstacles[i].set_new_resolution(new_resolution)
@@ -74,7 +75,7 @@ class ObstaclesManager:
         self._obstacles.append(deepcopy(choice(self._possibles_obstacles)))
         self._obstacles[0].set_y(self._player_center[1] - self._start_distance_mult * self._player_normal_distance)
 
-        for i in range(1, self._amount_obstacles):
+        for i in range(1, self._amount_obstacles): # Something wrong here with the spacing between two groups
             new_obstacle = deepcopy(choice(self._possibles_obstacles))
             new_obstacle_y = self._obstacles[i-1].get_y() - max(self._obstacles[i-1].get_spacing_mult(), new_obstacle.get_spacing_mult()) * self._player_normal_distance
             new_obstacle.set_y(new_obstacle_y)
@@ -88,7 +89,9 @@ class ObstaclesManager:
         self._last_obstacle = self._obstacles[self._amount_obstacles-1]
     
     def _generate_new_y(self, player: Player) -> None:
-        self._obstacles[0].set_y(player.get_center()[1] - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance * player.get_normal_distance())
+        y_ratio = (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance
+        new_y = player.get_center()[1] - y_ratio * player.get_normal_distance()
+        self._obstacles[0].set_y(new_y)
 
         for i in range(1, self._amount_obstacles):
             self._obstacles[i].set_y(self._obstacles[i-1].get_y() - max(self._obstacles[i-1].get_spacing_mult(), self._obstacles[i].get_spacing_mult()) * player.get_normal_distance())

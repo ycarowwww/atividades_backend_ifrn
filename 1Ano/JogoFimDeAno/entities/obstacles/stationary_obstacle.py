@@ -42,6 +42,8 @@ class StationaryObstacle(Obstacle):
         self._rect.width = self._width
         self._rect.height = self._height
 
+        self._rect.center = (round(self._x), round(self._y))
+
         for i in range(len(self._position_tracker)):
             time = self._position_tracker_lifetime - self._position_tracker_times[i]
             self._position_tracker[i] = (round(self._x), round(self._y - self._speed * time))
