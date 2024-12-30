@@ -7,10 +7,11 @@ class ObstacleGroup:
     def __init__(self, obstacles: list[Obstacle] = []):
         self._amount = len(obstacles)
         self._obstacles = obstacles
-        self._obstacles.sort(key=lambda obst: obst.get_y(), reverse=True)
-        yobst0 = self._obstacles[0].get_y()
+        self._spacing_mult = max(self._obstacles, key=lambda obst: obst.get_spacing_mult()).get_spacing_mult()
+        self._obstacles.sort(key=lambda obst: obst.get_y(), reverse=True) # 0 -100 -200
+        obstacle0_y = self._obstacles[0].get_y()
         for i in self._obstacles:
-            i.set_y(i.get_y() - yobst0)
+            i.set_y(i.get_y() - obstacle0_y)
 
     def update(self, dt: float) -> None:
         for obstacle in self._obstacles:
@@ -27,9 +28,9 @@ class ObstacleGroup:
         
         return False
 
-    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+    def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None:
         for obstacle in self._obstacles:
-            obstacle.set_new_resolution(new_resolution)
+            obstacle.set_new_resolution(new_resolution, old_player_info, new_player_info, new_speed)
 
     def set_x(self, new_x: float) -> None: 
         if self._amount <= 0: return
@@ -44,7 +45,7 @@ class ObstacleGroup:
         dists = [self._obstacles[i-1].get_y() - self._obstacles[i].get_y() for i in range(1, self._amount)]
         self._obstacles[0].set_y(new_y)
         for i in range(1, self._amount):
-            self._obstacles[i].set_y(self._obstacles[i-1].get_y() + dists[i-1])
+            self._obstacles[i].set_y(self._obstacles[i-1].get_y() - dists[i-1])
 
     def set_speed(self, new_speed: float) -> None:
         for obst in self._obstacles:
@@ -61,4 +62,8 @@ class ObstacleGroup:
         return self._obstacles[self._amount-1].get_y()
 
     def get_spacing_mult(self) -> float: 
-        return max(self._obstacles, key=lambda obst: obst.get_spacing_mult()).get_spacing_mult()
+        return self._spacing_mult
+    
+    def set_color(self, color: tuple[int, int, int]) -> None:
+        for obst in self._obstacles:
+            obst.set_color(color)

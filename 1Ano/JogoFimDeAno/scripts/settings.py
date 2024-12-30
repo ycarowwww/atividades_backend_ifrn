@@ -1,5 +1,6 @@
 import pygame as pg
 import pygame.freetype as pgft
+from os import path
 
 pg.init()
 
@@ -33,3 +34,8 @@ def scale_position(position: tuple[int, int], actual_resolution: tuple[int, int]
 
 def scale_dimension(original_dimension: int, new_resolution: tuple[int, int]) -> int:
     return round(original_dimension * min(new_resolution[0] / BASE_RESOLUTION[0], new_resolution[1] / BASE_RESOLUTION[1]))
+
+def get_file_path(file: str) -> str:
+    base_dir: str = path.dirname(path.abspath(__file__))
+
+    return path.join(base_dir, file)

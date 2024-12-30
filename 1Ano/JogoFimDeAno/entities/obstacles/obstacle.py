@@ -28,7 +28,7 @@ class Obstacle:
     
     def check_collision(self, player: Player) -> bool: pass
 
-    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None: pass
+    def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None: pass
 
     def _update_tracker(self, dt: float) -> None: pass
 
@@ -36,12 +36,12 @@ class Obstacle:
 
     def set_x(self, new_x: float) -> None: self._x = new_x
 
-    def set_y(self, new_y: float) -> None: self._y = new_y
-
-    def set_speed(self, new_speed: float) -> None: self._speed = new_speed
-
     def get_x(self) -> int: return self._x
+
+    def set_y(self, new_y: float) -> None: self._y = new_y
 
     def get_y(self) -> int: return self._y
 
     def get_spacing_mult(self) -> float: return self._spacing_mult
+
+    def set_color(self, color: tuple[int, int, int]) -> None: self._color = color

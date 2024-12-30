@@ -8,7 +8,8 @@ from entities.obstacles.obstacles_manager import ObstaclesManager
 from scripts.settings import *
 from time import time
 
-# Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu
+# Menu, Buttons Resizable, Good Punctuation
+# Maybe use an Enum to the windows
 
 class Game:
     def __init__(self):
@@ -16,6 +17,8 @@ class Game:
 
         self.__screen: pg.Surface = pg.display.set_mode(BASE_RESOLUTION, pg.RESIZABLE)
         pg.display.set_caption("Duet")
+        icon_img = pg.image.load(get_file_path("../images/icon.png")).convert_alpha()
+        pg.display.set_icon(icon_img)
         self.__clock: pg.time.Clock = pg.time.Clock()
         self.__MAX_FPS = FPS
         self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
@@ -65,16 +68,11 @@ class Game:
         pause_button = PauseButton((50, 50), (self.__screen.get_size()[0] - 60, 10), lambda: None, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (self.__screen.get_size()[0] - 120, 10), return_menu_func, (255, 255, 255))
         punctuation, max_score = 0, 0
-        obstacle_manager = ObstaclesManager(player)
+        obstacle_manager = ObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed())
 
         last_time = time()
 
         while self.__current_window == 2:
-            key = pg.key.get_pressed()
-
-            if key[pg.K_LSHIFT] and key[pg.K_ESCAPE]:
-                self.__current_window = 1
-
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.__current_window = 0
@@ -84,7 +82,12 @@ class Game:
                 return_menu_button.update_by_event(event)
 
                 if event.type == pg.VIDEORESIZE:
-                    obstacle_manager.set_new_resolution(event.size, player)
+                    obstacle_manager.set_new_resolution(event.size, player.get_center(), player.get_normal_distance())
+
+            keys = pg.key.get_pressed()
+
+            if keys[pg.K_LSHIFT] and keys[pg.K_ESCAPE]:
+                self.__current_window = 1
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])

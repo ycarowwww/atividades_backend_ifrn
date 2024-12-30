@@ -53,11 +53,21 @@ class RotatingObstacle(Obstacle):
         
         return False
 
-    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+    def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None:
+        self._speed = new_speed
+        
         self._width = scale_dimension(self._base_width, new_resolution)
         self._height = scale_dimension(self._base_height, new_resolution)
         self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
-        self._points = self._calculate_rotating_points(self._angle)
+        # self._points = self._calculate_rotating_points(self._angle)
+
+        y_ratio = (old_player_info[0][1] - self._y) / old_player_info[1]
+        new_y = new_player_info[0][1] - y_ratio * new_player_info[1]
+        self.set_y(new_y)
+
+        x_ratio = (self._x - old_player_info[0][0]) / old_player_info[1]
+        new_x = new_player_info[0][0] + x_ratio * new_player_info[1]
+        self.set_x(new_x)
 
         for i in range(len(self._position_tracker)):
             time = self._position_tracker_lifetime - self._position_tracker_times[i]
