@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame.freetype as pgft
 from entities.player import Player # Use Packages
 from entities.buttons.pause_button import PauseButton
 from entities.buttons.return_button import ReturnButton
@@ -9,8 +8,7 @@ from entities.text.text import Text
 from scripts.settings import *
 from time import time
 
-# Menu, Good Punctuation, Background
-# Maybe use an Enum to the windows, FPS Viewer
+# Menu, Good Punctuation, Background, FPS Viewer
 
 class Game:
     def __init__(self):
@@ -22,14 +20,19 @@ class Game:
         pg.display.set_icon(icon_img)
         self.__clock: pg.time.Clock = pg.time.Clock()
         self.__MAX_FPS = FPS
-        self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
         self.__FONT = FONT
+        self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
+        self.__windows = {
+            1 : self.main_menu,
+            2 : self.main_game
+        }
 
     def run(self):
         while self.__current_window != 0:
-            match self.__current_window:
-                case 1: self.main_menu()
-                case 2: self.main_game()
+            window = self.__windows.get(self.__current_window)
+
+            if window == None: break
+            else: window()
         
         pg.quit()
 
@@ -37,6 +40,7 @@ class Game:
         def game_bt_func(): self.__current_window = 2
         game_button = TextButton((400, 300), "center", game_bt_func, "Game", self.__FONT, COLORS["WHITE"], COLORS["BLUE"], size_font=30, padding=15)
         game_title = Text("DUET", self.__FONT, (255, 255, 255), (400, 150), "center", 70)
+        
         game_button.resize(self.__screen.get_size()) # Change later
         game_title.resize(self.__screen.get_size())
 
