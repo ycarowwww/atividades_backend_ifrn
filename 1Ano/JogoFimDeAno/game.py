@@ -5,11 +5,12 @@ from entities.buttons.pause_button import PauseButton
 from entities.buttons.return_button import ReturnButton
 from entities.buttons.text_button import TextButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
+from entities.text.text import Text
 from scripts.settings import *
 from time import time
 
-# Menu, Buttons Resizable, Good Punctuation
-# Maybe use an Enum to the windows
+# Menu, Good Punctuation, Background
+# Maybe use an Enum to the windows, FPS Viewer
 
 class Game:
     def __init__(self):
@@ -22,8 +23,7 @@ class Game:
         self.__clock: pg.time.Clock = pg.time.Clock()
         self.__MAX_FPS = FPS
         self.__current_window = 1 # 1 : Menu | 2 : Game | Change to a dictionary/enum after
-        self.__GAME_FONT = GAME_FONT
-        self.__MAX_SCORE_FONT = MAX_SCORE_FONT
+        self.__FONT = FONT
 
     def run(self):
         while self.__current_window != 0:
@@ -34,11 +34,11 @@ class Game:
         pg.quit()
 
     def main_menu(self):
-        SCREEN_CENTER: tuple[int, int] = tuple([i // 2 for i in self.__screen.get_size()])
-
         def game_bt_func(): self.__current_window = 2
-        game_button = TextButton((0, 0), game_bt_func, "Game", self.__GAME_FONT, COLORS["WHITE"], COLORS["BLUE"], padding=15)
-        game_button.set_position_attr("center", SCREEN_CENTER)
+        game_button = TextButton((400, 300), "center", game_bt_func, "Game", self.__FONT, COLORS["WHITE"], COLORS["BLUE"], size_font=30, padding=15)
+        game_title = Text("DUET", self.__FONT, (255, 255, 255), (400, 150), "center", 70)
+        game_button.resize(self.__screen.get_size()) # Change later
+        game_title.resize(self.__screen.get_size())
 
         while self.__current_window == 1:
             for event in pg.event.get():
@@ -48,6 +48,9 @@ class Game:
                 if event.type == pg.KEYDOWN: # Change Later
                     if event.key == pg.K_RETURN:
                         self.__current_window = 2 # Open Selected Option
+                
+                if event.type == pg.VIDEORESIZE:
+                    game_title.resize(event.size)
 
                 game_button.update_by_event(event)
 
@@ -55,7 +58,7 @@ class Game:
             self.__screen.fill(COLORS["BLACK"])
 
             game_button.draw(self.__screen)
-            blit_text(self.__screen, "DUET", COLORS["WHITE"], self.__GAME_FONT, (SCREEN_CENTER[0], 100), "center", style=pgft.STYLE_STRONG)
+            game_title.draw(self.__screen)
             
             pg.display.flip()
 
@@ -63,12 +66,21 @@ class Game:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = 1
-        player = Player([i // 2 for i in self.__screen.get_size()], 2, 20)
+        player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20) # Player Tracker Decreasing Size - Bug:
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
-        pause_button = PauseButton((50, 50), (self.__screen.get_size()[0] - 60, 10), lambda: None, (255, 255, 255), 15)
-        return_menu_button = ReturnButton((50, 50), (self.__screen.get_size()[0] - 120, 10), return_menu_func, (255, 255, 255))
+        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", lambda: None, (255, 255, 255), 15)
+        return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
         punctuation, max_score = 0, 0
         obstacle_manager = ObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed())
+        score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
+        max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
+
+        pause_button.resize(self.__screen.get_size()) # Maybe try to find a better way later
+        return_menu_button.resize(self.__screen.get_size())
+        score_text.resize(self.__screen.get_size())
+        max_score_text.resize(self.__screen.get_size())
+        player.set_new_resolution(self.__screen.get_size())
+        obstacle_manager.set_new_resolution(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
 
         last_time = time()
 
@@ -78,11 +90,13 @@ class Game:
                     self.__current_window = 0
                 
                 pause_button.update_by_event(event)
-                player.update_by_event(event)
                 return_menu_button.update_by_event(event)
+                player.update_by_event(event)
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.set_new_resolution(event.size, player.get_center(), player.get_normal_distance())
+                    score_text.resize(event.size)
+                    max_score_text.resize(event.size)
 
             keys = pg.key.get_pressed()
 
@@ -101,27 +115,24 @@ class Game:
                 player.draw(self.__screen)
                 obstacle_manager.draw(self.__screen)
                 return_menu_button.draw(self.__screen)
-                
-                blit_text(self.__screen, f"Score: {punctuation}", COLORS["WHITE"], self.__GAME_FONT, (10, 10), "topleft")
-                blit_text(self.__screen, f"Max: {max_score}", COLORS["GREEN"], self.__MAX_SCORE_FONT, (10, 40), "topleft")
-                
-                pg.display.flip()
-                continue
+            else:
+                player.update(dt)
+                player.draw(self.__screen)
 
-            player.update(dt)
-            player.draw(self.__screen)
+                obstacle_manager.update(dt)
+                obstacle_manager.draw(self.__screen)
+                
+                if obstacle_manager.check_collision(player):
+                    punctuation = 0
+                elif obstacle_manager.get_obstacles_passed() > 0:
+                    punctuation += obstacle_manager.get_obstacles_passed()
+                    max_score = max(max_score, punctuation)
+                
+                score_text.set_text(f"Score: {punctuation}")
+                max_score_text.set_text(f"Max: {max_score}")
 
-            obstacle_manager.update(dt)
-            obstacle_manager.draw(self.__screen)
-            
-            if obstacle_manager.check_collision(player):
-                punctuation = 0
-            elif obstacle_manager.get_obstacles_passed() > 0:
-                punctuation += obstacle_manager.get_obstacles_passed()
-                max_score = max(max_score, punctuation)
-            
-            blit_text(self.__screen, f"Score: {punctuation}", COLORS["WHITE"], self.__GAME_FONT, (10, 10), "topleft")
-            blit_text(self.__screen, f"Max: {max_score}", COLORS["GREEN"], self.__MAX_SCORE_FONT, (10, 40), "topleft")
+            score_text.draw(self.__screen)
+            max_score_text.draw(self.__screen)
             
             pg.display.flip()
 

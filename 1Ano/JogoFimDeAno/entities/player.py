@@ -91,7 +91,7 @@ class Player:
                 if event.key == Keys.TOGGLEBORDER:
                     self._toggle_border()
             case pg.VIDEORESIZE:
-                self._set_new_resolution(event.size)
+                self.set_new_resolution(event.size)
     
     def _toggle_border(self) -> None:
         self._show_border = not self._show_border
@@ -211,7 +211,7 @@ class Player:
     def _check_circles_collided(self) -> bool:
         return sqrt((self._positions[0][0] - self._positions[1][0]) ** 2 + (self._positions[0][1] - self._positions[1][1]) ** 2) < self._radius * 2
 
-    def _set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
         self._center = scale_position(self._center, self._actual_resolution, new_resolution)
         self._distance /= self._normal_distance
         self._linear_speed /= self._normal_distance
@@ -220,7 +220,7 @@ class Player:
         self._max_distance = self._normal_distance * self._max_distance_multiplier
         self._radius = self._normal_distance * self._base_radius_distance_proportion
         self._linear_speed *= self._normal_distance
-        self._tracker_speed = self._tracker_speed_multipler * self._radius
+        self._tracker_speed = self._tracker_speed_multipler * self._radius / self._positions_tracker_lifetime
         self._border_size = scale_dimension(self._base_border_size, new_resolution)
         self._rotate_to_center()
         self._reposition_tracker()

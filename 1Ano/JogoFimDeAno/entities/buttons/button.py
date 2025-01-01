@@ -1,13 +1,19 @@
 import pygame as pg
+from scripts.settings import BASE_RESOLUTION
 from typing import Callable
 
 class Button:
     """Button Template Class for the others Buttons."""
-    def __init__(self, size: tuple[int, int], topleft: tuple[int, int], action: Callable):
+    def __init__(self, size: tuple[int, int], position: tuple[int, int], attr_pos: str, action: Callable, base_resolution: tuple[int, int] = BASE_RESOLUTION):
         self._size = size
-        self._topleft = topleft
-        self._hitbox = pg.Rect(self._topleft, self._size)
+        self._position = position
+        self._attr_pos = attr_pos
+        self._hitbox = pg.Rect(self._position, self._size)
+        self.set_position_attr(self._attr_pos, self._position)
         self._action = action
+        self._base_size = self._size
+        self._base_position = self._position
+        self._base_resolution = base_resolution
     
     def update(self) -> None:
         self._action()
@@ -24,9 +30,11 @@ class Button:
 
         return checking
 
-    def _draw_animation(self, screen: pg.Surface) -> None: pass
-
     def update_by_event(self, event: pg.event.Event) -> None: pass
+
+    def resize(self, new_resolution: tuple[int, int]) -> None: pass
+
+    def _draw_animation(self, screen: pg.Surface) -> None: pass
 
     def set_position_attr(self, attr_pos: str, new_pos: tuple[int, int]) -> None:
         """Sets a position attribute for the button's hitbox.
@@ -41,5 +49,5 @@ class Button:
 
                 hitbox.center = (100, 100)
         """
-        setattr(self._hitbox, attr_pos, new_pos)
-        self._topleft = self._hitbox.topleft
+        self._position = new_pos
+        setattr(self._hitbox, attr_pos, self._position)
