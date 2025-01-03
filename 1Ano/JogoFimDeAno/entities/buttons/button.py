@@ -1,5 +1,5 @@
 import pygame as pg
-from scripts.settings import BASE_RESOLUTION
+from scripts import BASE_RESOLUTION
 from typing import Callable
 
 class Button:

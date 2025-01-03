@@ -1,6 +1,6 @@
 import pygame as pg
 import pygame.freetype as pgft
-from scripts.settings import scale_position, scale_dimension, BASE_RESOLUTION
+from scripts import scale_position, scale_dimension, BASE_RESOLUTION
 
 class Text:
     def __init__(self, text: str, font: pgft.Font, color: tuple[int, int, int], pos: tuple[int, int], pos_attr: str = "topleft", size: float = 0, base_rslt: tuple[int, int] = BASE_RESOLUTION) -> None:

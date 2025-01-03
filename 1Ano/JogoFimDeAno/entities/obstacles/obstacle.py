@@ -1,6 +1,6 @@
 import pygame as pg
-from entities.player import Player
-from scripts.settings import INITIAL_ALPHA_TRACKER
+from ..player import Player
+from scripts import INITIAL_ALPHA_TRACKER
 from collections import deque
 
 # Could add some JSON recognition for the levels

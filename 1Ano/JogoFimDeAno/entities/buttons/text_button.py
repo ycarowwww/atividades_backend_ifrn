@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities.buttons.button import Button
-from scripts.settings import scale_dimension, scale_position
+from . import Button
+from scripts import scale_dimension, scale_position
 from typing import Callable
 
 class TextButton(Button):

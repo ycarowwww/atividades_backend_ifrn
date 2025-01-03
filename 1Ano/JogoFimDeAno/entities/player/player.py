@@ -1,5 +1,5 @@
 import pygame as pg
-from scripts.settings import scale_dimension, scale_position, BASE_RESOLUTION
+from scripts import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
 from enum import IntFlag
 from math import sqrt, pi, radians, sin, cos, atan2
@@ -267,3 +267,5 @@ class Player:
     def toggle_gravity(self) -> None: self._gravity = not self._gravity
 
     def toggle_control(self) -> None: self._enable_control = not self._enable_control
+
+    def reset_rotation(self) -> None: self._angle = 0

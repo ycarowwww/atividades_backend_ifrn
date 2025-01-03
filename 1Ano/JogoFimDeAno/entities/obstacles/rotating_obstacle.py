@@ -1,7 +1,7 @@
 import pygame as pg
-from scripts.settings import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
-from entities.player import Player
-from entities.obstacles.obstacle import Obstacle
+from . import Obstacle
+from ..player import Player
+from scripts import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
 from math import sqrt, pi, radians, cos, sin, asin
 
 class RotatingObstacle(Obstacle):

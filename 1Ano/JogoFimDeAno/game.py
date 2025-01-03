@@ -1,15 +1,9 @@
 import pygame as pg
-from entities.player import Player # Use Packages
-from entities.buttons.pause_button import PauseButton
-from entities.buttons.return_button import ReturnButton
-from entities.buttons.text_button import TextButton
-from entities.buttons.image_button import ImageButton
-from entities.obstacles.obstacles_manager import ObstaclesManager
-from entities.text.text import Text
-from scripts.settings import *
+from entities import Player, ObstaclesManager, ImageButton, PauseButton, ReturnButton, Text
+from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from time import time
 
-# Menu, Good Punctuation, Background, FPS Viewer
+# Background, FPS Viewer
 
 class Game:
     def __init__(self):
@@ -94,8 +88,8 @@ class Game:
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", lambda: None, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
-        punctuation, max_score = 0, 0
         obstacle_manager = ObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed())
+        score, max_score = 0, 0
         score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
 
@@ -145,14 +139,12 @@ class Game:
 
                 obstacle_manager.update(dt)
                 obstacle_manager.draw(self.__screen)
+                obstacle_manager.check_collision(player)
+
+                score = obstacle_manager.get_score()
+                max_score = max(max_score, score)
                 
-                if obstacle_manager.check_collision(player):
-                    punctuation = 0
-                elif obstacle_manager.get_obstacles_passed() > 0:
-                    punctuation += obstacle_manager.get_obstacles_passed()
-                    max_score = max(max_score, punctuation)
-                
-                score_text.set_text(f"Score: {punctuation}")
+                score_text.set_text(f"Score: {score}")
                 max_score_text.set_text(f"Max: {max_score}")
 
             score_text.draw(self.__screen)

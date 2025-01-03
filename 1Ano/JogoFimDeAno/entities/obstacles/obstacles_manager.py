@@ -1,10 +1,10 @@
 import pygame as pg
-from entities.player import Player
-from entities.obstacles.obstacle import Obstacle
-from entities.obstacles.stationary_obstacle import StationaryObstacle
-from entities.obstacles.rotating_obstacle import RotatingObstacle
-from entities.obstacles.obstacle_group import ObstacleGroup
-from scripts.settings import OBSTACLES_HEIGHT, COLORS, BASE_RESOLUTION
+from .obstacle import Obstacle
+from .stationary_obstacle import StationaryObstacle
+from .rotating_obstacle import RotatingObstacle
+from .obstacle_group import ObstacleGroup
+from ..player import Player
+from scripts import OBSTACLES_HEIGHT, COLORS, BASE_RESOLUTION
 from copy import deepcopy
 from random import choice, randint
 
@@ -43,29 +43,28 @@ class ObstaclesManager:
                 ])
         ]
         self._base_obstacles_attrs = (self._player_center, self._player_normal_distance, self._speed)
-        self._obstacles_passed = 0
         self._actual_resolution = BASE_RESOLUTION
+        self._total_score = 0
+        self._actual_score = 0
     
     def update(self, dt: float) -> None:
         for obstacle in self._obstacles:
             obstacle.update(dt)
         
         if self._last_obstacle == None or self._last_obstacle.get_y() - self._player_center[1] > self._player_normal_distance * 3:
-            self._obstacles_passed = self._amount_obstacles
             self._generate_obstacles()
-        else:
-            self._obstacles_passed = 0
 
     def draw(self, screen: pg.Surface) -> None:
         for obstacle in self._obstacles:
             obstacle.draw(screen)
 
-    def check_collision(self, player: Player) -> bool: # Implement Better
+    def check_collision(self, player: Player) -> None: # Implement Better
         for obstacle in self._obstacles:
             if obstacle.check_collision(player):
-                return True
+                self._set_base_y()
+                player.reset_rotation()
         
-        return False
+        self._calculate_actual_score()
     
     def set_new_resolution(self, new_resolution: tuple[int, int], player_center: tuple[int, int], player_normal_distance: int) -> None:
         self._speed = self._speed / self._player_normal_distance * player_normal_distance
@@ -78,6 +77,8 @@ class ObstaclesManager:
         self._actual_resolution = new_resolution
 
     def _generate_obstacles(self) -> None:
+        self._total_score += self._actual_score
+        self._actual_score = 0
         self._obstacles.clear()
         self._amount_obstacles = randint(10, 20)
         # Basically to convert the "standard" obstacles to the new resolution
@@ -90,7 +91,7 @@ class ObstaclesManager:
         self._obstacles.append(deepcopy(choice(self._possibles_obstacles)))
         self._obstacles[0].set_y(self._player_center[1] - self._start_distance_mult * self._player_normal_distance)
 
-        for i in range(1, self._amount_obstacles): # Something wrong here with the spacing between two groups
+        for i in range(1, self._amount_obstacles): # Maybe integrate with "_set_base_y()"
             new_obstacle = deepcopy(choice(self._possibles_obstacles))
             new_obstacle_y = self._obstacles[i-1].get_y() - max(self._obstacles[i-1].get_spacing_mult(), new_obstacle.get_spacing_mult()) * self._player_normal_distance
             new_obstacle.set_y(new_obstacle_y)
@@ -105,7 +106,20 @@ class ObstaclesManager:
 
         self.set_new_resolution(self._actual_resolution, actual_center, actual_distance)
     
-    def get_obstacles_passed(self) -> int: return self._obstacles_passed
+    def _calculate_actual_score(self) -> None:
+        self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
+    
+    def _set_base_y(self) -> None:
+        for i in range(self._amount_obstacles):
+            if i == 0: 
+                new_y = self._player_center[1] - self._start_distance_mult * self._player_normal_distance
+            else: 
+                new_y = self._obstacles[i-1].get_y() - max(self._obstacles[i-1].get_spacing_mult(), self._obstacles[i].get_spacing_mult()) * self._player_normal_distance
+            self._obstacles[i].set_y(new_y)
+
+            if isinstance(self._obstacles[i], RotatingObstacle):
+                ratiodist = (self._player_center[1] - new_y) / self._player_normal_distance
+                self._obstacles[i].set_angle((ratiodist % 2) * 90)
 
     def set_new_color(self, color: tuple[int, int, int]) -> None:
         self._color = color
@@ -115,3 +129,5 @@ class ObstaclesManager:
 
         for obst in self._obstacles:
             obst.set_color(color)
+
+    def get_score(self) -> int: return self._total_score + self._actual_score

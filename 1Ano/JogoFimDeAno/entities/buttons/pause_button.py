@@ -1,6 +1,6 @@
 import pygame as pg
-from entities.buttons.button import Button
-from scripts.settings import scale_dimension, scale_position
+from . import Button
+from scripts import scale_dimension, scale_position
 from typing import Callable
 
 class PauseButton(Button):

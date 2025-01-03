@@ -1,6 +1,6 @@
 import pygame as pg
-from entities.player import Player
-from entities.obstacles.obstacle import Obstacle
+from . import Obstacle
+from ..player import Player
 
 class ObstacleGroup:
     """A group of obstacles acting as one."""

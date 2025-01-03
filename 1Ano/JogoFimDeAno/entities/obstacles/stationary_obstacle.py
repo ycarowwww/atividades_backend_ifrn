@@ -1,7 +1,7 @@
 import pygame as pg
-from entities.player import Player
-from entities.obstacles.obstacle import Obstacle
-from scripts.settings import scale_dimension
+from . import Obstacle
+from ..player import Player
+from scripts import scale_dimension
 from math import sqrt
 
 class StationaryObstacle(Obstacle):
