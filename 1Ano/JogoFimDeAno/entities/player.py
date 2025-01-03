@@ -42,32 +42,37 @@ class Player:
         self._base_radius_distance_proportion = self._radius / self._base_distance
         self._base_border_size = self._border_size
         self._actual_resolution = BASE_RESOLUTION
+        self._gravity = True
+        self._enable_control = True
     
     def update(self, dt: float) -> None:
         key = pg.key.get_pressed()
 
         linear_speed = self._linear_speed * dt
         
-        if key[Keys.LESSDISTANCE] or key[Keys.MOREDISTANCE]:
-            if key[Keys.LESSDISTANCE]:
-                self._distance -= linear_speed
-            if key[Keys.MOREDISTANCE]:
-                self._distance += linear_speed
-        else:
-            if abs(self._normal_distance - self._distance) <= linear_speed:
-                self._distance = self._normal_distance
-            elif self._distance < self._normal_distance:
-                self._distance += linear_speed
+        if self._enable_control:
+            if key[Keys.LESSDISTANCE] or key[Keys.MOREDISTANCE]:
+                if key[Keys.LESSDISTANCE]:
+                    self._distance -= linear_speed
+                if key[Keys.MOREDISTANCE]:
+                    self._distance += linear_speed
             else:
-                self._distance -= linear_speed
-            
-        if self._distance > self._max_distance:
-            self._distance = self._max_distance
-        elif self._distance < 0:
-            self._distance = 0
+                if abs(self._normal_distance - self._distance) <= linear_speed:
+                    self._distance = self._normal_distance
+                elif self._distance < self._normal_distance:
+                    self._distance += linear_speed
+                else:
+                    self._distance -= linear_speed
+                
+            if self._distance > self._max_distance:
+                self._distance = self._max_distance
+            elif self._distance < 0:
+                self._distance = 0
 
-        if key[Keys.ROTATELEFT]: self._angle -= self._angular_speed * dt
-        if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
+            if key[Keys.ROTATELEFT]: self._angle -= self._angular_speed * dt
+            if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
+        else:
+            self._angle += self._angular_speed * dt
         self._angle %= 360
 
         self._rotate_to_center()
@@ -88,8 +93,9 @@ class Player:
     def update_by_event(self, event: pg.event.Event) -> None:
         match event.type:
             case pg.KEYDOWN:
-                if event.key == Keys.TOGGLEBORDER:
+                if event.key == Keys.TOGGLEBORDER and self._enable_control:
                     self._toggle_border()
+
             case pg.VIDEORESIZE:
                 self.set_new_resolution(event.size)
     
@@ -105,7 +111,7 @@ class Player:
         for i in range(self._amount):
             len_pos = len(self._positions_tracker[i])
             for j in range(len_pos):
-                self._positions_tracker[i][j][1] += self._tracker_speed * dt
+                self._positions_tracker[i][j][1] += self._tracker_speed * dt if self._gravity else 0
                 self._positions_tracker_times[i][j] -= dt
                 self._positions_tracker_formulas[i][j][2] += dt
             
@@ -257,3 +263,7 @@ class Player:
     def get_center(self) -> tuple[int, int]: return (round(self._center[0]), round(self._center[1]))
 
     def get_positions(self) -> list[tuple[int, int]]: return self._positions
+
+    def toggle_gravity(self) -> None: self._gravity = not self._gravity
+
+    def toggle_control(self) -> None: self._enable_control = not self._enable_control

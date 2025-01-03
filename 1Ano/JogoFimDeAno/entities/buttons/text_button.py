@@ -22,19 +22,8 @@ class TextButton(Button):
         self._base_padding = self._padding
         self._base_position = self._position
     
-    def update(self) -> None:
-        self._action()
-    
     def draw(self, screen: pg.Surface) -> None:
         screen.blit(self._box_surf, self._hitbox.topleft)
-    
-    def check_clicked(self, mouse_pos: tuple[int, int]) -> bool:
-        checking: bool = self._hitbox.collidepoint(mouse_pos)
-
-        if checking:
-            self.update()
-
-        return checking
 
     def update_by_event(self, event: pg.event.Event) -> None:
         if event.type == pg.MOUSEBUTTONDOWN:

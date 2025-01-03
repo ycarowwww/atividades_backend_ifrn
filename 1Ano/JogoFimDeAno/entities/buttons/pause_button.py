@@ -23,14 +23,6 @@ class PauseButton(Button):
         else:
             for rect in self._rects:
                 pg.draw.rect(screen, self._color, rect)
-    
-    def check_clicked(self, mouse_pos: tuple[int, int]) -> bool:
-        checking: bool = self._hitbox.collidepoint(mouse_pos)
-
-        if checking:
-            self.update()
-
-        return checking
 
     def update_by_event(self, event: pg.event.Event) -> None:
         if event.type == pg.KEYDOWN:

@@ -13,19 +13,8 @@ class ReturnButton(Button):
             (self._hitbox.left, self._hitbox.centery)
         ]
     
-    def update(self) -> None:
-        self._action()
-    
     def draw(self, screen: pg.Surface) -> None:
         pg.draw.polygon(screen, self._color, self._triangle_points)
-    
-    def check_clicked(self, mouse_pos: tuple[int, int]) -> bool:
-        checking: bool = self._hitbox.collidepoint(mouse_pos)
-
-        if checking:
-            self.update()
-
-        return checking
 
     def update_by_event(self, event: pg.event.Event) -> None:
         if event.type == pg.MOUSEBUTTONDOWN:

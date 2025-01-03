@@ -3,6 +3,7 @@ from entities.player import Player # Use Packages
 from entities.buttons.pause_button import PauseButton
 from entities.buttons.return_button import ReturnButton
 from entities.buttons.text_button import TextButton
+from entities.buttons.image_button import ImageButton
 from entities.obstacles.obstacles_manager import ObstaclesManager
 from entities.text.text import Text
 from scripts.settings import *
@@ -38,11 +39,21 @@ class Game:
 
     def main_menu(self):
         def game_bt_func(): self.__current_window = 2
-        game_button = TextButton((400, 300), "center", game_bt_func, "Game", self.__FONT, COLORS["WHITE"], COLORS["BLUE"], size_font=30, padding=15)
+        game_settings = ImageButton((70, 70), (300, 350), "center", lambda: None, get_file_path("../images/gear.svg"), 10, 3, 96, (255, 255, 255))
+        game_start = ImageButton((50, 50), (500, 350), "center", game_bt_func, get_file_path("../images/triangle.svg"), 20, 3, 96, (255, 255, 255))
         game_title = Text("DUET", self.__FONT, (255, 255, 255), (400, 150), "center", 70)
+        player_background = Player((400, 250), 2, 20)
+        player_background.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
+        player_background.toggle_gravity()
+        player_background.toggle_control()
+        player_background._toggle_border()
         
-        game_button.resize(self.__screen.get_size()) # Change later
-        game_title.resize(self.__screen.get_size())
+        game_title.resize(self.__screen.get_size()) # Maybe try to find a better way later
+        game_start.resize(self.__screen.get_size())
+        game_settings.resize(self.__screen.get_size())
+        player_background.set_new_resolution(self.__screen.get_size())
+
+        last_time = time() # Maybe a timer later
 
         while self.__current_window == 1:
             for event in pg.event.get():
@@ -56,13 +67,22 @@ class Game:
                 if event.type == pg.VIDEORESIZE:
                     game_title.resize(event.size)
 
-                game_button.update_by_event(event)
+                game_start.update_by_event(event)
+                game_settings.update_by_event(event)
+                player_background.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            game_button.draw(self.__screen)
+            dt = time() - last_time
+            last_time = time()
+
+            player_background.update(dt)
+            player_background.draw(self.__screen)
+
             game_title.draw(self.__screen)
+            game_start.draw(self.__screen)
+            game_settings.draw(self.__screen)
             
             pg.display.flip()
 
@@ -70,7 +90,7 @@ class Game:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = 1
-        player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20) # Player Tracker Decreasing Size - Bug:
+        player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20)
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", lambda: None, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
