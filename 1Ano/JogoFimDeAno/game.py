@@ -1,9 +1,9 @@
 import pygame as pg
-from entities import Player, ObstaclesManager, ImageButton, PauseButton, ReturnButton, Text
+from entities import Player, ObstaclesManager, ImageButton, PauseButton, ReturnButton, Text, Lines
 from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from time import time
 
-# Background, FPS Viewer
+# Ink stains (Preferably proceduraly), More Backgrounds, Animations (Death) + Particles, FPS Viewer
 
 class Game:
     def __init__(self):
@@ -41,6 +41,7 @@ class Game:
         player_background.toggle_gravity()
         player_background.toggle_control()
         player_background._toggle_border()
+        background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
         
         game_title.resize(self.__screen.get_size()) # Maybe try to find a better way later
         game_start.resize(self.__screen.get_size())
@@ -60,6 +61,7 @@ class Game:
                 
                 if event.type == pg.VIDEORESIZE:
                     game_title.resize(event.size)
+                    background.resize(event.size)
 
                 game_start.update_by_event(event)
                 game_settings.update_by_event(event)
@@ -70,6 +72,9 @@ class Game:
 
             dt = time() - last_time
             last_time = time()
+
+            background.update(dt)
+            background.draw(self.__screen)
 
             player_background.update(dt)
             player_background.draw(self.__screen)
@@ -92,6 +97,7 @@ class Game:
         score, max_score = 0, 0
         score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
+        background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
 
         pause_button.resize(self.__screen.get_size()) # Maybe try to find a better way later
         return_menu_button.resize(self.__screen.get_size())
@@ -115,6 +121,7 @@ class Game:
                     obstacle_manager.set_new_resolution(event.size, player.get_center(), player.get_normal_distance())
                     score_text.resize(event.size)
                     max_score_text.resize(event.size)
+                    background.resize(event.size)
 
             keys = pg.key.get_pressed()
 
@@ -126,6 +133,9 @@ class Game:
 
             dt = time() - last_time
             last_time = time()
+
+            background.update(dt)
+            background.draw(self.__screen)
 
             pause_button.draw(self.__screen)
 

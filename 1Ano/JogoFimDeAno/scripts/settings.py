@@ -26,7 +26,7 @@ PLAYER_ROTATION_VELOCITY: float = 5
 FPS: float = 60.0
 COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "BLACK" : (0, 0, 0),
-    "GRAY" : (50, 50, 50),
+    "GRAY" : (20, 20, 20),
     "WHITE" : (255, 255, 255),
     "RED" : (255, 0, 0),
     "GREEN" : (0, 255, 0),

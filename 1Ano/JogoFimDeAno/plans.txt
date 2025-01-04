@@ -62,4 +62,4 @@ Talvez Adicionar:
 - Pontuação
 - Definir Cores
 
-Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu, Better Fonts, Buttons Resizable, Good Punctuation -> Kinda made
+Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu, Better Fonts, Buttons Resizable, Good Punctuation, Background -> Kinda made
