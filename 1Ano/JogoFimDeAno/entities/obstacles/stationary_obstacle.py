@@ -23,7 +23,7 @@ class StationaryObstacle(Obstacle):
         pg.draw.rect(screen, self._color, self._rect)
     
     def check_collision(self, player: Player) -> bool:
-        if self._rect.bottom < player.get_center()[1] - player.get_distance() or self._rect.top > player.get_center()[1] + player.get_distance(): 
+        if self._rect.bottom < player.get_center()[1] - player.get_distance() - player.get_radius() or self._rect.top > player.get_center()[1] + player.get_distance() + player.get_radius(): 
             return False
         
         for i in range(player.get_amount()):

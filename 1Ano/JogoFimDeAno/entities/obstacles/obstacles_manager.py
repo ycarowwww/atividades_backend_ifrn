@@ -3,6 +3,7 @@ from .obstacle import Obstacle
 from .rotating_obstacle import RotatingObstacle
 from .standard_obstacles import get_obstacle_list
 from ..player import Player
+from ..eventhandler import *
 from scripts import OBSTACLES_HEIGHT, COLORS, BASE_RESOLUTION, get_file_path
 from copy import deepcopy
 from json import load as json_load
@@ -84,6 +85,8 @@ class ObstaclesManager:
                 self._obstacles.append(deepcopy(self._possibles_obstacles[i]))
             
             self._amount_obstacles = len(self._obstacles)
+            
+            CustomEventHandler.post_event(CustomEventList.NEWLEVELWARNING, {"level" : self._actual_level})
         else:
             self._amount_obstacles = randint(10, 20)
             self._obstacles.append(deepcopy(choice(self._possibles_obstacles)))

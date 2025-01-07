@@ -1,10 +1,10 @@
 import pygame as pg
 from scripts import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
-from enum import IntFlag
+from enum import IntEnum
 from math import sqrt, pi, radians, sin, cos, atan2
 
-class Keys(IntFlag):
+class Keys(IntEnum):
     """Enum with the Keyboard Keys to the Player's movements."""
     MOREDISTANCE = pg.K_SPACE
     LESSDISTANCE = pg.K_LSHIFT
