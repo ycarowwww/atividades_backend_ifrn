@@ -5,12 +5,15 @@ from scripts import scale_dimension, scale_position
 from typing import Callable
 
 class TextButton(Button):
-    def __init__(self, position: tuple[int, int], attr_pos: str, action: Callable, text: str, font: pgft.Font, fgcolor: tuple[int, int, int] | None, bgcolor: tuple[int, int, int] | None = None, style: int = pgft.STYLE_DEFAULT, rotation: int = 0, size_font: float = 0, padding: int = 0):
+    def __init__(self, position: tuple[int, int], attr_pos: str, action: Callable, text: str, font: pgft.Font, fgcolor: tuple[int, int, int] | None, bgcolor: tuple[int, int, int] | None = None, style: int = pgft.STYLE_DEFAULT, rotation: int = 0, size_font: float = 0, padding: tuple[int, int] = (0, 0), padding_by_size: tuple[int, int] = (0, 0)):
         self._font_size = size_font
-        self._padding = padding
         self._generate_text = lambda size: font.render(text, fgcolor, None, style, rotation, size)
         text_surf, text_rect = self._generate_text(self._font_size)
-        self._box_surf = pg.Surface(text_rect.inflate(self._padding, self._padding).size)
+        if padding_by_size != (0, 0):
+            self._padding = (max(0, (padding_by_size[0] - text_rect.width)), max(0, (padding_by_size[1] - text_rect.height)))
+        else:
+            self._padding = padding
+        self._box_surf = pg.Surface(text_rect.inflate(self._padding[0], self._padding[1]).size)
         self._box_surf.set_colorkey((0, 0, 0))
         text_rect.center = self._box_surf.get_rect().center
         self._bg_color = bgcolor
@@ -33,10 +36,10 @@ class TextButton(Button):
             self.resize(event.size)
 
     def resize(self, new_resolution: tuple[int, int]) -> None:
-        self._padding = scale_dimension(self._base_padding, new_resolution)
+        self._padding = (scale_dimension(self._base_padding[0], new_resolution), scale_dimension(self._base_padding[1], new_resolution))
         self._font_size = scale_dimension(self._base_font_size, new_resolution)
         text_surf, text_rect = self._generate_text(self._font_size)
-        self._box_surf = pg.Surface(text_rect.inflate(self._padding, self._padding).size)
+        self._box_surf = pg.Surface(text_rect.inflate(self._padding[0], self._padding[1]).size)
         self._box_surf.set_colorkey((0, 0, 0))
         text_rect.center = self._box_surf.get_rect().center
         if self._bg_color:

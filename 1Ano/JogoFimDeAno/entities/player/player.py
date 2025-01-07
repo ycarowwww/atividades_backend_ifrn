@@ -28,7 +28,7 @@ class Player:
         self._linear_speed = linear_speed
         self._positions = [[0, 0] for _ in range(self._amount)]
         self._rotate_to_center() # defines the starting positions
-        self._show_border = False
+        self._show_border = True
         self._border_size = border_size
         self._border_color = (30, 30, 30)
         self._positions_tracker: list[deque[tuple[float, float]]] = [deque() for _ in range(self._amount)]

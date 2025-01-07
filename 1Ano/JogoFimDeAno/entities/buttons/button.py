@@ -51,3 +51,5 @@ class Button:
         """
         self._position = new_pos
         setattr(self._hitbox, attr_pos, self._position)
+    
+    def get_size(self) -> tuple[int, int]: return self._size

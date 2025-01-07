@@ -61,5 +61,6 @@ Talvez Adicionar:
 - Cada jogador controla um Círculo (Modo)
 - Pontuação
 - Definir Cores
+- Custom Bar
 
-Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu, Better Fonts, Buttons Resizable, Good Punctuation, Background -> Kinda made
+Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu, Better Fonts, Buttons Resizable, Good Punctuation, Background, FPS Viewer -> Kinda made
