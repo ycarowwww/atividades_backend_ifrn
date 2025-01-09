@@ -43,7 +43,7 @@ class ObstaclesManager:
         for obstacle in self._obstacles:
             if obstacle.check_collision(player):
                 self._set_base_y()
-                player.reset_rotation()
+                player.reset_movements()
         
         self._calculate_actual_score()
     

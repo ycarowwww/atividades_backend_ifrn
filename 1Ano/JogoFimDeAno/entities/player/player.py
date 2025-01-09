@@ -1,4 +1,5 @@
 import pygame as pg
+from ..eventhandler import CustomEventList
 from scripts import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
 from enum import IntEnum
@@ -98,6 +99,9 @@ class Player:
 
             case pg.VIDEORESIZE:
                 self.set_new_resolution(event.size)
+            
+            case CustomEventList.NEWLEVELWARNING | CustomEventList.NEWGENERATIONWARNING:
+                self.reset_movements()
     
     def _toggle_border(self) -> None:
         self._show_border = not self._show_border
@@ -268,4 +272,6 @@ class Player:
 
     def toggle_control(self) -> None: self._enable_control = not self._enable_control
 
-    def reset_rotation(self) -> None: self._angle = 0
+    def reset_movements(self) -> None: 
+        self._angle = 0
+        self._distance = self._normal_distance
