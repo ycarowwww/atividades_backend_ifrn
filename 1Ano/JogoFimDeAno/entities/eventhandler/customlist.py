@@ -3,5 +3,6 @@ from enum import IntEnum, auto
 
 class CustomEventList(IntEnum):
     NEWLEVELWARNING = USEREVENT + 1
-    DISABLELEVELWARNING = auto()
+    NEWGENERATIONWARNING = auto()
+    DISABLEWARNING = auto()
     # auto for new custom events

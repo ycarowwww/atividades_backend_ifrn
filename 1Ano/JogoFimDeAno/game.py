@@ -152,10 +152,15 @@ class Game:
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
-                    pg.time.set_timer(CustomEventList.DISABLELEVELWARNING, 1000, 1)
+                    pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
                     show_warn = True
                 
-                if event.type == CustomEventList.DISABLELEVELWARNING:
+                if event.type == CustomEventList.NEWGENERATIONWARNING:
+                    warn_text.set_text("New Generated Obstacles")
+                    pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
+                    show_warn = True
+                
+                if event.type == CustomEventList.DISABLEWARNING:
                     show_warn = False
 
             keys = pg.key.get_pressed()

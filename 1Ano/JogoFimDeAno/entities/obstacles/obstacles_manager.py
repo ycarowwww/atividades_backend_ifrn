@@ -32,7 +32,7 @@ class ObstaclesManager:
         for obstacle in self._obstacles:
             obstacle.update(dt)
         
-        if self._last_obstacle == None or self._last_obstacle.get_y() - self._player_center[1] > self._player_normal_distance * 3:
+        if self._last_obstacle == None or self._last_obstacle.get_y() - self._player_center[1] > self._player_normal_distance * 3: # Change this "3" later
             self._generate_obstacles()
 
     def draw(self, screen: pg.Surface) -> None:
@@ -94,6 +94,8 @@ class ObstaclesManager:
             for _ in range(1, self._amount_obstacles): # Maybe integrate with "_set_base_y()"
                 new_obstacle = deepcopy(choice(self._possibles_obstacles))
                 self._obstacles.append(new_obstacle)
+            
+            CustomEventHandler.post_event(CustomEventList.NEWGENERATIONWARNING)
         
         self._set_base_y()
         
