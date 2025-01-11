@@ -41,9 +41,9 @@ class ObstaclesManager:
 
     def check_collision(self, player: Player) -> None: # Implement Better
         for obstacle in self._obstacles:
-            if obstacle.check_collision(player):
-                self._set_base_y()
-                player.reset_movements()
+            detection, circles_indexes = obstacle.check_collision(player)
+            if detection:
+                CustomEventHandler.post_event(CustomEventList.PLAYERCOLLISION, { "indexes" : circles_indexes })
         
         self._calculate_actual_score()
     
@@ -106,6 +106,9 @@ class ObstaclesManager:
     def _calculate_actual_score(self) -> None:
         self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
     
+    def reset(self) -> None:
+        self._set_base_y()
+
     def _set_base_y(self) -> None:
         for i in range(self._amount_obstacles):
             if i == 0: 

@@ -121,6 +121,7 @@ class Game:
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
+        player_collided = False
 
         pause_button.resize(self.__screen.get_size()) # Maybe try to find a better way later
         return_menu_button.resize(self.__screen.get_size())
@@ -162,6 +163,16 @@ class Game:
                 
                 if event.type == CustomEventList.DISABLEWARNING:
                     show_warn = False
+                
+                if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class
+                    pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                    player_collided = True
+                    player.add_lost_particles(event.indexes)
+                
+                if event.type == CustomEventList.RESETGAME:
+                    player_collided = False
+                    player.reset_movements()
+                    obstacle_manager.reset()
 
             keys = pg.key.get_pressed()
 
@@ -184,12 +195,15 @@ class Game:
                 obstacle_manager.draw(self.__screen)
                 return_menu_button.draw(self.__screen)
             else:
-                player.update(dt)
-                player.draw(self.__screen)
+                if not player_collided:
+                    player.update(dt)
+                    obstacle_manager.update(dt)
+                    obstacle_manager.check_collision(player)
+                else:
+                    player.update_lost_particles(dt)
 
-                obstacle_manager.update(dt)
+                player.draw(self.__screen)
                 obstacle_manager.draw(self.__screen)
-                obstacle_manager.check_collision(player)
 
                 score = obstacle_manager.get_score()
                 max_score = max(max_score, score)

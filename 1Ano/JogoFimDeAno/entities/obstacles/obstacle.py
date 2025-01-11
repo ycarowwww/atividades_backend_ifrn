@@ -26,7 +26,7 @@ class Obstacle:
     
     def draw(self, screen: pg.Surface) -> None: pass
     
-    def check_collision(self, player: Player) -> bool: pass
+    def check_collision(self, player: Player) -> tuple[bool, list[int]]: pass
 
     def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None: pass
 

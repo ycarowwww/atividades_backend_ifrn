@@ -1,4 +1,5 @@
 import pygame as pg
+from . import PlayerParticles
 from ..eventhandler import CustomEventList
 from scripts import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
@@ -45,6 +46,8 @@ class Player:
         self._actual_resolution = BASE_RESOLUTION
         self._gravity = True
         self._enable_control = True
+        self._indexes_particles: list[int] = []
+        self._particles: list[PlayerParticles] = []
     
     def update(self, dt: float) -> None:
         key = pg.key.get_pressed()
@@ -86,6 +89,11 @@ class Player:
         self._draw_tracker(screen)
         
         for i in range(self._amount):
+            if i in self._indexes_particles: 
+                for j in self._particles:
+                    j.draw(screen)
+                continue
+
             pos = [ round(j) for j in self._positions[i] ]
             pg.draw.circle(screen, self._colors[i], pos, self._radius)
 
@@ -245,6 +253,15 @@ class Player:
                 self._positions_tracker[i][j][0] = round(dist * cos(ang) + self._center[0])
                 self._positions_tracker[i][j][1] = round(dist * sin(ang) + self._center[1] + self._tracker_speed * dt)
 
+    def add_lost_particles(self, indexes: list[int]) -> None:
+        self._indexes_particles = indexes
+        for i in self._indexes_particles:
+            self._particles.append(PlayerParticles(self._positions[i], 20, self._linear_speed * 4, self.get_radius() / 10, self._colors[i])) # Maybe change this 4 for something more logical
+
+    def update_lost_particles(self, dt: float) -> None:
+        for i in self._particles:
+            i.update(dt)
+
     def set_circle_colors(self, new_colors: list[tuple[int, int, int]]) -> None:
         for i in range(min(len(new_colors), self._amount)):
             self._colors[i] = new_colors[i]
@@ -275,3 +292,5 @@ class Player:
     def reset_movements(self) -> None: 
         self._angle = 0
         self._distance = self._normal_distance
+        self._indexes_particles.clear()
+        self._particles.clear()

@@ -21,12 +21,13 @@ class ObstacleGroup:
         for obstacle in self._obstacles:
             obstacle.draw(screen)
     
-    def check_collision(self, player: Player) -> bool:
-        for obstacle in self._obstacles:
-            if obstacle.check_collision(player):
-                return True
+    def check_collision(self, player: Player) -> tuple[bool, list[int]]:
+        for obstacle in self._obstacles: # Maybe do to all of the obstacles to ensure that if more than 1 obstacle collided, both will be return
+            detection, indexes = obstacle.check_collision(player)
+            if detection:
+                return (True, indexes)
         
-        return False
+        return (False, [])
 
     def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None:
         for obstacle in self._obstacles:

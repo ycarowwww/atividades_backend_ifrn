@@ -22,9 +22,9 @@ class StationaryObstacle(Obstacle):
         
         pg.draw.rect(screen, self._color, self._rect)
     
-    def check_collision(self, player: Player) -> bool:
+    def check_collision(self, player: Player) -> tuple[bool, list[int]]:
         if self._rect.bottom < player.get_center()[1] - player.get_distance() - player.get_radius() or self._rect.top > player.get_center()[1] + player.get_distance() + player.get_radius(): 
-            return False
+            return (False, [])
         
         for i in range(player.get_amount()):
             closest_x: float = max(self._rect.left, min(player.get_positions()[i][0], self._rect.right))
@@ -32,9 +32,10 @@ class StationaryObstacle(Obstacle):
 
             distance: float = sqrt((player.get_positions()[i][0] - closest_x) ** 2 + (player.get_positions()[i][1] - closest_y) ** 2)
 
-            if distance < player.get_radius(): return True
+            if distance < player.get_radius(): 
+                return (True, [i])
         
-        return False
+        return (False, [])
 
     def set_new_resolution(self, new_resolution: tuple[int, int], old_player_info: tuple[tuple[int, int], int], new_player_info: tuple[tuple[int, int], int], new_speed: float) -> None:
         self._speed = new_speed

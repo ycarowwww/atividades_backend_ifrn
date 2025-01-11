@@ -5,4 +5,6 @@ class CustomEventList(IntEnum):
     NEWLEVELWARNING = USEREVENT + 1
     NEWGENERATIONWARNING = auto()
     DISABLEWARNING = auto()
+    PLAYERCOLLISION = auto()
+    RESETGAME = auto()
     # auto for new custom events
