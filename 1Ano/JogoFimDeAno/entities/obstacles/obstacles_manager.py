@@ -47,7 +47,7 @@ class ObstaclesManager:
         
         self._calculate_actual_score()
     
-    def set_new_resolution(self, new_resolution: tuple[int, int], player_center: tuple[int, int], player_normal_distance: int) -> None:
+    def resize(self, new_resolution: tuple[int, int], player_center: tuple[int, int], player_normal_distance: int) -> None:
         self._speed = self._speed / self._player_normal_distance * player_normal_distance
 
         for obst in self._obstacles:
@@ -101,7 +101,7 @@ class ObstaclesManager:
         
         self._last_obstacle = self._obstacles[self._amount_obstacles-1]
 
-        self.set_new_resolution(self._actual_resolution, actual_center, actual_distance)
+        self.resize(self._actual_resolution, actual_center, actual_distance)
     
     def _calculate_actual_score(self) -> None:
         self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)

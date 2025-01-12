@@ -5,6 +5,8 @@ from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
 
+# Set new Resolution to the Particles | Expand Particles Class | Add Stains
+# Most of the things are from a "x" player's distance of distance (proportion) | Maybe we can see that to simplify some code
 # Ink stains (Preferably proceduraly), More Backgrounds, Animations (Death) + Particles, Better dt (like a class), Custom Events
 
 class WindowsKeys(IntEnum):
@@ -62,7 +64,7 @@ class Game:
         fps_text.resize(self.__screen.get_size())
         game_start.resize(self.__screen.get_size())
         game_settings.resize(self.__screen.get_size())
-        player_background.set_new_resolution(self.__screen.get_size())
+        player_background.resize(self.__screen.get_size())
 
         last_time = time() # Maybe a timer later
 
@@ -128,8 +130,8 @@ class Game:
         score_text.resize(self.__screen.get_size())
         max_score_text.resize(self.__screen.get_size())
         fps_text.resize(self.__screen.get_size())
-        player.set_new_resolution(self.__screen.get_size())
-        obstacle_manager.set_new_resolution(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
+        player.resize(self.__screen.get_size())
+        obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
         warn_text.resize(self.__screen.get_size())
 
         last_time = time()
@@ -144,7 +146,7 @@ class Game:
                 player.update_by_event(event)
 
                 if event.type == pg.VIDEORESIZE:
-                    obstacle_manager.set_new_resolution(event.size, player.get_center(), player.get_normal_distance())
+                    obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
                     score_text.resize(event.size)
                     max_score_text.resize(event.size)
                     fps_text.resize(event.size)
@@ -243,9 +245,9 @@ class Game:
             ],
             25,
             False
-            )
+        )
 
-        player_background.set_new_resolution(self.__screen.get_size())
+        player_background.resize(self.__screen.get_size())
         fps_text.resize(self.__screen.get_size())
         buttongroup.resize(self.__screen.get_size())
 
@@ -257,6 +259,9 @@ class Game:
                     self.__current_window = WindowsKeys.QUIT
                 
                 if event.type == pg.KEYDOWN: # Change Later
+                    if event.key == pg.K_ESCAPE:
+                        self.__current_window = WindowsKeys.MAINMENU
+                    
                     if event.key == pg.K_RETURN:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
@@ -307,9 +312,9 @@ class Game:
             ],
             25,
             False
-            )
+        )
 
-        player_background.set_new_resolution(self.__screen.get_size())
+        player_background.resize(self.__screen.get_size())
         fps_text.resize(self.__screen.get_size())
         buttongroup.resize(self.__screen.get_size())
 
@@ -321,6 +326,10 @@ class Game:
                     self.__current_window = WindowsKeys.QUIT
                 
                 if event.type == pg.KEYDOWN: # Change Later
+                    if event.key == pg.K_ESCAPE:
+                        self.__is_level = False
+                        self.__current_window = WindowsKeys.SETGAMEMODE
+                    
                     if event.key == pg.K_RETURN:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 

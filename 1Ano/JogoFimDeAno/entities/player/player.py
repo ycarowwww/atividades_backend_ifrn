@@ -1,5 +1,5 @@
 import pygame as pg
-from . import PlayerParticles
+from . import PlayerParticleManager
 from ..eventhandler import CustomEventList
 from scripts import scale_dimension, scale_position, BASE_RESOLUTION
 from collections import deque
@@ -47,7 +47,7 @@ class Player:
         self._gravity = True
         self._enable_control = True
         self._indexes_particles: list[int] = []
-        self._particles: list[PlayerParticles] = []
+        self._particles: list[PlayerParticleManager] = []
     
     def update(self, dt: float) -> None:
         key = pg.key.get_pressed()
@@ -106,7 +106,7 @@ class Player:
                     self._toggle_border()
 
             case pg.VIDEORESIZE:
-                self.set_new_resolution(event.size)
+                self.resize(event.size)
             
             case CustomEventList.NEWLEVELWARNING | CustomEventList.NEWGENERATIONWARNING:
                 self.reset_movements()
@@ -229,7 +229,7 @@ class Player:
     def _check_circles_collided(self) -> bool:
         return sqrt((self._positions[0][0] - self._positions[1][0]) ** 2 + (self._positions[0][1] - self._positions[1][1]) ** 2) < self._radius * 2
 
-    def set_new_resolution(self, new_resolution: tuple[int, int]) -> None:
+    def resize(self, new_resolution: tuple[int, int]) -> None:
         self._center = scale_position(self._center, self._actual_resolution, new_resolution)
         self._distance /= self._normal_distance
         self._linear_speed /= self._normal_distance
@@ -256,7 +256,7 @@ class Player:
     def add_lost_particles(self, indexes: list[int]) -> None:
         self._indexes_particles = indexes
         for i in self._indexes_particles:
-            self._particles.append(PlayerParticles(self._positions[i], 20, self._linear_speed * 4, self.get_radius() / 10, self._colors[i])) # Maybe change this 4 for something more logical
+            self._particles.append(PlayerParticleManager(self._positions[i], 20, self._linear_speed * 4, self.get_radius() / 10, self._colors[i])) # Maybe change this 4 for something more logical
 
     def update_lost_particles(self, dt: float) -> None:
         for i in self._particles:
