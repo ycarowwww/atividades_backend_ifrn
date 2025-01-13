@@ -14,8 +14,8 @@ def blit_text(screen: pg.Surface, text: str, color: tuple[int, int, int], font: 
 def scale_position(position: tuple[int, int], actual_resolution: tuple[int, int], new_resolution: tuple[int, int]) -> tuple[int, int]:
     return (round(position[0] / actual_resolution[0] * new_resolution[0]), round(position[1] / actual_resolution[1] * new_resolution[1]))
 
-def scale_dimension(original_dimension: int, new_resolution: tuple[int, int]) -> int:
-    return round(original_dimension * min(new_resolution[0] / BASE_RESOLUTION[0], new_resolution[1] / BASE_RESOLUTION[1]))
+def scale_dimension(original_dimension: int, new_resolution: tuple[int, int], original_resolution: tuple[int, int] = BASE_RESOLUTION) -> int:
+    return round(original_dimension * min(new_resolution[0] / original_resolution[0], new_resolution[1] / original_resolution[1]))
 
 def get_file_path(file: str) -> str:
     base_dir: str = path.dirname(path.abspath(__file__))

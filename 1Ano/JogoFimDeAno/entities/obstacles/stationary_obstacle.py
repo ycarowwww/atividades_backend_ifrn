@@ -21,6 +21,8 @@ class StationaryObstacle(Obstacle):
         self._draw_tracker(screen)
         
         pg.draw.rect(screen, self._color, self._rect)
+
+        self._draw_ink_stains(screen)
     
     def check_collision(self, player: Player) -> tuple[bool, list[int]]:
         if self._rect.bottom < player.get_center()[1] - player.get_distance() - player.get_radius() or self._rect.top > player.get_center()[1] + player.get_distance() + player.get_radius(): 
@@ -33,6 +35,8 @@ class StationaryObstacle(Obstacle):
             distance: float = sqrt((player.get_positions()[i][0] - closest_x) ** 2 + (player.get_positions()[i][1] - closest_y) ** 2)
 
             if distance < player.get_radius(): 
+                self._has_ink_stain = True
+                self._paint_new_stain((closest_x, closest_y), player.get_radius(), player.get_colors()[i])
                 return (True, [i])
         
         return (False, [])
@@ -56,6 +60,8 @@ class StationaryObstacle(Obstacle):
         for i in range(len(self._position_tracker)):
             time = self._position_tracker_lifetime - self._position_tracker_times[i]
             self._position_tracker[i] = (round(self._x), round(self._y - self._speed * time))
+        
+        self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, self._rect.size)
 
     def _update_tracker(self, dt: float) -> None:
         for i in range(len(self._position_tracker_times)):
@@ -104,6 +110,23 @@ class StationaryObstacle(Obstacle):
                 pg.draw.polygon(surf, col, (prev_rect.bottomleft, rect.bottomleft, rect.bottomright, prev_rect.bottomright))
 
         screen.blit(surf, topleft_extreme)
+
+    def _draw_ink_stains(self, screen: pg.Surface) -> None:
+        if not self._has_ink_stain: return
+
+        screen.blit(self._ink_stain_surface, self._rect)
+
+    def _paint_new_stain(self, pos: tuple[float, float], size: float, color: tuple[int, int, int]) -> None:
+        ratio_pos = (
+            (pos[0] - self._rect.x) / self._width * self._base_width,
+            (pos[1] - self._rect.y) / self._height * self._base_height
+        )
+
+        rad = size * self._base_width / self._width
+
+        pg.draw.circle(self._base_ink_stain_surface, color, ratio_pos, rad) # Function to draw the Stain
+        
+        self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, self._rect.size)
 
     def set_x(self, new_x: float) -> None: 
         self._x = new_x

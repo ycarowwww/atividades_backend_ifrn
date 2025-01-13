@@ -7,7 +7,7 @@ from collections import deque
 
 class Obstacle:
     """Obstacle Template Class for the others Obstacles."""
-    def __init__(self, x: float, y: float, width: float, height: float, speed: float, spacing_mult: float, color: tuple[int, int, int]):
+    def __init__(self, x: float, y: float, width: float, height: float, speed: float, spacing_mult: float, color: tuple[int, int, int]) -> None:
         self._x = x
         self._y = y
         self._width = width
@@ -21,6 +21,10 @@ class Obstacle:
         self._initial_alpha_tracker = INITIAL_ALPHA_TRACKER
         self._base_width = self._width
         self._base_height = self._height
+        self._ink_stain_surface = pg.Surface((self._base_width, self._base_height), pg.SRCALPHA)
+        self._base_ink_stain_surface = pg.Surface((self._base_width, self._base_height), pg.SRCALPHA)
+        self._base_ink_stain_surface.fill((0, 0, 0, 0))
+        self._has_ink_stain = False
     
     def update(self, dt: float) -> None: pass
     
@@ -33,6 +37,10 @@ class Obstacle:
     def _update_tracker(self, dt: float) -> None: pass
 
     def _draw_tracker(self, screen: pg.Surface) -> None: pass
+
+    def _draw_ink_stains(self, screen: pg.Surface) -> None: pass
+
+    def _paint_new_stain(self, pos: tuple[float, float], size: float) -> None: pass
 
     def set_x(self, new_x: float) -> None: self._x = new_x
 
