@@ -1,3 +1,4 @@
+from .stains import *
 from .particles import *
 from .backgrounds import *
 from .eventhandler import *

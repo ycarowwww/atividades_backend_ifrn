@@ -1,6 +1,7 @@
 import pygame as pg
 from . import Obstacle
 from ..player import Player
+from ..stains import generate_stain
 from scripts import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
 from math import sqrt, pi, radians, cos, sin, asin, degrees
 
@@ -24,9 +25,9 @@ class RotatingObstacle(Obstacle):
     def draw(self, screen: pg.Surface) -> None:
         self._draw_tracker(screen)
 
-        self._draw_ink_stains(screen)
-        
         pg.draw.polygon(screen, self._color, self._points)
+        
+        self._draw_ink_stains(screen)
     
     def check_collision(self, player: Player) -> tuple[bool, list[int]]:
         """Check Collision between the Player and the Obstacle.
@@ -52,6 +53,7 @@ class RotatingObstacle(Obstacle):
             distance = sqrt((player_relative_center[0] - nearest_x) ** 2 + (player_relative_center[1] - nearest_y) ** 2)
 
             if distance < player.get_radius(): 
+                self._has_ink_stain = True
                 self._paint_new_stain((nearest_x, nearest_y), player.get_radius(), player.get_colors()[i])
                 return (True, [i])
         
@@ -116,21 +118,23 @@ class RotatingObstacle(Obstacle):
     def _draw_ink_stains(self, screen: pg.Surface) -> None:
         if not self._has_ink_stain: return
 
+        self._update_ink_stain()
+
         screen.blit(self._ink_stain_surface, self._ink_stain_surface.get_rect(center=(round(self._x), round(self._y))))
-    """INK STAINS AREN'T FUNCTIONALS YET"""
+    
     def _paint_new_stain(self, pos: tuple[float, float], size: float, color: tuple[int, int, int]) -> None:
         ratio_pos = (
-            (pos[0] - (-self._width / 2)) / self._width * self._base_width,
-            (pos[1] - (-self._height / 2)) / self._height * self._base_height
+            round((pos[0] - (-self._width / 2)) / self._width * self._base_width),
+            round((pos[1] - (-self._height / 2)) / self._height * self._base_height)
         )
 
-        rad = size * self._base_width / self._width
+        rad = round(size * self._base_width / self._width)
 
-        pg.draw.circle(self._base_ink_stain_surface, color, ratio_pos, rad) # Function to draw the Stain
+        generate_stain(self._base_ink_stain_surface, ratio_pos, rad, color, rad * 1.5)
     
     def _update_ink_stain(self) -> None:
-        self._ink_stain_surface = pg.transform.scale(self._ink_stain_surface, (self._width, self._height))
-        self._ink_stain_surface = pg.transform.rotate(self._ink_stain_surface, degrees(self._angle))
+        self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, (self._width, self._height))
+        self._ink_stain_surface = pg.transform.rotate(self._ink_stain_surface, -degrees(self._angle + self._d_angle / 2))
 
     def _calculate_rotating_points(self, ang: float) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
         return [

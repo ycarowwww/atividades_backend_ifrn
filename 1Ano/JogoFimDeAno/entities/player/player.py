@@ -46,7 +46,7 @@ class Player:
         self._actual_resolution = BASE_RESOLUTION
         self._gravity = True
         self._enable_control = True
-        self._indexes_particles: list[int] = []
+        self._indexes_particles: set[int] = set()
         self._particles: list[ParticleManager] = []
     
     def update(self, dt: float) -> None:
@@ -268,7 +268,7 @@ class Player:
                 self._positions_tracker[i][j][1] = round(dist * sin(ang) + self._center[1] + self._tracker_speed * dt)
 
     def add_lost_particles(self, indexes: list[int]) -> None:
-        self._indexes_particles = indexes
+        self._indexes_particles.update(indexes)
         for i in self._indexes_particles:
             self._particles.append(ParticleManager(self._positions[i], 20, self._linear_speed * 4, self.get_radius() / 10, self._colors[i], self._actual_resolution)) # Maybe change this 4 for something more logical
 

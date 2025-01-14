@@ -1,6 +1,7 @@
 import pygame as pg
 from . import Obstacle
 from ..player import Player
+from ..stains import generate_stain
 from scripts import scale_dimension
 from math import sqrt
 
@@ -124,7 +125,7 @@ class StationaryObstacle(Obstacle):
 
         rad = size * self._base_width / self._width
 
-        pg.draw.circle(self._base_ink_stain_surface, color, ratio_pos, rad) # Function to draw the Stain
+        generate_stain(self._base_ink_stain_surface, ratio_pos, rad, color, rad * 1.5)
         
         self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, self._rect.size)
 
