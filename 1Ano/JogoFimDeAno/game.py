@@ -1,13 +1,11 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Lines, CustomEventList
+from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Lines, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
 
-# Set new Resolution to the Particles | Expand Particles Class | Add Stains
-# Most of the things are from a "x" player's distance of distance (proportion) | Maybe we can see that to simplify some code
-# Ink stains (Preferably proceduraly), More Backgrounds, Animations (Death) + Particles, Better dt (like a class), Custom Events
+# More Backgrounds, Animations, Better dt (like a class)
 
 class WindowsKeys(IntEnum):
     """Enum with the Windows Keys."""
@@ -113,7 +111,8 @@ class Game:
                 self.__current_window = WindowsKeys.MAINMENU
         player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20)
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
-        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", lambda: None, (255, 255, 255), 15)
+        event_pauser = EventPauser()
+        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", event_pauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
         obstacle_manager = ObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__is_level, self.__start_level)
         score, max_score = 0, 0
@@ -156,11 +155,13 @@ class Game:
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
+                    event_pauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1) # Maybe we can get this better with the "EventHandler"
                     show_warn = True
                 
                 if event.type == CustomEventList.NEWGENERATIONWARNING:
                     warn_text.set_text("New Generated Obstacles")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
+                    event_pauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1)
                     show_warn = True
                 
                 if event.type == CustomEventList.DISABLEWARNING:
@@ -168,6 +169,7 @@ class Game:
                 
                 if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class
                     pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                    event_pauser.add_event(CustomEventList.RESETGAME, 500, 1)
                     player_collided = True
                     player.add_lost_particles(event.indexes)
                 
@@ -186,6 +188,8 @@ class Game:
 
             dt = time() - last_time
             last_time = time()
+
+            event_pauser.update(dt)
 
             background.update(dt)
             background.draw(self.__screen)

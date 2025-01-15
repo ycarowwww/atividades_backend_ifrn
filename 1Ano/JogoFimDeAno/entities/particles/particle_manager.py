@@ -1,7 +1,7 @@
 import pygame as pg
 from . import CircleParticle, ShockwaveParticle
 from random import uniform
-# Maybe we need to set a new resolution method
+
 class ParticleManager:
     def __init__(self, start_pos: tuple[float, float], amount: int, main_speed: float, main_size: float, color: tuple[int, int, int], original_resolution: tuple[int, int]) -> None:
         self._central_pos = start_pos
