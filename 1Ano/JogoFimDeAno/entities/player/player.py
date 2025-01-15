@@ -75,6 +75,12 @@ class Player:
 
             if key[Keys.ROTATELEFT]: self._angle -= self._angular_speed * dt
             if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
+
+            if pg.mouse.get_pressed()[0]:
+                mx, _ = pg.mouse.get_pos()
+
+                if mx > self._center[0]: self._angle += self._angular_speed * dt
+                else: self._angle -= self._angular_speed * dt
         else:
             self._angle += self._angular_speed * dt
         self._angle %= 360
