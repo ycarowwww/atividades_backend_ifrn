@@ -77,7 +77,7 @@ class Player:
             if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
 
             if pg.mouse.get_pressed()[0]:
-                mx, _ = pg.mouse.get_pos()
+                mx = pg.mouse.get_pos()[0]
 
                 if mx > self._center[0]: self._angle += self._angular_speed * dt
                 else: self._angle -= self._angular_speed * dt
@@ -312,7 +312,7 @@ class Player:
     def toggle_control(self) -> None: self._enable_control = not self._enable_control
 
     def reset_movements(self) -> None: 
-        self._angle = 0
+        self._angle = 180 if 90 < self._angle < 270 else 0
         self._distance = self._normal_distance
         self._indexes_particles.clear()
         self._particles.clear()
