@@ -27,6 +27,7 @@ class ObstaclesManager:
         self._actual_score = 0
         self._load_level = load_level
         self._actual_level = actual_level - 1
+        self._player_count_collisions = 0
     
     def update(self, dt: float) -> None:
         for obstacle in self._obstacles:
@@ -40,12 +41,15 @@ class ObstaclesManager:
             obstacle.draw(screen)
 
     def check_collision(self, player: Player) -> None: # Implement Better
+        player_collided = False
         for obstacle in self._obstacles:
             detection, circles_indexes = obstacle.check_collision(player)
             if detection:
+                player_collided = True
                 CustomEventHandler.post_event(CustomEventList.PLAYERCOLLISION, { "indexes" : circles_indexes })
         
         self._calculate_actual_score()
+        if player_collided: self._increase_player_collision_count()
     
     def resize(self, new_resolution: tuple[int, int], player_center: tuple[int, int], player_normal_distance: int) -> None:
         self._speed = self._speed / self._player_normal_distance * player_normal_distance
@@ -106,8 +110,15 @@ class ObstaclesManager:
     def _calculate_actual_score(self) -> None:
         self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
     
+    def _increase_player_collision_count(self) -> None:
+        self._player_count_collisions += 1
+    
     def reset(self) -> None:
         self._set_base_y()
+
+    def get_score(self) -> int: return self._total_score + self._actual_score
+
+    def get_player_collision_count(self) -> int: return self._player_count_collisions
 
     def _set_base_y(self) -> None:
         for i in range(self._amount_obstacles):
@@ -129,5 +140,3 @@ class ObstaclesManager:
 
         for obst in self._obstacles:
             obst.set_color(color)
-
-    def get_score(self) -> int: return self._total_score + self._actual_score

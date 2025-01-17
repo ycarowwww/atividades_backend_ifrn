@@ -118,7 +118,8 @@ class Game:
         score, max_score = 0, 0
         score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
-        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 65), size=15)
+        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 65), size=20)
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 85), size=15)
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
@@ -128,6 +129,7 @@ class Game:
         return_menu_button.resize(self.__screen.get_size())
         score_text.resize(self.__screen.get_size())
         max_score_text.resize(self.__screen.get_size())
+        collision_count.resize(self.__screen.get_size())
         fps_text.resize(self.__screen.get_size())
         player.resize(self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
@@ -148,6 +150,7 @@ class Game:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
                     score_text.resize(event.size)
                     max_score_text.resize(event.size)
+                    collision_count.resize(event.size)
                     fps_text.resize(event.size)
                     background.resize(event.size)
                     warn_text.resize(event.size)
@@ -213,12 +216,15 @@ class Game:
 
                 score = obstacle_manager.get_score()
                 max_score = max(max_score, score)
+                collisions = obstacle_manager.get_player_collision_count()
                 
                 score_text.set_text(f"Score: {score}")
                 max_score_text.set_text(f"Max: {max_score}")
+                collision_count.set_text(f"Collisions: {collisions}")
 
             score_text.draw(self.__screen)
             max_score_text.draw(self.__screen)
+            collision_count.draw(self.__screen)
 
             if show_warn:
                 warn_text.draw(self.__screen)
