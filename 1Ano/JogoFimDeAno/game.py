@@ -5,11 +5,12 @@ from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
 
-# More Backgrounds, Animations, Better dt (like a class)
+# More Backgrounds, Animations, Better dt (like a class), def show of some texts (like FPS), background setter, game loop maker
 
 class WindowsKeys(IntEnum):
     """Enum with the Windows Keys."""
     QUIT = auto()
+    SETTINGS = auto()
     MAINMENU = auto()
     MAINGAME = auto()
     SETGAMEMODE = auto()
@@ -31,7 +32,8 @@ class Game:
             WindowsKeys.MAINMENU : self.main_menu,
             WindowsKeys.MAINGAME : self.main_game,
             WindowsKeys.SETGAMEMODE : self.set_gamemode,
-            WindowsKeys.SETLEVEL : self.set_level
+            WindowsKeys.SETLEVEL : self.set_level,
+            WindowsKeys.SETTINGS : self.settings
         }
 
         self.__is_level = False
@@ -47,8 +49,9 @@ class Game:
         pg.quit()
 
     def main_menu(self) -> None:
-        def game_bt_func(): self.__current_window = WindowsKeys.SETGAMEMODE
-        game_settings = ImageButton((70, 70), (300, 350), "center", lambda: None, get_file_path("../images/gear.svg"), 10, 3, 96, (255, 255, 255))
+        def game_bt_func(): self.__current_window = WindowsKeys.SETGAMEMODE # Some "Game" Class function to edit these properties
+        def settings_bt_func(): self.__current_window = WindowsKeys.SETTINGS
+        game_settings = ImageButton((70, 70), (300, 350), "center", settings_bt_func, get_file_path("../images/gear.svg"), 10, 3, 96, (255, 255, 255))
         game_start = ImageButton((50, 50), (500, 350), "center", game_bt_func, get_file_path("../images/triangle.svg"), 20, 3, 96, (255, 255, 255))
         game_title = Text("DUET", self.__FONT, (255, 255, 255), (400, 150), "center", 70)
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
@@ -363,6 +366,41 @@ class Game:
             player_background.draw(self.__screen)
 
             buttongroup.draw(self.__screen)
+
+            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+            fps_text.draw(self.__screen)
+            
+            pg.display.flip()
+
+    def settings(self) -> None:
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
+        background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
+        
+        fps_text.resize(self.__screen.get_size())
+
+        last_time = time() # Maybe a timer later
+
+        while self.__current_window == WindowsKeys.SETTINGS:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.__current_window = WindowsKeys.QUIT
+                
+                if event.type == pg.KEYDOWN: # Change Later
+                    if event.key == pg.K_ESCAPE:
+                        self.__current_window = WindowsKeys.MAINMENU
+                
+                if event.type == pg.VIDEORESIZE:
+                    fps_text.resize(event.size)
+                    background.resize(event.size)
+
+            self.__clock.tick(self.__MAX_FPS)
+            self.__screen.fill(COLORS["BLACK"])
+
+            dt = time() - last_time
+            last_time = time()
+
+            background.update(dt)
+            background.draw(self.__screen)
 
             fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
             fps_text.draw(self.__screen)
