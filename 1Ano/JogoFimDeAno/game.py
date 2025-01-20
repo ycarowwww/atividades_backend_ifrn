@@ -1,6 +1,6 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Lines, CustomEventList, EventPauser
+from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, Lines, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
@@ -380,12 +380,21 @@ class Game:
     def settings(self) -> None:
         def toggle_fps_visibility():
             self.__show_fps = not self.__show_fps
+        def set_max_fps(amount: float):
+            self.__MAX_FPS = amount
+            if self.__MAX_FPS == 300:
+                self.__MAX_FPS = 0
+            amount_fps_limiter.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
-        toggle_fps_vsblt_btn = TextButton((400, 300), "center", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
+        toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
+        limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 300 else self.__MAX_FPS, set_max_fps)
+        amount_fps_limiter = Text(f"Max FPS: {self.__MAX_FPS:.1f}", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
         
         fps_text.resize(self.__screen.get_size())
         toggle_fps_vsblt_btn.resize(self.__screen.get_size())
+        limiter_fps_btn.resize(self.__screen.get_size())
+        amount_fps_limiter.resize(self.__screen.get_size())
 
         last_time = time() # Maybe a timer later
 
@@ -401,8 +410,11 @@ class Game:
                 if event.type == pg.VIDEORESIZE:
                     fps_text.resize(event.size)
                     background.resize(event.size)
+                    limiter_fps_btn.resize(event.size)
+                    amount_fps_limiter.resize(event.size)
                     
                 toggle_fps_vsblt_btn.update_by_event(event)
+                limiter_fps_btn.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -414,6 +426,11 @@ class Game:
             background.draw(self.__screen)
 
             toggle_fps_vsblt_btn.draw(self.__screen)
+
+            amount_fps_limiter.draw(self.__screen)
+
+            limiter_fps_btn.update(dt)
+            limiter_fps_btn.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
