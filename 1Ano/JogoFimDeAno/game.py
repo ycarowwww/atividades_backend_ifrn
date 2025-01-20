@@ -38,6 +38,7 @@ class Game:
 
         self.__is_level = False
         self.__start_level = 0
+        self.__show_fps = True
 
     def run(self) -> None:
         while self.__current_window != 0:
@@ -103,8 +104,9 @@ class Game:
             game_start.draw(self.__screen)
             game_settings.draw(self.__screen)
 
-            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
-            fps_text.draw(self.__screen)
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
             
             pg.display.flip()
 
@@ -232,8 +234,9 @@ class Game:
             if show_warn:
                 warn_text.draw(self.__screen)
 
-            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
-            fps_text.draw(self.__screen)
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
             
             pg.display.flip()
 
@@ -299,8 +302,9 @@ class Game:
 
             buttongroup.draw(self.__screen)
 
-            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
-            fps_text.draw(self.__screen)
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
             
             pg.display.flip()
 
@@ -367,16 +371,21 @@ class Game:
 
             buttongroup.draw(self.__screen)
 
-            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
-            fps_text.draw(self.__screen)
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
             
             pg.display.flip()
 
     def settings(self) -> None:
+        def toggle_fps_visibility():
+            self.__show_fps = not self.__show_fps
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
+        toggle_fps_vsblt_btn = TextButton((400, 300), "center", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
         
         fps_text.resize(self.__screen.get_size())
+        toggle_fps_vsblt_btn.resize(self.__screen.get_size())
 
         last_time = time() # Maybe a timer later
 
@@ -392,6 +401,8 @@ class Game:
                 if event.type == pg.VIDEORESIZE:
                     fps_text.resize(event.size)
                     background.resize(event.size)
+                    
+                toggle_fps_vsblt_btn.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -402,8 +413,11 @@ class Game:
             background.update(dt)
             background.draw(self.__screen)
 
-            fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
-            fps_text.draw(self.__screen)
+            toggle_fps_vsblt_btn.draw(self.__screen)
+
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
             
             pg.display.flip()
 
