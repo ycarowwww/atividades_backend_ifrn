@@ -7,6 +7,22 @@ from time import time
 
 # More Backgrounds, Animations, Better dt (like a class), def show of some texts (like FPS), background setter, game loop maker
 
+class DeltaTimeCalculator:
+    """Class that calculates automatically the 'deltatime' to the framerate independence."""
+    def __init__(self):
+        self.set_actual_time()
+        self.get_dt()
+    
+    def set_actual_time(self) -> None:
+        """Set actual time."""
+        self._last_time = time()
+    
+    def get_dt(self) -> float:
+        """Calculates and Returns the actual dt."""
+        self._dt = time() - self._last_time
+        self._last_time = time()
+        return self._dt
+
 class WindowsKeys(IntEnum):
     """Enum with the Windows Keys."""
     QUIT = auto()
@@ -39,10 +55,13 @@ class Game:
         self.__is_level = False
         self.__start_level = 0
         self.__show_fps = True
+        self.__delta_time = DeltaTimeCalculator()
 
     def run(self) -> None:
         while self.__current_window != 0:
             window = self.__windows.get(self.__current_window)
+
+            self.__delta_time.set_actual_time()
 
             if window == None: break
             else: window()
@@ -68,8 +87,6 @@ class Game:
         game_settings.resize(self.__screen.get_size())
         player_background.resize(self.__screen.get_size())
 
-        last_time = time() # Maybe a timer later
-
         while self.__current_window == WindowsKeys.MAINMENU:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -91,8 +108,7 @@ class Game:
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            dt = time() - last_time
-            last_time = time()
+            dt = self.__delta_time.get_dt()
 
             background.update(dt)
             background.draw(self.__screen)
@@ -139,8 +155,6 @@ class Game:
         player.resize(self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
         warn_text.resize(self.__screen.get_size())
-
-        last_time = time()
 
         while self.__current_window == WindowsKeys.MAINGAME:
             for event in pg.event.get():
@@ -194,8 +208,7 @@ class Game:
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            dt = time() - last_time
-            last_time = time()
+            dt = self.__delta_time.get_dt()
 
             event_pauser.update(dt)
 
@@ -267,8 +280,6 @@ class Game:
         fps_text.resize(self.__screen.get_size())
         buttongroup.resize(self.__screen.get_size())
 
-        last_time = time()
-
         while self.__current_window == WindowsKeys.SETGAMEMODE:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -291,8 +302,7 @@ class Game:
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            dt = time() - last_time
-            last_time = time()
+            dt = self.__delta_time.get_dt()
 
             background.update(dt)
             background.draw(self.__screen)
@@ -335,8 +345,6 @@ class Game:
         fps_text.resize(self.__screen.get_size())
         buttongroup.resize(self.__screen.get_size())
 
-        last_time = time()
-
         while self.__current_window == WindowsKeys.SETLEVEL:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -360,8 +368,7 @@ class Game:
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            dt = time() - last_time
-            last_time = time()
+            dt = self.__delta_time.get_dt()
 
             background.update(dt)
             background.draw(self.__screen)
@@ -381,10 +388,12 @@ class Game:
         def toggle_fps_visibility():
             self.__show_fps = not self.__show_fps
         def set_max_fps(amount: float):
-            self.__MAX_FPS = amount
-            if self.__MAX_FPS == 300:
+            if amount == 300:
                 self.__MAX_FPS = 0
-            amount_fps_limiter.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
+                amount_fps_limiter.set_text(f"Max FPS: No Limit")
+            else:
+                self.__MAX_FPS = amount
+                amount_fps_limiter.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
         toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
@@ -395,8 +404,6 @@ class Game:
         toggle_fps_vsblt_btn.resize(self.__screen.get_size())
         limiter_fps_btn.resize(self.__screen.get_size())
         amount_fps_limiter.resize(self.__screen.get_size())
-
-        last_time = time() # Maybe a timer later
 
         while self.__current_window == WindowsKeys.SETTINGS:
             for event in pg.event.get():
@@ -419,8 +426,7 @@ class Game:
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
 
-            dt = time() - last_time
-            last_time = time()
+            dt = self.__delta_time.get_dt()
 
             background.update(dt)
             background.draw(self.__screen)
