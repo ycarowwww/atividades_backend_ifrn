@@ -1,11 +1,13 @@
 import pygame as pg
 import pygame.freetype as pgft
 from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, Lines, CustomEventList, EventPauser
-from scripts import BASE_RESOLUTION, FPS, FONT, COLORS, get_file_path
+from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
+from typing import Any
 
-# More Backgrounds, Animations, Better dt (like a class), def show of some texts (like FPS), background setter, game loop maker
+# More Backgrounds, Animations, def show of some texts (like FPS), background setter, game loop maker
+# Better Limiter
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -41,7 +43,7 @@ class Game:
         icon_img = pg.image.load(get_file_path("../images/icon.png")).convert_alpha()
         pg.display.set_icon(icon_img)
         self.__clock: pg.time.Clock = pg.time.Clock()
-        self.__MAX_FPS = FPS
+        self.__MAX_FPS = INITIAL_MAX_FPS
         self.__FONT = FONT
         self.__current_window = WindowsKeys.MAINMENU
         self.__windows = { # An Enum will be better for the Keys
@@ -81,11 +83,7 @@ class Game:
         player_background.toggle_control()
         background = Lines(self.__screen.get_size(), 30, COLORS["GRAY"])
         
-        game_title.resize(self.__screen.get_size()) # Maybe try to find a better way later
-        fps_text.resize(self.__screen.get_size())
-        game_start.resize(self.__screen.get_size())
-        game_settings.resize(self.__screen.get_size())
-        player_background.resize(self.__screen.get_size())
+        self._resize_objects((game_title, fps_text, game_start, game_settings, player_background), self.__screen.get_size()) # Maybe try to find a better way later
 
         while self.__current_window == WindowsKeys.MAINMENU:
             for event in pg.event.get():
@@ -97,9 +95,7 @@ class Game:
                         self.__current_window = WindowsKeys.SETGAMEMODE # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    game_title.resize(event.size)
-                    fps_text.resize(event.size)
-                    background.resize(event.size)
+                    self._resize_objects((game_title, fps_text, background), event.size)
 
                 game_start.update_by_event(event)
                 game_settings.update_by_event(event)
@@ -146,15 +142,8 @@ class Game:
         show_warn = False
         player_collided = False
 
-        pause_button.resize(self.__screen.get_size()) # Maybe try to find a better way later
-        return_menu_button.resize(self.__screen.get_size())
-        score_text.resize(self.__screen.get_size())
-        max_score_text.resize(self.__screen.get_size())
-        collision_count.resize(self.__screen.get_size())
-        fps_text.resize(self.__screen.get_size())
-        player.resize(self.__screen.get_size())
+        self._resize_objects((pause_button, return_menu_button, score_text, max_score_text, collision_count, fps_text, player, warn_text), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
-        warn_text.resize(self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.MAINGAME:
             for event in pg.event.get():
@@ -167,12 +156,7 @@ class Game:
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
-                    score_text.resize(event.size)
-                    max_score_text.resize(event.size)
-                    collision_count.resize(event.size)
-                    fps_text.resize(event.size)
-                    background.resize(event.size)
-                    warn_text.resize(event.size)
+                    self._resize_objects((score_text, max_score_text, collision_count, fps_text, background, warn_text), event.size)
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
@@ -276,9 +260,7 @@ class Game:
             False
         )
 
-        player_background.resize(self.__screen.get_size())
-        fps_text.resize(self.__screen.get_size())
-        buttongroup.resize(self.__screen.get_size())
+        self._resize_objects((player_background, fps_text, buttongroup), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETGAMEMODE:
             for event in pg.event.get():
@@ -293,8 +275,7 @@ class Game:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    fps_text.resize(event.size)
-                    background.resize(event.size)
+                    self._resize_objects((fps_text, background), event.size)
 
                 player_background.update_by_event(event)
                 buttongroup.update_by_event(event)
@@ -341,9 +322,7 @@ class Game:
             False
         )
 
-        player_background.resize(self.__screen.get_size())
-        fps_text.resize(self.__screen.get_size())
-        buttongroup.resize(self.__screen.get_size())
+        self._resize_objects((player_background, fps_text, buttongroup), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETLEVEL:
             for event in pg.event.get():
@@ -359,8 +338,7 @@ class Game:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    fps_text.resize(event.size)
-                    background.resize(event.size)
+                    self._resize_objects((fps_text, background), event.size)
 
                 player_background.update_by_event(event)
                 buttongroup.update_by_event(event)
@@ -400,10 +378,7 @@ class Game:
         limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 300 else self.__MAX_FPS, set_max_fps)
         amount_fps_limiter = Text(f"Max FPS: {self.__MAX_FPS:.1f}", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
         
-        fps_text.resize(self.__screen.get_size())
-        toggle_fps_vsblt_btn.resize(self.__screen.get_size())
-        limiter_fps_btn.resize(self.__screen.get_size())
-        amount_fps_limiter.resize(self.__screen.get_size())
+        self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps_btn, amount_fps_limiter), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETTINGS:
             for event in pg.event.get():
@@ -415,10 +390,7 @@ class Game:
                         self.__current_window = WindowsKeys.MAINMENU
                 
                 if event.type == pg.VIDEORESIZE:
-                    fps_text.resize(event.size)
-                    background.resize(event.size)
-                    limiter_fps_btn.resize(event.size)
-                    amount_fps_limiter.resize(event.size)
+                    self._resize_objects((fps_text, background, limiter_fps_btn, amount_fps_limiter), event.size)
                     
                 toggle_fps_vsblt_btn.update_by_event(event)
                 limiter_fps_btn.update_by_event(event)
@@ -443,6 +415,11 @@ class Game:
                 fps_text.draw(self.__screen)
             
             pg.display.flip()
+
+    @staticmethod
+    def _resize_objects(objects: list[Any], resolution: tuple[int, int]) -> None:
+        for obj in objects:
+            obj.resize(resolution)
 
 if __name__ == '__main__':
     Game().run()

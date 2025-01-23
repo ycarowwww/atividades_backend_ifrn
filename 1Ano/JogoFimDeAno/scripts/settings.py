@@ -23,7 +23,7 @@ def get_file_path(file: str) -> str:
     return path.join(base_dir, file)
 
 PLAYER_ROTATION_VELOCITY: float = 5
-FPS: float = 60.0
+INITIAL_MAX_FPS: float = 60.0
 COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "BLACK" : (0, 0, 0),
     "GRAY" : (20, 20, 20),
@@ -34,9 +34,7 @@ COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "BLANK" : (0, 0, 0, 0)
 }
 FONT: pgft.Font = pgft.Font(get_file_path("../fonts/inter.ttf"))
-GAME_FONT: pgft.Font = pgft.SysFont("Arial", 30, True, False)
 OBSTACLES_HEIGHT: int = 30
 OBSTACLES_SPEED: int = int((240 + OBSTACLES_HEIGHT * 2) / (180 / PLAYER_ROTATION_VELOCITY)) # 240 is the distance + radius of the balls
-MAX_POSITIONS_TRACKER: int = 5
-INITIAL_ALPHA_TRACKER: int = 50
 ROTATING_OBSTACLE_ANGULAR_SPEED: float = 180 / (240 / OBSTACLES_SPEED) # Implement Better
+INITIAL_ALPHA_TRACKER: int = 50
