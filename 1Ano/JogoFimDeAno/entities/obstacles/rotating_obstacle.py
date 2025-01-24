@@ -6,7 +6,7 @@ from scripts import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
 from math import sqrt, pi, radians, cos, sin, asin, degrees
 
 class RotatingObstacle(Obstacle):
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0):
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0) -> None:
         super().__init__(x, y, width, height, speed, spacing_mult, color)
         self._angular_speed = radians(angular_speed) * (1 if rotating_to_right else -1)
         self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
@@ -134,7 +134,7 @@ class RotatingObstacle(Obstacle):
     
     def _update_ink_stain(self) -> None:
         self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, (self._width, self._height))
-        self._ink_stain_surface = pg.transform.rotate(self._ink_stain_surface, -degrees(self._angle + self._d_angle / 2))
+        self._ink_stain_surface = pg.transform.rotate(self._ink_stain_surface, 360 - degrees(self._angle + self._d_angle / 2))
 
     def _calculate_rotating_points(self, ang: float) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
         return [
