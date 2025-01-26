@@ -109,7 +109,7 @@ def main():
         print_players(game.get_players(), game.get_players_drawn_nums())
         
         print(f"=> Última dezena sorteada: {last_draw_num:02d}")
-        print(f"Dezenas sorteadas até o momento: {" ".join([f"{i:02d}" for i in game.get_drawn_numbers()])}")
+        print(f"Dezenas sorteadas até o momento: {' '.join([f'{i:02d}' for i in game.get_drawn_numbers()])}")
 
         if len(game.check_win()) != 0: # Verifica se alguma cartela foi completada.
             break
