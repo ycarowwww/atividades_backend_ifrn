@@ -13,3 +13,6 @@ Questões sobre saídas de matrizes
 Questões sobre saídas de tuplas
 Questões sobre saídas de dicionários
 Trabalho de Recriar o Campo Minado
+
+4º Bimestre:
+Trabalho de criar um Simulador de Bingo
