@@ -7,11 +7,12 @@ from math import sqrt
 
 class InvisibleObstacle(Obstacle):
     """An obstacle that just stands stil, doesn't move and becomes invisible when is nearby the Player."""
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], visibility: bool = True) -> None:
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int]) -> None:
         super().__init__(x, y, width, height, speed, spacing_mult, color)
-        self._rect = pg.Rect(self._x, self._y, self._width, self._height)
-        self._rect.center = (self._x, self._y)
-        self._is_visible = visibility
+        self._surf_rect = pg.Surface((self._width, self._height))
+        self._surf_rect.fill(self._color)
+        self._rect = self._surf_rect.get_rect(center=(self._x, self._y))
+        self._max_alpha_tracker = self._initial_alpha_tracker
     
     def update(self, dt: float) -> None:
         self._y += self._speed * dt
@@ -20,10 +21,9 @@ class InvisibleObstacle(Obstacle):
         self._update_tracker(dt)
     
     def draw(self, screen: pg.Surface) -> None:
-        if self._is_visible:
-            self._draw_tracker(screen)
-        
-            pg.draw.rect(screen, self._color, self._rect)
+        self._draw_tracker(screen)
+    
+        screen.blit(self._surf_rect, self._rect)
 
         self._draw_ink_stains(screen)
     
@@ -49,8 +49,9 @@ class InvisibleObstacle(Obstacle):
         
         self._width = round(scale_dimension(self._base_width, new_resolution))
         self._height = round(scale_dimension(self._base_height, new_resolution))
-        self._rect.width = self._width
-        self._rect.height = self._height
+        self._surf_rect = pg.Surface((self._width, self._height))
+        self._surf_rect.fill(self._color)
+        self._rect = self._surf_rect.get_rect()
 
         y_ratio = (old_player_info[0][1] - self._y) / old_player_info[1]
         new_y = new_player_info[0][1] - y_ratio * new_player_info[1]
@@ -131,6 +132,22 @@ class InvisibleObstacle(Obstacle):
         
         self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, self._rect.size)
 
+    def check_distance(self, player_center: tuple[float, float], player_distance: float) -> None:
+        """Check and Defines the new 'Alpha' for the obstacle in relation to the player_center."""
+        distancey = player_center[1] - self._rect.centery
+
+        limits = (player_distance * 3, player_distance * 2)
+        
+        if distancey > limits[0]:
+            self._surf_rect.set_alpha(255)
+            self._initial_alpha_tracker = self._max_alpha_tracker
+        elif distancey < limits[1]:
+            self._surf_rect.set_alpha(0)
+            self._initial_alpha_tracker = 0
+        else:
+            self._surf_rect.set_alpha(255 / (limits[0] - limits[1]) * (distancey - limits[1]))
+            self._initial_alpha_tracker = self._max_alpha_tracker / (limits[0] - limits[1]) * (distancey - limits[1])
+
     def set_x(self, new_x: float) -> None: 
         self._x = new_x
         self._rect.centerx = round(self._x)
@@ -138,6 +155,3 @@ class InvisibleObstacle(Obstacle):
     def set_y(self, new_y: float) -> None: 
         self._y = new_y
         self._rect.centery = round(self._y)
-
-    def set_visibility(self, visibility: bool) -> None:
-        self._is_visible = visibility

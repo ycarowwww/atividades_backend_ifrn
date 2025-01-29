@@ -34,8 +34,8 @@ class ObstaclesManager:
         for obstacle in self._obstacles:
             obstacle.update(dt)
 
-            if isinstance(obstacle, InvisibleObstacle) and (self._player_center[1] - obstacle.get_y()) / self._player_normal_distance <= 2: # Small Distance
-                obstacle.set_visibility(False)
+            if isinstance(obstacle, InvisibleObstacle):
+                obstacle.check_distance(self._player_center, self._player_normal_distance)
         
         if self._last_obstacle == None or self._last_obstacle.get_y() - self._player_center[1] > self._player_normal_distance * 3: # Change this "3" later
             self._generate_obstacles()
@@ -135,8 +135,6 @@ class ObstaclesManager:
             if isinstance(self._obstacles[i], RotatingObstacle):
                 ratiodist = (self._player_center[1] - new_y) / self._player_normal_distance
                 self._obstacles[i].set_angle((ratiodist % 2) * 90)
-            elif isinstance(self._obstacles[i], InvisibleObstacle):
-                self._obstacles[i].set_visibility(True)
 
     def set_new_color(self, color: tuple[int, int, int]) -> None:
         self._color = color
