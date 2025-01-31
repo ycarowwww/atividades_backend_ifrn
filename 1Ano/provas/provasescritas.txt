@@ -16,3 +16,4 @@ Trabalho de Recriar o Campo Minado
 
 4º Bimestre:
 Trabalho de criar um Simulador de Bingo
+Criar um Jogo do Pygame
