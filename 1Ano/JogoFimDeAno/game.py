@@ -1,13 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, Lines, Checkered, CustomEventList, EventPauser
+from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, BackgroundGetter, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
-from random import choice, randint, uniform
 from time import time
 from typing import Any
 
-# More Backgrounds, Animations, def show of some texts (like FPS), background setter, game loop maker
+# More Backgrounds, Lines Background Better, Animations, def show of some texts (like FPS), game loop maker
 # Better Limiter
 
 class DeltaTimeCalculator:
@@ -82,7 +81,7 @@ class Game:
         player_background.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         player_background.toggle_gravity()
         player_background.toggle_control()
-        background = choice((Lines(self.__screen.get_size(), 30, COLORS["GRAY"]), Checkered(self.__screen.get_size(), randint(10, 20), COLORS["GRAY"], COLORS["BLACK"], uniform(0.5, 2), uniform(0, 360))))
+        background = BackgroundGetter.random_background(self.__screen.get_size())
         
         self._resize_objects((game_title, fps_text, game_start, game_settings, player_background), self.__screen.get_size()) # Maybe try to find a better way later
 
@@ -138,7 +137,7 @@ class Game:
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
         collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 65), size=20)
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 85), size=15)
-        background = choice((Lines(self.__screen.get_size(), 30, COLORS["GRAY"]), Checkered(self.__screen.get_size(), randint(10, 20), COLORS["GRAY"], COLORS["BLACK"], uniform(0.5, 2), uniform(0, 360))))
+        background = BackgroundGetter.random_background(self.__screen.get_size())
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
@@ -250,7 +249,7 @@ class Game:
         player_background.toggle_gravity()
         player_background.toggle_control()
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
-        background = choice((Lines(self.__screen.get_size(), 30, COLORS["GRAY"]), Checkered(self.__screen.get_size(), randint(10, 20), COLORS["GRAY"], COLORS["BLACK"], uniform(0.5, 2), uniform(0, 360))))
+        background = BackgroundGetter.random_background(self.__screen.get_size())
         buttongroup = ButtonGroup(
             (400, 300), 
             [
@@ -311,7 +310,7 @@ class Game:
         player_background.toggle_gravity()
         player_background.toggle_control()
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
-        background = choice((Lines(self.__screen.get_size(), 30, COLORS["GRAY"]), Checkered(self.__screen.get_size(), randint(10, 20), COLORS["GRAY"], COLORS["BLACK"], uniform(0.5, 2), uniform(0, 360))))
+        background = BackgroundGetter.random_background(self.__screen.get_size())
         buttongroup = ButtonGroup(
             (400, 300), 
             [
@@ -374,7 +373,7 @@ class Game:
                 self.__MAX_FPS = amount
                 amount_fps_limiter.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
-        background = choice((Lines(self.__screen.get_size(), 30, COLORS["GRAY"]), Checkered(self.__screen.get_size(), randint(10, 20), COLORS["GRAY"], COLORS["BLACK"], uniform(0.5, 2), uniform(0, 360))))
+        background = BackgroundGetter.random_background(self.__screen.get_size())
         toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
         limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 300 else self.__MAX_FPS, set_max_fps)
         amount_fps_limiter = Text(f"Max FPS: {self.__MAX_FPS:.1f}", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)

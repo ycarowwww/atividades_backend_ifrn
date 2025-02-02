@@ -1,3 +1,3 @@
-from .customlist import CustomEventList
-from .eventhandler import CustomEventHandler
-from .eventpauser import EventPauser
+from .custom_event_list import CustomEventList
+from .event_handler import CustomEventHandler
+from .event_pauser import EventPauser

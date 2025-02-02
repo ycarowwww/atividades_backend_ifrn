@@ -2,11 +2,11 @@ import pygame as pg
 from . import Obstacle
 from ..player import Player
 from ..stains import generate_stain
-from scripts import ROTATING_OBSTACLE_ANGULAR_SPEED, scale_dimension
+from scripts import scale_dimension
 from math import sqrt, pi, radians, cos, sin, asin, degrees
 
 class RotatingObstacle(Obstacle):
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], angular_speed: float = ROTATING_OBSTACLE_ANGULAR_SPEED, rotating_to_right: bool = True, initial_angle: int = 0) -> None:
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int, spacing_mult: float, color: tuple[int, int, int], angular_speed: float = 180, rotating_to_right: bool = True, initial_angle: int = 0) -> None:
         super().__init__(x, y, width, height, speed, spacing_mult, color)
         self._angular_speed = radians(angular_speed) * (1 if rotating_to_right else -1)
         self._circumscribed_circle_radius = sqrt(self._width ** 2 + self._height ** 2) / 2
