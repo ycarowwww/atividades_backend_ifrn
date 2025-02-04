@@ -375,8 +375,9 @@ class Game:
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
         toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
-        limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 300 else self.__MAX_FPS, set_max_fps)
-        amount_fps_limiter = Text(f"Max FPS: {self.__MAX_FPS:.1f}", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 0 else self.__MAX_FPS, set_max_fps)
+        amount_fps_limiter = Text("Max FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        set_max_fps(limiter_fps_btn.get_actual_value())
         
         self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps_btn, amount_fps_limiter), self.__screen.get_size())
 
