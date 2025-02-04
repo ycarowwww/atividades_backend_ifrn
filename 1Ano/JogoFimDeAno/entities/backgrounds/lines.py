@@ -1,56 +1,57 @@
 import pygame as pg
 
 class Lines:
-    def __init__(self, size: tuple[int, int], amount_lines: int, color: tuple[int, int, int]):
-        self._amount = amount_lines # need to be even
-        self._size = size
-        self._actual_drop = 0
-        self._max_drop = 2 / (self._amount - 1)
-        self._velocity = self._max_drop
-        self._times = [ i / (self._amount-1) for i in range(-2, self._amount-1) ]
-        self._indexes = [ i for i in range(1, len(self._times) + 1, 2) ]
-        self._points = [ [], [] ]
-        self._color = color
-    
+    """A Diagonal Lines Background."""
+    def __init__(self, amount_lines: int, screen_size: tuple[int, int], speed_multiplier: float, fgcolor: tuple[int, int, int], bgcolor: tuple[int, int, int], moving_left: bool = True, inverse_vertical: bool = False) -> None:
+        self._amount = amount_lines
+        self._size = screen_size
+        self._distance_between_lines = self._size[0] / self._amount
+        self._moving_horizontal_mult = -1 if moving_left else 1
+        self._inverse_vertical = inverse_vertical
+        self._speed = self._distance_between_lines * speed_multiplier * self._moving_horizontal_mult
+        self._fgcolor = fgcolor
+        self._bgcolor = bgcolor
+        self._create_background()
+        self._surface_x = 0
+        
     def update(self, dt: float) -> None:
-        self._actual_drop += self._velocity * dt
-        self._actual_drop %= self._max_drop
-        self._calculate_points()
+        self._surface_x += self._speed * dt
+        self._surface_x %= 2 * self._distance_between_lines
+        self._surface_x -= 2 * self._distance_between_lines
     
     def draw(self, screen: pg.Surface) -> None:
-        for i in range(len(self._indexes)-1):
-            self._draw_without_medium(screen, self._indexes[i])
-        
-        index_diagonals = round((self._amount - 1) / 2)
-        self._draw_with_medium(screen, index_diagonals-1)
-        self._draw_with_medium(screen, index_diagonals+1)
-    
+        screen.blit(self._surface, (self._surface_x, 0))
+
     def resize(self, new_size: tuple[int, int]) -> None:
         self._size = new_size
+        self._speed /= self._distance_between_lines
+        self._distance_between_lines = self._size[0] / self._amount
+        self._speed *= self._distance_between_lines
+        self._create_background()
     
-    def _calculate_points(self) -> None:
-        self._points = [ [], [] ]
-        for t in self._times:
-            self._points[0].append((2 * min(0.5, t + self._actual_drop) * self._size[0], 
-                                    2 * max(0, t + self._actual_drop - 0.5) * self._size[1]))
-            
-            self._points[1].append((2 * max(0, t + self._actual_drop - 0.5) * self._size[0], 
-                                    2 * min(0.5, t + self._actual_drop) * self._size[1]))
-    
-    def _draw_without_medium(self, screen: pg.Surface, index: int) -> None:
-        pg.draw.polygon(screen, self._color, (
-            self._points[0][index],
-            self._points[1][index],
-            self._points[1][index+1],
-            self._points[0][index+1]
-        ))
-    
-    def _draw_with_medium(self, screen: pg.Surface, index: int) -> None:
-        pg.draw.polygon(screen, self._color, (
-            self._points[0][index],
-            self._points[1][index],
-            (self._points[1][index][0], self._points[1][index+1][1]),
-            self._points[1][index+1],
-            self._points[0][index+1],
-            (self._points[0][index+1][0], self._points[0][index][1])
-        ))
+    def _create_background(self) -> None:
+        self._surface = pg.Surface((self._size[0] + 2 * self._distance_between_lines, self._size[1])) # Creates a surface a bit longer than the screen draw one more line to the movement.
+        self._surface.fill(self._bgcolor)
+        # Creates points on the left and on the top of the surface equally spaced.
+        points_x = [
+            (
+                self._size[0] * i / self._amount,
+                0
+            )
+            for i in range(2 * self._amount + 2)
+        ]
+        points_y = [
+            (
+                0,
+                self._size[1] * i / self._amount
+            )
+            for i in range(2 * self._amount + 2)
+        ]
+        # Draws trapeziums with these points.
+        for i in range(0, 2 * self._amount + 2, 2):
+            pg.draw.polygon(self._surface, self._fgcolor, (
+                points_x[i], points_x[i+1], points_y[i+1], points_y[i]
+            ))
+        
+        if self._inverse_vertical:
+            self._surface = pg.transform.flip(self._surface, False, True)
