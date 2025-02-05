@@ -46,7 +46,7 @@ class Game:
         self.__MAX_FPS = INITIAL_MAX_FPS
         self.__FONT = FONT
         self.__current_window = WindowsKeys.MAINMENU
-        self.__windows = { # An Enum will be better for the Keys
+        self.__windows = {
             WindowsKeys.MAINMENU : self.main_menu,
             WindowsKeys.MAINGAME : self.main_game,
             WindowsKeys.SETGAMEMODE : self.set_gamemode,
