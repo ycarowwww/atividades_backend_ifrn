@@ -66,3 +66,5 @@ Talvez Adicionar:
 - Criador de Fases Customizada
 
 Create Framerate Independence, Custom Screen Size, obstacles levels, Fix obstacles movement, Menu, Better Fonts, Buttons Resizable, Good Punctuation, Background, FPS Viewer -> Kinda made
+
+Acceleration, Lifes, Amount of lifes = Difficult, Unlock things by Achievemtns, Color Changer

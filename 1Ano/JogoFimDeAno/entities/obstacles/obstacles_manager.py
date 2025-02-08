@@ -33,15 +33,15 @@ class ObstaclesManager:
     def update(self, dt: float) -> None:
         for obstacle in self._obstacles:
             obstacle.update(dt)
-
-            if isinstance(obstacle, InvisibleObstacle):
-                obstacle.check_distance(self._player_center, self._player_normal_distance)
         
         if self._last_obstacle == None or self._last_obstacle.get_y() - self._player_center[1] > self._player_normal_distance * 3: # Change this "3" later
             self._generate_obstacles()
 
     def draw(self, screen: pg.Surface) -> None:
         for obstacle in self._obstacles:
+            if isinstance(obstacle, InvisibleObstacle): # Checkar a transparência do obstáculo invisível
+                obstacle.check_distance(self._player_center, self._player_normal_distance)
+
             obstacle.draw(screen)
 
     def check_collision(self, player: Player) -> None: # Implement Better
