@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, ObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, BackgroundGetter, CustomEventList, EventPauser
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, BackgroundGetter, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -130,7 +130,12 @@ class Game:
         event_pauser = EventPauser()
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", event_pauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
-        obstacle_manager = ObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__is_level, self.__start_level)
+        if self.__is_level:
+            obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level)
+        else:
+            obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
+            remaining_lives = 0
+            lives_count = Text("Remaining Lives: 0", self.__FONT, (255, 255, 255), (10, 105), size=20)
         score, max_score = 0, 0
         score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
@@ -143,6 +148,7 @@ class Game:
 
         self._resize_objects((pause_button, return_menu_button, score_text, max_score_text, collision_count, fps_text, player, warn_text), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
+        if not self.__is_level: lives_count.resize(self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.MAINGAME:
             for event in pg.event.get():
@@ -156,6 +162,7 @@ class Game:
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
                     self._resize_objects((score_text, max_score_text, collision_count, fps_text, background, warn_text), event.size)
+                    if not self.__is_level: self._resize_objects((lives_count, ), event.size)
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
@@ -173,8 +180,14 @@ class Game:
                     show_warn = False
                 
                 if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class
-                    pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
-                    event_pauser.add_event(CustomEventList.RESETGAME, 500, 1)
+                    if not self.__is_level and obstacle_manager.check_lives():
+                        pg.time.set_timer(CustomEventList.RANDOMGAMEEND, 500, 1)
+                        event_pauser.add_event(CustomEventList.RANDOMGAMEEND, 500, 1)
+                        warn_text.set_text("You lost all your Lives!")
+                        show_warn = True
+                    else:
+                        pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                        event_pauser.add_event(CustomEventList.RESETGAME, 500, 1)
                     player_collided = True
                     player.add_lost_particles(event.indexes)
                 
@@ -182,6 +195,9 @@ class Game:
                     player_collided = False
                     player.reset_movements()
                     obstacle_manager.reset()
+                
+                if event.type == CustomEventList.RANDOMGAMEEND:
+                    self.__current_window = WindowsKeys.MAINMENU
 
             keys = pg.key.get_pressed()
 
@@ -226,6 +242,11 @@ class Game:
             score_text.draw(self.__screen)
             max_score_text.draw(self.__screen)
             collision_count.draw(self.__screen)
+
+            if not self.__is_level:
+                remaining_lives = obstacle_manager.get_remaining_lives()
+                lives_count.set_text(f"Remaining Lives: {remaining_lives}")
+                lives_count.draw(self.__screen)
 
             if show_warn:
                 warn_text.draw(self.__screen)

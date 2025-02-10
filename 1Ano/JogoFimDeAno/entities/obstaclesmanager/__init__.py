@@ -1,0 +1,3 @@
+from .base_obstacles_manager import BaseObstaclesManager
+from .random_obstacles_manager import RandomObstaclesManager
+from .level_obstacles_manager import LevelObstaclesManager
