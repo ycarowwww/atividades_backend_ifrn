@@ -59,7 +59,7 @@ class Game:
         self.__delta_time = DeltaTimeCalculator()
 
     def run(self) -> None:
-        while self.__current_window != 0:
+        while self.__current_window != WindowsKeys.QUIT:
             window = self.__windows.get(self.__current_window)
 
             self.__delta_time.set_actual_time()

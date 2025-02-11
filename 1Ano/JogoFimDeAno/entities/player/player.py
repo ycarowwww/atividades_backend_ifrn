@@ -55,12 +55,12 @@ class Player:
         linear_speed = self._linear_speed * dt
         
         if self._enable_control:
-            if key[Keys.LESSDISTANCE] or key[Keys.MOREDISTANCE]:
+            if key[Keys.LESSDISTANCE] or key[Keys.MOREDISTANCE]: # If the player is changing its distance.
                 if key[Keys.LESSDISTANCE]:
                     self._distance -= linear_speed
                 if key[Keys.MOREDISTANCE]:
                     self._distance += linear_speed
-            else:
+            else: # Else, returns to normal
                 if abs(self._normal_distance - self._distance) <= linear_speed:
                     self._distance = self._normal_distance
                 elif self._distance < self._normal_distance:
@@ -73,15 +73,11 @@ class Player:
             elif self._distance < 0:
                 self._distance = 0
 
-            if key[Keys.ROTATELEFT]: self._angle -= self._angular_speed * dt
-            if key[Keys.ROTATERIGHT]: self._angle += self._angular_speed * dt
-
-            if pg.mouse.get_pressed()[0]:
-                mx = pg.mouse.get_pos()[0]
-
-                if mx > self._center[0]: self._angle += self._angular_speed * dt
-                else: self._angle -= self._angular_speed * dt
-        else:
+            if key[Keys.ROTATELEFT] or (pg.mouse.get_pressed()[0] and pg.mouse.get_pos()[0] < self._center[0]): 
+                self._angle -= self._angular_speed * dt
+            if key[Keys.ROTATERIGHT] or (pg.mouse.get_pressed()[0] and pg.mouse.get_pos()[0] > self._center[0]): 
+                self._angle += self._angular_speed * dt
+        else: # If the player doesn't control itself, so it's a background, just rotate...
             self._angle += self._angular_speed * dt
         self._angle %= 360
 
