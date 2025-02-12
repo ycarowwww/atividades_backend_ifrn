@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Limiter, BackgroundGetter, CustomEventList, EventPauser
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Organizer, OrganizerDirection, OrganizerOrientation, Limiter, BackgroundGetter, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode, mouse, buttons hover, better menus, custom controls, eventpauser can be a statis class, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -29,7 +29,8 @@ class WindowsKeys(IntEnum):
     QUIT = auto()
     SETTINGS = auto()
     MAINMENU = auto()
-    MAINGAME = auto()
+    MAINGAMERANDOM = auto()
+    MAINGAMELEVEL = auto()
     SETGAMEMODE = auto()
     SETLEVEL = auto()
 
@@ -47,13 +48,13 @@ class Game:
         self.__current_window = WindowsKeys.MAINMENU
         self.__windows = {
             WindowsKeys.MAINMENU : self.main_menu,
-            WindowsKeys.MAINGAME : self.main_game,
+            WindowsKeys.MAINGAMERANDOM : self.main_game_random,
+            WindowsKeys.MAINGAMELEVEL : self.main_game_level,
             WindowsKeys.SETGAMEMODE : self.set_gamemode,
             WindowsKeys.SETLEVEL : self.set_level,
             WindowsKeys.SETTINGS : self.settings
         }
 
-        self.__is_level = False
         self.__start_level = 0
         self.__show_fps = True
         self.__delta_time = DeltaTimeCalculator()
@@ -121,21 +122,19 @@ class Game:
             
             pg.display.flip()
 
-    def main_game(self) -> None:
+    def main_game_random(self) -> None:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = WindowsKeys.MAINMENU
         player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20)
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
-        event_pauser = EventPauser()
-        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", event_pauser.toggle_timers, (255, 255, 255), 15)
+        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", EventPauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
-        if self.__is_level:
-            obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level)
-        else:
-            obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
-            remaining_lives = 0
-            lives_count = Text("Remaining Lives: 0", self.__FONT, (255, 255, 255), (10, 105), size=20)
+        obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
+        remaining_lives = 0
+        heart_img = pg.image.load(get_file_path("../images/heart.svg")).convert_alpha() # Improve this later
+        heart_img = pg.transform.scale(heart_img, (30, round(heart_img.height * 30 / heart_img.width)))
+        lives_count = Organizer([ heart_img for _ in range(obstacle_manager.get_remaining_lives()) ], OrganizerDirection.HORIZONTAL, OrganizerOrientation.MIDDLE, 10, "topleft", (10, 100))
         score, max_score = 0, 0
         score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
         max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
@@ -146,11 +145,13 @@ class Game:
         show_warn = False
         player_collided = False
 
-        self._resize_objects((pause_button, return_menu_button, score_text, max_score_text, collision_count, fps_text, player, warn_text), self.__screen.get_size())
+        self._resize_objects(
+            (pause_button, return_menu_button, score_text, max_score_text, collision_count, fps_text, player, warn_text, lives_count), 
+            self.__screen.get_size()
+        )
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
-        if not self.__is_level: lives_count.resize(self.__screen.get_size())
 
-        while self.__current_window == WindowsKeys.MAINGAME:
+        while self.__current_window == WindowsKeys.MAINGAMERANDOM:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.__current_window = WindowsKeys.QUIT
@@ -161,33 +162,31 @@ class Game:
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
-                    self._resize_objects((score_text, max_score_text, collision_count, fps_text, background, warn_text), event.size)
-                    if not self.__is_level: self._resize_objects((lives_count, ), event.size)
-                
-                if event.type == CustomEventList.NEWLEVELWARNING:
-                    warn_text.set_text(f"New Level: {event.level}")
-                    pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
-                    event_pauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1) # Maybe we can get this better with the "EventHandler"
-                    show_warn = True
+                    self._resize_objects((score_text, max_score_text, collision_count, fps_text, background, warn_text, lives_count), event.size)
                 
                 if event.type == CustomEventList.NEWGENERATIONWARNING:
+                    remaining_lives = obstacle_manager.get_remaining_lives()
+                    lives_count.change_surfaces([heart_img for _ in range(remaining_lives)])
                     warn_text.set_text("New Generated Obstacles")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
-                    event_pauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1)
+                    EventPauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1)
                     show_warn = True
                 
                 if event.type == CustomEventList.DISABLEWARNING:
                     show_warn = False
                 
-                if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class
-                    if not self.__is_level and obstacle_manager.check_lives():
+                if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class:
+                    if obstacle_manager.check_player_lost():
                         pg.time.set_timer(CustomEventList.RANDOMGAMEEND, 500, 1)
-                        event_pauser.add_event(CustomEventList.RANDOMGAMEEND, 500, 1)
+                        EventPauser.add_event(CustomEventList.RANDOMGAMEEND, 500, 1)
                         warn_text.set_text("You lost all your Lives!")
                         show_warn = True
-                    else:
-                        pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
-                        event_pauser.add_event(CustomEventList.RESETGAME, 500, 1)
+                    else: # THIS REALLY NEED TO BE BETTER
+                        remaining_lives = obstacle_manager.get_remaining_lives()
+                        lives_count.change_surfaces([heart_img for _ in range(remaining_lives)])
+
+                    pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                    EventPauser.add_event(CustomEventList.RESETGAME, 500, 1)
                     player_collided = True
                     player.add_lost_particles(event.indexes)
                 
@@ -209,7 +208,7 @@ class Game:
 
             dt = self.__delta_time.get_dt()
 
-            event_pauser.update(dt)
+            EventPauser.update(dt)
 
             background.update(dt)
             background.draw(self.__screen)
@@ -242,11 +241,108 @@ class Game:
             score_text.draw(self.__screen)
             max_score_text.draw(self.__screen)
             collision_count.draw(self.__screen)
+            lives_count.draw(self.__screen)
 
-            if not self.__is_level:
-                remaining_lives = obstacle_manager.get_remaining_lives()
-                lives_count.set_text(f"Remaining Lives: {remaining_lives}")
-                lives_count.draw(self.__screen)
+            if show_warn:
+                warn_text.draw(self.__screen)
+
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
+            
+            pg.display.flip()
+
+    def main_game_level(self) -> None:
+        def return_menu_func():
+            if pause_button.is_paused:
+                self.__current_window = WindowsKeys.MAINMENU
+        player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20)
+        player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
+        pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", EventPauser.toggle_timers, (255, 255, 255), 15)
+        return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
+        obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level)
+        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 10), size=20)
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 35), size=15)
+        background = BackgroundGetter.random_background(self.__screen.get_size())
+        warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
+        show_warn = False
+        player_collided = False
+
+        self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text), self.__screen.get_size())
+        obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
+
+        while self.__current_window == WindowsKeys.MAINGAMELEVEL:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.__current_window = WindowsKeys.QUIT
+                
+                pause_button.update_by_event(event)
+                return_menu_button.update_by_event(event)
+                player.update_by_event(event)
+
+                if event.type == pg.VIDEORESIZE:
+                    obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
+                    self._resize_objects((collision_count, fps_text, background, warn_text), event.size)
+                
+                if event.type == CustomEventList.NEWLEVELWARNING:
+                    warn_text.set_text(f"New Level: {event.level}")
+                    pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
+                    EventPauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1) # Maybe we can get this better with the "EventHandler"
+                    show_warn = True
+                
+                if event.type == CustomEventList.DISABLEWARNING:
+                    show_warn = False
+                
+                if event.type == CustomEventList.PLAYERCOLLISION: # Maybe handle this on the player's class
+                    pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                    EventPauser.add_event(CustomEventList.RESETGAME, 500, 1)
+                    player_collided = True
+                    player.add_lost_particles(event.indexes)
+                
+                if event.type == CustomEventList.RESETGAME:
+                    player_collided = False
+                    player.reset_movements()
+                    obstacle_manager.reset()
+                
+                if event.type == CustomEventList.RANDOMGAMEEND:
+                    self.__current_window = WindowsKeys.MAINMENU
+
+            keys = pg.key.get_pressed()
+
+            if keys[pg.K_LSHIFT] and keys[pg.K_ESCAPE]:
+                self.__current_window = WindowsKeys.MAINMENU
+
+            self.__clock.tick(self.__MAX_FPS)
+            self.__screen.fill(COLORS["BLACK"])
+
+            dt = self.__delta_time.get_dt()
+
+            EventPauser.update(dt)
+
+            background.update(dt)
+            background.draw(self.__screen)
+
+            pause_button.draw(self.__screen)
+
+            if pause_button.is_paused:
+                player.draw(self.__screen)
+                obstacle_manager.draw(self.__screen)
+                return_menu_button.draw(self.__screen)
+            else:
+                if not player_collided:
+                    player.update(dt)
+                    obstacle_manager.update(dt)
+                    obstacle_manager.check_collision(player)
+                else:
+                    player.update_lost_particles(dt)
+
+                player.draw(self.__screen)
+                obstacle_manager.draw(self.__screen)
+
+                collisions = obstacle_manager.get_player_collision_count()
+                collision_count.set_text(f"Collisions: {collisions}")
+
+            collision_count.draw(self.__screen)
 
             if show_warn:
                 warn_text.draw(self.__screen)
@@ -258,11 +354,9 @@ class Game:
             pg.display.flip()
 
     def set_gamemode(self) -> None:
-        def game_bt_func(): 
-            self.__is_level = False
-            self.__current_window = WindowsKeys.MAINGAME
+        def game_bt_func():
+            self.__current_window = WindowsKeys.MAINGAMERANDOM
         def game_lvl_func(): 
-            self.__is_level = True
             self.__current_window = WindowsKeys.SETLEVEL
         player_background = Player((400, 300), 2, 20)
         player_background.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
@@ -322,7 +416,7 @@ class Game:
     def set_level(self) -> None:
         def set_level(n: int): 
             def set_start() -> None:
-                self.__current_window = WindowsKeys.MAINGAME
+                self.__current_window = WindowsKeys.MAINGAMELEVEL
                 self.__start_level = n
             return set_start
         player_background = Player((400, 300), 2, 20)

@@ -12,8 +12,6 @@ class LevelObstaclesManager(BaseObstaclesManager):
 
     def _generate_obstacles(self) -> None:
         """Load Current Level Obstacles."""
-        self._total_score += self._actual_score
-        self._actual_score = 0
         self._obstacles.clear()
         # Basically to convert the "standard" obstacles to the new resolution
         self._speed = self._base_obstacles_attrs[2]

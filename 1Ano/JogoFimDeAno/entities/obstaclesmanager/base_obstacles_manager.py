@@ -18,8 +18,6 @@ class BaseObstaclesManager:
         self._possibles_obstacles: list[Obstacle] = get_obstacle_list(self._player_center, self._player_normal_distance, player_angular_speed, self._height, self._speed, self._color)
         self._base_obstacles_attrs = (self._player_center, self._player_normal_distance, self._speed)
         self._actual_resolution = BASE_RESOLUTION
-        self._total_score = 0
-        self._actual_score = 0
         self._player_count_collisions = 0
     
     def update(self, dt: float) -> None:
@@ -44,7 +42,6 @@ class BaseObstaclesManager:
                 player_collided = True
                 CustomEventHandler.post_event(CustomEventList.PLAYERCOLLISION, { "indexes" : circles_indexes })
         
-        self._calculate_actual_score()
         if player_collided: self._increase_player_collision_count()
     
     def resize(self, new_resolution: tuple[int, int], player_center: tuple[int, int], player_normal_distance: int) -> None:
@@ -57,21 +54,13 @@ class BaseObstaclesManager:
         self._player_normal_distance = player_normal_distance
         self._actual_resolution = new_resolution
 
-    def _generate_obstacles(self) -> None:
-        ...
-    
-    def _calculate_actual_score(self) -> None:
-        self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
+    def _generate_obstacles(self) -> None: ...
     
     def _increase_player_collision_count(self) -> None:
         self._player_count_collisions += 1
     
     def reset(self) -> None:
         self._set_base_y()
-
-    def get_score(self) -> int: return self._total_score + self._actual_score
-
-    def get_player_collision_count(self) -> int: return self._player_count_collisions
 
     def _set_base_y(self) -> None:
         for i in range(self._amount_obstacles):
@@ -93,3 +82,5 @@ class BaseObstaclesManager:
 
         for obst in self._obstacles:
             obst.set_color(color)
+
+    def get_player_collision_count(self) -> int: return self._player_count_collisions

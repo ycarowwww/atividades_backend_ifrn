@@ -2,12 +2,12 @@ import pygame as pg
 
 class EventPauser:
     """Pauses event timers when the game is paused."""
-    def __init__(self) -> None:
-        self._current_events: list[int] = []
-        self._current_times_remaining: list[float] = []
-        self._current_loops: list[int] = []
-        self._is_paused = False
+    _current_events: list[int] = []
+    _current_times_remaining: list[float] = []
+    _current_loops: list[int] = []
+    _is_paused = False
     
+    @classmethod
     def update(self, dt: float) -> None:
         """Updates the remaining time of each of the event timers. 'dt' needs to be in seconds."""
         if self._is_paused: return
@@ -23,11 +23,13 @@ class EventPauser:
             self._current_times_remaining.pop(i)
             self._current_loops.pop(i)
     
+    @classmethod
     def add_event(self, event: int, mills: int, loops: int = 0) -> None:
         self._current_events.append(event)
         self._current_times_remaining.append(mills)
         self._current_loops.append(loops)
 
+    @classmethod
     def toggle_timers(self) -> None:
         """Updates the paused or unpaused status of events."""
         self._is_paused = not self._is_paused

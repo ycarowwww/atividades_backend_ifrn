@@ -8,3 +8,4 @@ from .obstaclesmanager import *
 from .player import *
 from .text import *
 from .limiter import *
+from .organizer import *
