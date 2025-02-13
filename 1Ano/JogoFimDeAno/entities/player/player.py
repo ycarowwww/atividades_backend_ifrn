@@ -1,10 +1,10 @@
 import pygame as pg
 from ..eventhandler import CustomEventList
 from ..particles import ParticleManager
-from scripts import scale_dimension, scale_position, BASE_RESOLUTION
+from scripts import scale_dimension, scale_position, BASE_RESOLUTION, get_diagonal_line
 from collections import deque
 from enum import IntEnum
-from math import sqrt, pi, radians, sin, cos, atan2
+from math import sqrt, radians, sin, cos
 
 class Keys(IntEnum):
     """Enum with the Keyboard Keys to the Player's movements."""
@@ -152,36 +152,6 @@ class Player:
                 initial_alpha (int): Initial alpha of the line.
         """
         if len(self._positions_tracker[0]) < 2: return
-
-        def get_diagonal_line(point1: tuple[int, int], radius1: int, point2: tuple[int, int], radius2: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]]:
-            """Returns the 4 points of a 'quadrilateral' for a 'diagonal' line from circle1 to circle2
-
-                Pygame can only draw lines with 90º ends, creating a 'shrinking' effect when drawing a line between two circles.
-                This function returns 4 points between the circles to draw in the 'pg.draw.polygon' function for a line with a 'diagonal' ending.
-
-                Args:
-                    point1 (tuple): Circle1's center.
-                    radius1 (tuple): Circle1's radius.
-                    point2 (int): Circle2's center.
-                    radius1 (int): Circle2's radius.
-
-                Returns:
-                    tuple: A tuple with 4 points positions.
-            """
-            pos1: tuple[int, int] = (point1[0], -point1[1]) # Flipping the y-axis because of Pygame
-            pos2: tuple[int, int] = (point2[0], -point2[1]) # Flipping the y-axis because of Pygame
-            angle: float = atan2(point1[0] - point2[0], point1[1] - point2[1])
-
-            def rotate_point(rad: int, ang: float, x: int, y: int) -> tuple[int, int]:
-                """Returns the point position in the circle."""
-                return (int(rad * cos(ang) + x), int(rad * sin(ang) + y))
-            
-            points = (rotate_point(radius1, angle, pos1[0], pos1[1]), 
-                      rotate_point(radius1, angle + pi, pos1[0], pos1[1]), 
-                      rotate_point(radius2, angle + pi, pos2[0], pos2[1]), 
-                      rotate_point(radius2, angle, pos2[0], pos2[1]))
-        
-            return tuple([(p[0], -p[1]) for p in points]) # Unflipping the y-axis because of Pygame
 
         for i in range(len(self._positions_tracker)):
             topleft_extreme = [0, 0]

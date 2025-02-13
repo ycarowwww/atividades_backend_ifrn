@@ -9,3 +9,4 @@ from .player import *
 from .text import *
 from .limiter import *
 from .organizer import *
+from .lines import Line

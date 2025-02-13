@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Organizer, OrganizerDirection, OrganizerOrientation, Limiter, BackgroundGetter, CustomEventList, EventPauser
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, BackgroundGetter, CustomEventList, EventPauser
 from enum import IntEnum, auto
 from time import time
 from typing import Any
@@ -419,24 +419,17 @@ class Game:
                 self.__current_window = WindowsKeys.MAINGAMELEVEL
                 self.__start_level = n
             return set_start
-        player_background = Player((400, 300), 2, 20)
+        player_background = Player((200, 300), 2, 20)
         player_background.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         player_background.toggle_gravity()
         player_background.toggle_control()
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        buttongroup = ButtonGroup(
-            (400, 300), 
-            [
-                TextButton((0, 0), "center", set_level(1), "I", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=40, padding_by_size=(80, 80)),
-                TextButton((0, 0), "center", set_level(2), "II", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=40, padding_by_size=(80, 80)),
-                TextButton((0, 0), "center", set_level(3), "III", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=40, padding_by_size=(80, 80))
-            ],
-            25,
-            False
-        )
+        levels_organizer = LevelsOrganizer(400, (600, 0), 75, 3, set_level, self.__FONT)
+        division_line = Line((400, 0), (400, 600), 5, 5, COLORS["WHITE"])
+        level_text = Text("Level Selector", self.__FONT, COLORS["WHITE"], (200, 300), "center", 50)
 
-        self._resize_objects((player_background, fps_text, buttongroup), self.__screen.get_size())
+        self._resize_objects((player_background, fps_text, levels_organizer, division_line, level_text), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETLEVEL:
             for event in pg.event.get():
@@ -445,17 +438,16 @@ class Game:
                 
                 if event.type == pg.KEYDOWN: # Change Later
                     if event.key == pg.K_ESCAPE:
-                        self.__is_level = False
                         self.__current_window = WindowsKeys.SETGAMEMODE
                     
                     if event.key == pg.K_RETURN:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background), event.size)
+                    self._resize_objects((fps_text, background, division_line, level_text), event.size)
 
                 player_background.update_by_event(event)
-                buttongroup.update_by_event(event)
+                levels_organizer.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -468,7 +460,9 @@ class Game:
             player_background.update(dt)
             player_background.draw(self.__screen)
 
-            buttongroup.draw(self.__screen)
+            levels_organizer.draw(self.__screen)
+            level_text.draw(self.__screen)
+            division_line.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")

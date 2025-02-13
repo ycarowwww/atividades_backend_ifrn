@@ -1,8 +1,7 @@
+from scripts import LEVELS
 from . import BaseObstaclesManager
 from ..eventhandler import CustomEventHandler, CustomEventList
-from scripts import get_file_path
 from copy import deepcopy
-from json import load as json_load
 
 class LevelObstaclesManager(BaseObstaclesManager):
     """An Obstacle Manager that generates pre-defined obstacles (levels)."""
@@ -20,15 +19,12 @@ class LevelObstaclesManager(BaseObstaclesManager):
         self._player_center = self._base_obstacles_attrs[0]
         self._player_normal_distance = self._base_obstacles_attrs[1]
 
-        with open(get_file_path("../data/levels.json")) as file:
-            levels: dict[str, list[int]] = json_load(file)
-
-        indexes_lvl = levels.get(f"{self._actual_level}")
+        indexes_lvl = LEVELS.get(f"{self._actual_level}")
 
         if indexes_lvl is None:
             # Raise custom event
             self._actual_level = 1
-            indexes_lvl = levels.get(f"{self._actual_level}")
+            indexes_lvl = LEVELS.get(f"{self._actual_level}")
 
         CustomEventHandler.post_event(CustomEventList.NEWLEVELWARNING, {"level" : self._actual_level})
         self._actual_level += 1
