@@ -13,22 +13,35 @@ class OrganizerOrientation(IntEnum):
 
 class Organizer:
     """organizes a list of surfaces that are relatively close together."""
-    def __init__(self, surfaces: list[pg.Surface], direction: int, orientation: int, gap: int, pos_attr: str, pos_value: tuple[int, int]) -> None:
-        self._surfaces = surfaces # List of images of the Organizer
+    def __init__(self, surfaces: list[pg.Surface], surfaces_width: list[int], direction: int, orientation: int, gap: int, pos_attr: str, pos_value: tuple[int, int]) -> None:
+        self._original_surfaces = surfaces # List of images of the Organizer
+        self._surfaces_width = surfaces_width
+        self._surfaces = self._resize_surfaces_to_width()
         self._direction = direction # Vertical or Horizontal
         self._orientation = orientation # orientation of the opposite side of the direction
         self._gap = gap # Spacing between the Images
         self._pos_attr = pos_attr
         self._pos_value = pos_value
-        self._create_surface()
-        self._save_values = [self._pos_attr, self._pos_value, self._surface_rect.size, self._surface.copy()] # Save some values for resizing.
+        self._surface, self._surface_rect = self._create_surface()
+        self._save_values = [self._pos_value, self._surfaces_width.copy()] # Save some values for resizing.
         self._current_resolution = BASE_RESOLUTION
 
-    def _create_surface(self) -> None:
+    def _resize_surfaces_to_width(self) -> list[pg.Surface]:
+        surfs = []
+
+        for i in range(len(self._original_surfaces)):
+            width = self._surfaces_width[i]
+            height = self._original_surfaces[i].height / self._original_surfaces[i].width * width
+            surf = pg.transform.scale(self._original_surfaces[i], (width, height))
+            surfs.append(surf)
+        
+        return surfs
+
+    def _create_surface(self) -> tuple[pg.Surface, pg.Rect]:
         """Draws each one of the surfaces in a main surface. Also creates it too."""
         if len(self._surfaces) <= 0:
-            self._surface = pg.Surface((0, 0))
-            return
+            surf = pg.Surface((0, 0))
+            return (surf, pg.Rect((0, 0), (0, 0)))
         
         if self._direction == OrganizerDirection.HORIZONTAL:
             width = sum(i.width for i in self._surfaces) + self._gap * (len(self._surfaces) - 1)
@@ -77,28 +90,26 @@ class Organizer:
                 surf.blit(s, s_rect)
                 initial_top += s_rect.height + self._gap
         
-        self._surface = surf
-        self._surface.set_colorkey((0, 0, 0))
-        self._surface_rect = self._surface.get_rect()
-        setattr(self._surface_rect, self._pos_attr, self._pos_value)
+        surf = surf
+        surf.set_colorkey((0, 0, 0))
+        surf_rect = surf.get_rect()
+        setattr(surf_rect, self._pos_attr, self._pos_value)
+        return surf, surf_rect
 
     def draw(self, screen: pg.Surface) -> None:
         screen.blit(self._surface, self._surface_rect)
 
     def resize(self, new_resolution: tuple[int, int]) -> None:
-        self._pos_value = scale_position(self._save_values[1], BASE_RESOLUTION, new_resolution)
-        new_size = (
-            scale_dimension(self._save_values[2][0], new_resolution, BASE_RESOLUTION),
-            scale_dimension(self._save_values[2][1], new_resolution, BASE_RESOLUTION)
-        )
-        self._surface = pg.transform.scale(self._save_values[3], new_size)
-        self._surface_rect = self._surface.get_rect()
-        setattr(self._surface_rect, self._pos_attr, self._pos_value)
+        self._pos_value = scale_position(self._save_values[0], BASE_RESOLUTION, new_resolution)
+        self._surfaces_width = [scale_dimension(i, new_resolution) for i in self._save_values[1]]
+        self._surfaces = self._resize_surfaces_to_width()
+        self._surface, self._surface_rect = self._create_surface()
         self._current_resolution = new_resolution # Maybe this can be improved
 
-    def change_surfaces(self, new_surfaces: list[pg.Surface]) -> None:
-        self._surfaces = new_surfaces
-        self._create_surface()
-        self._save_values[2] = self._surface.size
-        self._save_values[3] = self._surface.copy()
+    def change_surfaces(self, new_surfaces: list[pg.Surface], new_surfaces_width: list[int]) -> None:
+        self._original_surfaces = new_surfaces
+        self._surfaces_width = new_surfaces_width
+        self._surfaces = self._resize_surfaces_to_width()
+        self._surface, self._surface_rect = self._create_surface()
+        self._save_values[1] = self._surfaces_width.copy()
         self.resize(self._current_resolution)

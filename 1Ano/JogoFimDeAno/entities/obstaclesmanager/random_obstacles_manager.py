@@ -10,6 +10,8 @@ class RandomObstaclesManager(BaseObstaclesManager):
         self._lives = lives
         self._actual_score = 0
         self._total_score = 0
+        self._best_score = 0
+        self._max_lives = self._lives
         
     def _generate_obstacles(self) -> None:
         """Generate Random Obstacles."""
@@ -42,7 +44,9 @@ class RandomObstaclesManager(BaseObstaclesManager):
 
     def _calculate_actual_score(self) -> None:
         if len(self._obstacles) <= 0: self._actual_score = 0
-        else: self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
+        else: 
+            self._actual_score = round(self._start_distance_mult - (self._player_center[1] - self._obstacles[0].get_y()) / self._player_normal_distance)
+            self._best_score = max(self._best_score, self._total_score + self._actual_score)
 
     def _increase_player_collision_count(self) -> None:
         self._player_count_collisions += 1
@@ -52,8 +56,20 @@ class RandomObstaclesManager(BaseObstaclesManager):
         """Returns if the remaining lives are less than or equal to 0."""
         return self._lives <= 0
 
+    def reset_manager(self) -> None:
+        self._lives = self._max_lives
+        self._generate_obstacles()
+        self._actual_score = 0
+        self._total_score = 0
+        self._best_score = 0
+        self._player_count_collisions = 0
+
     def get_score(self) -> int: 
         self._calculate_actual_score()
         return self._total_score + self._actual_score
+
+    def get_best_score(self) -> int: 
+        self._calculate_actual_score()
+        return self._best_score
 
     def get_remaining_lives(self) -> int: return self._lives
