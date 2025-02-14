@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, BackgroundGetter, CustomEventList, EventPauser
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventList, EventPauser
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode, mouse, buttons hover, better menus, custom controls, eventpauser can be a statis class, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode, mouse, buttons hover, better menus, custom controls, eventpauser can be a statis class, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -133,20 +133,33 @@ class Game:
         obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
         remaining_lives = 0
         heart_img = pg.image.load(get_file_path("../images/heart.svg")).convert_alpha() # Improve this later
-        heart_img = pg.transform.scale(heart_img, (30, round(heart_img.height * 30 / heart_img.width)))
-        lives_count = Organizer([ heart_img for _ in range(obstacle_manager.get_remaining_lives()) ], OrganizerDirection.HORIZONTAL, OrganizerOrientation.MIDDLE, 10, "topleft", (10, 100))
-        score, max_score = 0, 0
-        score_text = Text("Score: 0", self.__FONT, (255, 255, 255), (10, 10), size=40)
-        max_score_text = Text("Max: 0", self.__FONT, (0, 255, 0), (10, 45), size=20)
-        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 65), size=20)
-        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 85), size=15)
+        heart_img = pg.transform.scale(heart_img, (40, round(heart_img.height * 40 / heart_img.width)))
+        lives_count = Organizer([ heart_img for _ in range(obstacle_manager.get_remaining_lives()) ], OrganizerDirection.HORIZONTAL, OrganizerOrientation.MIDDLE, 10, "topleft", (10, 10))
+        score, best_score = 0, 0
+        score_text = ScoreText(score, (60, 60, 60), (255, 255, 255), self.__FONT, 20, (10, 55), "topleft", 10)
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 75), size=15)
+        best_score_text = Text("Best: 0", self.__FONT, (0, 0, 0), (400, 275), "center", 30)
+        collision_count = Text("Collisions: 0", self.__FONT, (0, 0, 0), (400, 325), "center", 30)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
+        warn_text = Text("New Generated Obstacles", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
+        grad_line = GradientLine(
+            [
+                (255, 255, 255, 0), 
+                (255, 255, 255, 255), 
+                (255, 255, 255, 255), 
+                (255, 255, 255, 255), 
+                (255, 255, 255, 0)
+            ],
+            (0, 300),
+            (800, 300),
+            300
+        )
+        game_ended = False
 
-        self._resize_objects(
-            (pause_button, return_menu_button, score_text, max_score_text, collision_count, fps_text, player, warn_text, lives_count), 
+        self._resize_objects( # Maybe add this to a list
+            (pause_button, return_menu_button, score_text, best_score_text, collision_count, fps_text, player, warn_text, lives_count, grad_line), 
             self.__screen.get_size()
         )
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
@@ -162,7 +175,7 @@ class Game:
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
-                    self._resize_objects((score_text, max_score_text, collision_count, fps_text, background, warn_text, lives_count), event.size)
+                    self._resize_objects((score_text, best_score_text, collision_count, fps_text, background, warn_text, lives_count, grad_line), event.size)
                 
                 if event.type == CustomEventList.NEWGENERATIONWARNING:
                     remaining_lives = obstacle_manager.get_remaining_lives()
@@ -182,13 +195,13 @@ class Game:
                         warn_text.set_text("You lost all your Lives!")
                         show_warn = True
                     else: # THIS REALLY NEED TO BE BETTER
-                        remaining_lives = obstacle_manager.get_remaining_lives()
-                        lives_count.change_surfaces([heart_img for _ in range(remaining_lives)])
+                        pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
+                        EventPauser.add_event(CustomEventList.RESETGAME, 500, 1)
 
-                    pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
-                    EventPauser.add_event(CustomEventList.RESETGAME, 500, 1)
                     player_collided = True
                     player.add_lost_particles(event.indexes)
+                    remaining_lives = obstacle_manager.get_remaining_lives()
+                    lives_count.change_surfaces([heart_img for _ in range(remaining_lives)])
                 
                 if event.type == CustomEventList.RESETGAME:
                     player_collided = False
@@ -196,7 +209,11 @@ class Game:
                     obstacle_manager.reset()
                 
                 if event.type == CustomEventList.RANDOMGAMEEND:
-                    self.__current_window = WindowsKeys.MAINMENU
+                    show_warn = False
+                    game_ended = True
+                    collisions = obstacle_manager.get_player_collision_count()
+                    best_score_text.set_text(f"Best: {best_score}")
+                    collision_count.set_text(f"Collisions: {collisions}")
 
             keys = pg.key.get_pressed()
 
@@ -216,10 +233,8 @@ class Game:
             pause_button.draw(self.__screen)
 
             if pause_button.is_paused:
-                player.draw(self.__screen)
-                obstacle_manager.draw(self.__screen)
                 return_menu_button.draw(self.__screen)
-            else:
+            elif not game_ended: # Improve this later
                 if not player_collided:
                     player.update(dt)
                     obstacle_manager.update(dt)
@@ -227,21 +242,19 @@ class Game:
                 else:
                     player.update_lost_particles(dt)
 
-                player.draw(self.__screen)
-                obstacle_manager.draw(self.__screen)
-
                 score = obstacle_manager.get_score()
-                max_score = max(max_score, score)
-                collisions = obstacle_manager.get_player_collision_count()
+                best_score = max(best_score, score)
                 
-                score_text.set_text(f"Score: {score}")
-                max_score_text.set_text(f"Max: {max_score}")
-                collision_count.set_text(f"Collisions: {collisions}")
+                score_text.set_score(score)
 
-            score_text.draw(self.__screen)
-            max_score_text.draw(self.__screen)
-            collision_count.draw(self.__screen)
+            player.draw(self.__screen) # Improve this draws later
+            obstacle_manager.draw(self.__screen)
             lives_count.draw(self.__screen)
+            score_text.draw(self.__screen)
+            if game_ended: # Improve this later
+                grad_line.draw(self.__screen)
+                best_score_text.draw(self.__screen)
+                collision_count.draw(self.__screen)
 
             if show_warn:
                 warn_text.draw(self.__screen)

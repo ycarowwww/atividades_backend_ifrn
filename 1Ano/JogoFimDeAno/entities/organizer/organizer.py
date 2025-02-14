@@ -26,6 +26,10 @@ class Organizer:
 
     def _create_surface(self) -> None:
         """Draws each one of the surfaces in a main surface. Also creates it too."""
+        if len(self._surfaces) <= 0:
+            self._surface = pg.Surface((0, 0))
+            return
+        
         if self._direction == OrganizerDirection.HORIZONTAL:
             width = sum(i.width for i in self._surfaces) + self._gap * (len(self._surfaces) - 1)
             height = max(i.height for i in self._surfaces)

@@ -1,10 +1,9 @@
-import pygame as pg
 import pygame.freetype as pgft
 from json import load as json_load
 from math import sin, cos, atan2, pi
 from os import path
 
-pg.init() # Needed for the FreeType library initialize
+pgft.init() # Needed for the FreeType library initialize
 
 BASE_RESOLUTION: tuple[int, int] = (800, 600) # Base Resolution of the screen
 

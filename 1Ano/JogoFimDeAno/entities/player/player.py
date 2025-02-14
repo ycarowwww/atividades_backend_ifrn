@@ -15,7 +15,7 @@ class Keys(IntEnum):
     TOGGLEBORDER = pg.K_b
 
 class Player:
-    def __init__(self, center: tuple[int, int], amount_circles: int, circle_radius: int, initial_angle: float = 0, angular_speed: float = 180, distance: float = 100, linear_speed: float = 100, max_distance_multiplier: float = 3, border_size: float = 5) -> None:
+    def __init__(self, center: tuple[int, int], amount_circles: int, circle_radius: int, initial_angle: float = 0, angular_speed: float = 180, distance: float = 100, linear_speed: float = 100, max_distance_multiplier: float = 2.5, border_size: float = 5) -> None:
         self._center = center
         self._radius = circle_radius
         self._amount = amount_circles
