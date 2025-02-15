@@ -85,7 +85,7 @@ COLORS: dict[str, tuple[int, int, int, int | None]] = {
     "GRAY" : (20, 20, 20),
     "WHITE" : (255, 255, 255),
     "RED" : (255, 30, 30),
-    "GREEN" : (0, 255, 0),
+    "GREEN" : (30, 255, 30),
     "BLUE" : (35, 172, 255),
     "BLANK" : (0, 0, 0, 0)
 }

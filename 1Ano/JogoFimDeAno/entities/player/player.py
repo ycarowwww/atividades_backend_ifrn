@@ -86,7 +86,7 @@ class Player:
     
     def draw(self, screen: pg.Surface) -> None:
         if self._show_border:
-            pg.draw.circle(screen, self._border_color, self._center, self._distance, round(self._border_size))
+            pg.draw.circle(screen, self._border_color, self._center, self._distance + self._border_size // 2, round(self._border_size))
 
         self._draw_tracker(screen)
         

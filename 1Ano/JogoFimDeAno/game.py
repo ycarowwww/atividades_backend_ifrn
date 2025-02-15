@@ -6,7 +6,7 @@ from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, lives in infinite mode, mouse, buttons hover, better menus, custom controls, eventpauser can be a statis class, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -55,6 +55,7 @@ class Game:
             WindowsKeys.SETTINGS : self.settings
         }
 
+        self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
         self.__start_level = 0
         self.__show_fps = True
         self.__delta_time = DeltaTimeCalculator()
@@ -126,8 +127,8 @@ class Game:
         def return_menu_func():
             if pause_button.is_paused:
                 self.__current_window = WindowsKeys.MAINMENU
-        player = Player([i // 2 for i in BASE_RESOLUTION], 2, 20)
-        player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
+        player = Player([i // 2 for i in BASE_RESOLUTION], self._rnd_mode_settings[0], 20)
+        player.set_circle_colors(self._rnd_mode_settings[1])
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", EventPauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
         obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
@@ -382,6 +383,10 @@ class Game:
 
     def set_gamemode(self) -> None:
         def game_bt_func():
+            self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
+            self.__current_window = WindowsKeys.MAINGAMERANDOM
+        def game_bt_func_3p():
+            self._rnd_mode_settings = [3, [COLORS["RED"], COLORS["BLUE"], COLORS["GREEN"]]]
             self.__current_window = WindowsKeys.MAINGAMERANDOM
         def game_lvl_func(): 
             self.__current_window = WindowsKeys.SETLEVEL
@@ -395,7 +400,8 @@ class Game:
             (400, 300), 
             [
                 TextButton((0, 0), "center", game_bt_func, "Random Generation", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
-                TextButton((0, 0), "center", game_lvl_func, "Levels", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40)
+                TextButton((0, 0), "center", game_lvl_func, "Levels", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
+                TextButton((0, 0), "center", game_bt_func_3p, "3 Players Mode", self.__FONT, (0, 255, 0), style=pgft.STYLE_STRONG, size_font=40)
             ],
             25,
             False
