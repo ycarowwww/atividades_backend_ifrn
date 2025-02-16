@@ -95,3 +95,9 @@ INITIAL_ALPHA_TRACKER: int = 50
 
 with open(get_file_path("../data/levels.json")) as file:
     LEVELS: dict[str, list[int]] = json_load(file)
+
+with open(get_file_path("../data/achievements.json")) as file:
+    ACHIEVEMENTS: dict[str, dict[str, str | bool | int]] = json_load(file)
+
+with open(get_file_path("../data/player_achievements_unlocked.json")) as file:
+    ACHIEVEMENTS_UNLOCKED: dict[str, bool] = json_load(file)
