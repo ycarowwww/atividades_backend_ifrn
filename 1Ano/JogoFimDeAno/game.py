@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid
 from enum import IntEnum, auto
 from time import time
 from typing import Any
@@ -33,6 +33,7 @@ class WindowsKeys(IntEnum):
     MAINGAMELEVEL = auto()
     SETGAMEMODE = auto()
     SETLEVEL = auto()
+    SHOWACHIEVEMENTS = auto()
 
 class Game:
     def __init__(self) -> None:
@@ -52,7 +53,8 @@ class Game:
             WindowsKeys.MAINGAMELEVEL : self.main_game_level,
             WindowsKeys.SETGAMEMODE : self.set_gamemode,
             WindowsKeys.SETLEVEL : self.set_level,
-            WindowsKeys.SETTINGS : self.settings
+            WindowsKeys.SETTINGS : self.settings,
+            WindowsKeys.SHOWACHIEVEMENTS : self.show_achievements
         }
 
         self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
@@ -390,6 +392,8 @@ class Game:
             self.__current_window = WindowsKeys.MAINGAMERANDOM
         def game_lvl_func(): 
             self.__current_window = WindowsKeys.SETLEVEL
+        def show_achievement_func(): 
+            self.__current_window = WindowsKeys.SHOWACHIEVEMENTS
         player_background = Player((400, 300), 2, 20)
         player_background.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         player_background.toggle_gravity()
@@ -401,7 +405,8 @@ class Game:
             [
                 TextButton((0, 0), "center", game_bt_func, "Random Generation", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
                 TextButton((0, 0), "center", game_lvl_func, "Levels", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
-                TextButton((0, 0), "center", game_bt_func_3p, "3 Players Mode", self.__FONT, (0, 255, 0), style=pgft.STYLE_STRONG, size_font=40)
+                TextButton((0, 0), "center", game_bt_func_3p, "3 Players Mode", self.__FONT, (0, 255, 0), style=pgft.STYLE_STRONG, size_font=40),
+                TextButton((0, 0), "center", show_achievement_func, "Achievements", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40)
             ],
             25,
             False
@@ -496,6 +501,46 @@ class Game:
             levels_organizer.draw(self.__screen)
             level_text.draw(self.__screen)
             division_line.draw(self.__screen)
+
+            if self.__show_fps:
+                fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
+                fps_text.draw(self.__screen)
+            
+            pg.display.flip()
+
+    def show_achievements(self) -> None:
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
+        background = BackgroundGetter.random_background(self.__screen.get_size())
+        achievement_grid = AchievementsGrid(self.__screen.get_size(), COLORS["WHITE"], COLORS["GRAY"], 20, 1.5, 10)
+        
+        self._resize_objects((fps_text, achievement_grid), self.__screen.get_size()) # Maybe try to find a better way later
+
+        while self.__current_window == WindowsKeys.SHOWACHIEVEMENTS:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.__current_window = WindowsKeys.QUIT
+                
+                if event.type == pg.KEYDOWN: # Change Later
+                    if event.key == pg.K_RETURN:
+                        self.__current_window = WindowsKeys.SETGAMEMODE # Open Selected Option
+                
+                if event.type == pg.VIDEORESIZE:
+                    self._resize_objects((fps_text, background, achievement_grid), event.size)
+
+            keys = pg.key.get_pressed()
+
+            if keys[pg.K_LSHIFT] and keys[pg.K_ESCAPE]:
+                self.__current_window = WindowsKeys.SETGAMEMODE
+
+            self.__clock.tick(self.__MAX_FPS)
+            self.__screen.fill(COLORS["BLACK"])
+
+            dt = self.__delta_time.get_dt()
+
+            background.update(dt)
+            background.draw(self.__screen)
+
+            achievement_grid.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
