@@ -1,7 +1,7 @@
 {
     "1" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
+        "title" : "First Level!",
+        "description" : "Complete the First Level of the Duet.",
         "secret" : false,
         "unlock_event_id" : null
     },
@@ -24,6 +24,30 @@
         "unlock_event_id" : null
     },
     "5" : {
+        "title" : "Test Achievement",
+        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
+        "secret" : false,
+        "unlock_event_id" : null
+    },
+    "6" : {
+        "title" : "Test Achievement",
+        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
+        "secret" : false,
+        "unlock_event_id" : null
+    },
+    "7" : {
+        "title" : "Test Achievement",
+        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
+        "secret" : false,
+        "unlock_event_id" : null
+    },
+    "8" : {
+        "title" : "Test Achievement",
+        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
+        "secret" : false,
+        "unlock_event_id" : null
+    },
+    "9" : {
         "title" : "Test Achievement",
         "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
         "secret" : false,

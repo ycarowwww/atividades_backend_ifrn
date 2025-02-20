@@ -24,9 +24,6 @@ class LevelsOrganizer:
 
         self._base_values = [self._width, self._midtop, self._button_width, self._mouse_wheel_speed]
         self._actual_resolution = BASE_RESOLUTION
-    
-    def update(self, dt: float) -> None: # Do something here later
-        ...
 
     def draw(self, screen: pg.Surface) -> None:
         screen.blit(self._surface, self._surface.get_rect(midtop=self._midtop))

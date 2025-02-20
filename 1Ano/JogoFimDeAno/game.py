@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
-from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid
+from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path, scale_dimension
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsHandler
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -297,6 +297,8 @@ class Game:
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
+        achievement_warning = None
+        achievement_warning_saves = ((0, 0), achievement_warning)
 
         self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
@@ -313,6 +315,14 @@ class Game:
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
                     self._resize_objects((collision_count, fps_text, background, warn_text), event.size)
+                    if achievement_warning != None:
+                        achievement_warning = pg.transform.scale( # Take this logic from here after...
+                            achievement_warning,
+                            (
+                                scale_dimension(achievement_warning_saves[0][0], event.size),
+                                scale_dimension(achievement_warning_saves[0][1], event.size)
+                            )
+                        )
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
@@ -336,6 +346,23 @@ class Game:
                 
                 if event.type == CustomEventList.RANDOMGAMEEND:
                     self.__current_window = WindowsKeys.MAINMENU
+
+                if event.type == CustomEventList.ACHIEVEMENTUNLOCKED:
+                    pg.time.set_timer(CustomEventList.DISABLEACHIEVEMENTUNLOCKED, 2500, 1)
+                    EventPauser.add_event(CustomEventList.DISABLEACHIEVEMENTUNLOCKED, 2500, 1)
+                    achievement_warning = AchievementsHandler.get_animation_unlock(event.id)
+                    achievement_warning_saves = (achievement_warning.size, achievement_warning.copy())
+                    achievement_warning = pg.transform.scale( # Take this logic from here after...
+                        achievement_warning,
+                        (
+                            scale_dimension(achievement_warning_saves[0][0], self.__screen.size),
+                            scale_dimension(achievement_warning_saves[0][1], self.__screen.size)
+                        )
+                    )
+                
+                if event.type == CustomEventList.DISABLEACHIEVEMENTUNLOCKED:
+                    achievement_warning = None
+                    achievement_warning_saves = ((0, 0), achievement_warning)
 
             keys = pg.key.get_pressed()
 
@@ -374,6 +401,10 @@ class Game:
 
             collision_count.draw(self.__screen)
 
+            if achievement_warning != None:
+                pos = [ self.__screen.size[i] - achievement_warning.size[i] - 10 for i in range(2) ]
+                self.__screen.blit(achievement_warning, pos)
+
             if show_warn:
                 warn_text.draw(self.__screen)
 
@@ -384,6 +415,8 @@ class Game:
             pg.display.flip()
 
     def set_gamemode(self) -> None:
+        def return_menu_func():
+            self.__current_window = WindowsKeys.MAINMENU
         def game_bt_func():
             self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
             self.__current_window = WindowsKeys.MAINGAMERANDOM
@@ -411,8 +444,9 @@ class Game:
             25,
             False
         )
+        return_menu_button = ReturnButton((50, 50), (20, 20), "topleft", return_menu_func, (255, 255, 255)) # This code repeat a lot of times
 
-        self._resize_objects((player_background, fps_text, buttongroup), self.__screen.get_size())
+        self._resize_objects((player_background, fps_text, buttongroup, return_menu_button), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETGAMEMODE:
             for event in pg.event.get():
@@ -427,10 +461,11 @@ class Game:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background), event.size)
+                    self._resize_objects((fps_text, background, return_menu_button), event.size)
 
                 player_background.update_by_event(event)
                 buttongroup.update_by_event(event)
+                return_menu_button.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -444,6 +479,7 @@ class Game:
             player_background.draw(self.__screen)
 
             buttongroup.draw(self.__screen)
+            return_menu_button.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
@@ -452,6 +488,8 @@ class Game:
             pg.display.flip()
 
     def set_level(self) -> None:
+        def return_menu_func():
+            self.__current_window = WindowsKeys.SETGAMEMODE
         def set_level(n: int): 
             def set_start() -> None:
                 self.__current_window = WindowsKeys.MAINGAMELEVEL
@@ -466,8 +504,9 @@ class Game:
         levels_organizer = LevelsOrganizer(400, (600, 0), 75, 3, set_level, self.__FONT)
         division_line = Line((400, 0), (400, 600), 5, 5, COLORS["WHITE"])
         level_text = Text("Level Selector", self.__FONT, COLORS["WHITE"], (200, 300), "center", 50)
+        return_menu_button = ReturnButton((50, 50), (20, 20), "topleft", return_menu_func, (255, 255, 255)) # This code repeat a lot of times
 
-        self._resize_objects((player_background, fps_text, levels_organizer, division_line, level_text), self.__screen.get_size())
+        self._resize_objects((player_background, fps_text, levels_organizer, division_line, level_text, return_menu_button), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETLEVEL:
             for event in pg.event.get():
@@ -482,10 +521,11 @@ class Game:
                         self.__current_window = WindowsKeys.MAINGAME # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background, division_line, level_text), event.size)
+                    self._resize_objects((fps_text, background, division_line, level_text, return_menu_button), event.size)
 
                 player_background.update_by_event(event)
                 levels_organizer.update_by_event(event)
+                return_menu_button.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -501,6 +541,7 @@ class Game:
             levels_organizer.draw(self.__screen)
             level_text.draw(self.__screen)
             division_line.draw(self.__screen)
+            return_menu_button.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
@@ -509,11 +550,14 @@ class Game:
             pg.display.flip()
 
     def show_achievements(self) -> None:
+        def return_menu_func():
+            self.__current_window = WindowsKeys.SETGAMEMODE
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        achievement_grid = AchievementsGrid(self.__screen.get_size(), COLORS["WHITE"], COLORS["GRAY"], 20, 1.5, 10)
+        achievement_grid = AchievementsGrid(self.__screen.get_size(), COLORS["WHITE"], (50, 50, 50), 20, 1.5, 10)
+        return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 20, 20), "topright", return_menu_func, (255, 255, 255))
         
-        self._resize_objects((fps_text, achievement_grid), self.__screen.get_size()) # Maybe try to find a better way later
+        self._resize_objects((fps_text, achievement_grid, return_menu_button), self.__screen.get_size()) # Maybe try to find a better way later
 
         while self.__current_window == WindowsKeys.SHOWACHIEVEMENTS:
             for event in pg.event.get():
@@ -525,7 +569,10 @@ class Game:
                         self.__current_window = WindowsKeys.SETGAMEMODE # Open Selected Option
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background, achievement_grid), event.size)
+                    self._resize_objects((fps_text, background, achievement_grid, return_menu_button), event.size)
+                
+                achievement_grid.update_by_event(event)
+                return_menu_button.update_by_event(event)
 
             keys = pg.key.get_pressed()
 
@@ -541,6 +588,7 @@ class Game:
             background.draw(self.__screen)
 
             achievement_grid.draw(self.__screen)
+            return_menu_button.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
@@ -549,6 +597,8 @@ class Game:
             pg.display.flip()
 
     def settings(self) -> None:
+        def return_menu_func():
+            self.__current_window = WindowsKeys.MAINMENU
         def toggle_fps_visibility():
             self.__show_fps = not self.__show_fps
         def set_max_fps(amount: float):
@@ -563,9 +613,10 @@ class Game:
         toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
         limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 0 else self.__MAX_FPS, set_max_fps)
         amount_fps_limiter = Text("Max FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 20, 20), "topright", return_menu_func, (255, 255, 255))
         set_max_fps(limiter_fps_btn.get_actual_value())
         
-        self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps_btn, amount_fps_limiter), self.__screen.get_size())
+        self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps_btn, amount_fps_limiter, return_menu_button), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETTINGS:
             for event in pg.event.get():
@@ -577,10 +628,11 @@ class Game:
                         self.__current_window = WindowsKeys.MAINMENU
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background, limiter_fps_btn, amount_fps_limiter), event.size)
+                    self._resize_objects((fps_text, background, limiter_fps_btn, amount_fps_limiter, return_menu_button), event.size)
                     
                 toggle_fps_vsblt_btn.update_by_event(event)
                 limiter_fps_btn.update_by_event(event)
+                return_menu_button.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
             self.__screen.fill(COLORS["BLACK"])
@@ -596,6 +648,7 @@ class Game:
 
             limiter_fps_btn.update(dt)
             limiter_fps_btn.draw(self.__screen)
+            return_menu_button.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
