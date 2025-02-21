@@ -3,7 +3,7 @@ from ..eventhandler import CustomEventHandler, CustomEventList
 from scripts import FONT, get_file_path, ACHIEVEMENTS, ACHIEVEMENTS_UNLOCKED
 from json import dump as json_dump
 from os.path import isfile
-
+# Maybe we can add a dict[achiev_id : achiev_surf], a save_array and a method to draw it.
 class AchievementsHandler:
     """Class with methods to handle the achievement's logic."""
     @staticmethod

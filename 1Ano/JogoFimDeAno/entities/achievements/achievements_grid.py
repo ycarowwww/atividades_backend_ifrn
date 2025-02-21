@@ -2,6 +2,7 @@ import pygame as pg
 import pygame.freetype as pgft
 from ..lines import GradientLine
 from scripts import ACHIEVEMENTS, ACHIEVEMENTS_UNLOCKED, FONT, get_file_path, scale_dimension
+from os.path import isfile
 
 class AchievementsGrid:
     def __init__(self, screen_size: tuple[int, int], base_color: tuple[int, int, int], locked_color: tuple[int, int, int], font_size: int, title_font_size_mult: float, gap: int, font: pgft.Font = FONT) -> None:
@@ -85,13 +86,21 @@ class AchievementsGrid:
 
         surf = pg.Surface((max_width, self._gap * 2 + max(title_surf.height + description_surf.height + self._gap, img_size)))
 
-        r_img = pg.Rect((0, 0), (img_size, img_size))
-        r_img.midleft = (self._gap, round(surf.height / 2))
-        pg.draw.rect(surf, self._locked_color, r_img, border_radius=(self._gap // 5))
+        img_rect = pg.Rect((0, 0), (img_size, img_size))
+        img_rect.midleft = (self._gap, round(surf.height / 2))
+        
+        pg.draw.rect(surf, self._locked_color, img_rect, border_radius=(self._gap // 5))
         
         if not is_unlocked:
             lock_img = pg.transform.scale(self._lock_img, (round(self._lock_img.width * (img_size * 0.9) / self._lock_img.height), round(img_size * 0.9)))
-            surf.blit(lock_img, lock_img.get_rect(center=r_img.center))
+            surf.blit(lock_img, lock_img.get_rect(center=img_rect.center))
+        elif isfile(get_file_path(f"../images/achievements/achiev{achievement_id}.svg")): # Check if the achievement's image exist.
+            achiev_img = pg.image.load(get_file_path(f"../images/achievements/achiev{achievement_id}.svg")).convert_alpha()
+            achiev_img = pg.transform.scale(achiev_img, ( # Scale achievement's image to be inside the "img_rect".
+                round(achiev_img.width * img_size * 0.8 / max(achiev_img.size)),
+                round(achiev_img.height * img_size * 0.8 / max(achiev_img.size))
+            ))
+            surf.blit(achiev_img, achiev_img.get_rect(center=img_rect.center)) # Place the image in the rect's center
 
         surf.blit(title_surf, (self._gap * 2 + img_size, self._gap))
         surf.blit(description_surf, (self._gap * 2 + img_size, self._gap * 2 + title_surf.height))
