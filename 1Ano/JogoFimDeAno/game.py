@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path, scale_dimension
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsHandler
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer
 from enum import IntEnum, auto
 from time import time
 from typing import Any
@@ -61,6 +61,7 @@ class Game:
         self.__start_level = 0
         self.__show_fps = True
         self.__delta_time = DeltaTimeCalculator()
+        self.__achievements_drawer = AchievementsDrawer(self.__screen.size, self.__FONT, 20, 16, 10, COLORS["WHITE"], (100, 100, 100))
 
     def run(self) -> None:
         while self.__current_window != WindowsKeys.QUIT:
@@ -297,8 +298,6 @@ class Game:
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
-        achievement_warning = None
-        achievement_warning_saves = ((0, 0), achievement_warning)
 
         self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
@@ -311,18 +310,11 @@ class Game:
                 pause_button.update_by_event(event)
                 return_menu_button.update_by_event(event)
                 player.update_by_event(event)
+                self.__achievements_drawer.update_by_event(event)
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
                     self._resize_objects((collision_count, fps_text, background, warn_text), event.size)
-                    if achievement_warning != None:
-                        achievement_warning = pg.transform.scale( # Take this logic from here after...
-                            achievement_warning,
-                            (
-                                scale_dimension(achievement_warning_saves[0][0], event.size),
-                                scale_dimension(achievement_warning_saves[0][1], event.size)
-                            )
-                        )
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
@@ -347,23 +339,6 @@ class Game:
                 if event.type == CustomEventList.RANDOMGAMEEND:
                     self.__current_window = WindowsKeys.MAINMENU
 
-                if event.type == CustomEventList.ACHIEVEMENTUNLOCKED:
-                    pg.time.set_timer(CustomEventList.DISABLEACHIEVEMENTUNLOCKED, 2500, 1)
-                    EventPauser.add_event(CustomEventList.DISABLEACHIEVEMENTUNLOCKED, 2500, 1)
-                    achievement_warning = AchievementsHandler.get_animation_unlock(event.id)
-                    achievement_warning_saves = (achievement_warning.size, achievement_warning.copy())
-                    achievement_warning = pg.transform.scale( # Take this logic from here after...
-                        achievement_warning,
-                        (
-                            scale_dimension(achievement_warning_saves[0][0], self.__screen.size),
-                            scale_dimension(achievement_warning_saves[0][1], self.__screen.size)
-                        )
-                    )
-                
-                if event.type == CustomEventList.DISABLEACHIEVEMENTUNLOCKED:
-                    achievement_warning = None
-                    achievement_warning_saves = ((0, 0), achievement_warning)
-
             keys = pg.key.get_pressed()
 
             if keys[pg.K_LSHIFT] and keys[pg.K_ESCAPE]:
@@ -380,6 +355,9 @@ class Game:
             background.draw(self.__screen)
 
             pause_button.draw(self.__screen)
+
+            self.__achievements_drawer.update(dt)
+            self.__achievements_drawer.draw(self.__screen)
 
             if pause_button.is_paused:
                 player.draw(self.__screen)
@@ -400,10 +378,6 @@ class Game:
                 collision_count.set_text(f"Collisions: {collisions}")
 
             collision_count.draw(self.__screen)
-
-            if achievement_warning != None:
-                pos = [ self.__screen.size[i] - achievement_warning.size[i] - 10 for i in range(2) ]
-                self.__screen.blit(achievement_warning, pos)
 
             if show_warn:
                 warn_text.draw(self.__screen)

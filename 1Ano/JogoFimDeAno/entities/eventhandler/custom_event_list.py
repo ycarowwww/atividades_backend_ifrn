@@ -9,5 +9,4 @@ class CustomEventList(IntEnum):
     RANDOMGAMEEND = auto()
     RESETGAME = auto()
     ACHIEVEMENTUNLOCKED = auto()
-    DISABLEACHIEVEMENTUNLOCKED = auto()
     # auto for new custom events
