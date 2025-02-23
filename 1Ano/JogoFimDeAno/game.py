@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
-from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path, scale_dimension
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer
+from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game, perfection levels bug: button pressed before the level restart
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -291,15 +291,16 @@ class Game:
         player.set_circle_colors([COLORS["RED"], COLORS["BLUE"]])
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", EventPauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
-        obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level)
-        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 10), size=20)
-        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 35), size=15)
+        perfection_drawer = PerfectionDrawer((50, 50), 30, COLORS["GREEN"], COLORS["RED"], COLORS["WHITE"], self.__start_level, difference_expansion=5, repetition_time=1)
+        obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level, perfection_drawer)
+        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 90), size=20)
+        fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 115), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
         warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
 
-        self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text), self.__screen.get_size())
+        self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text, perfection_drawer), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
 
         while self.__current_window == WindowsKeys.MAINGAMELEVEL:
@@ -314,13 +315,14 @@ class Game:
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
-                    self._resize_objects((collision_count, fps_text, background, warn_text), event.size)
+                    self._resize_objects((collision_count, fps_text, background, warn_text, perfection_drawer), event.size)
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
                     warn_text.set_text(f"New Level: {event.level}")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
                     EventPauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1) # Maybe we can get this better with the "EventHandler"
                     show_warn = True
+                    perfection_drawer.reset(obstacle_manager.get_actual_level())
                 
                 if event.type == CustomEventList.DISABLEWARNING:
                     show_warn = False
@@ -335,9 +337,18 @@ class Game:
                     player_collided = False
                     player.reset_movements()
                     obstacle_manager.reset()
+                    perfection_drawer.reset(obstacle_manager.get_actual_level())
                 
                 if event.type == CustomEventList.RANDOMGAMEEND:
                     self.__current_window = WindowsKeys.MAINMENU
+
+                if event.type == pg.KEYDOWN:
+                    if event.key in [pg.K_a, pg.K_d, pg.K_SPACE, pg.K_LSHIFT] and not pause_button.is_paused:
+                        perfection_drawer.update_movements()
+                
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1 and not pause_button.is_paused:
+                        perfection_drawer.update_movements()
 
             keys = pg.key.get_pressed()
 
@@ -358,6 +369,8 @@ class Game:
 
             self.__achievements_drawer.update(dt)
             self.__achievements_drawer.draw(self.__screen)
+            perfection_drawer.update(dt)
+            perfection_drawer.draw(self.__screen)
 
             if pause_button.is_paused:
                 player.draw(self.__screen)
@@ -528,7 +541,7 @@ class Game:
             self.__current_window = WindowsKeys.SETGAMEMODE
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        achievement_grid = AchievementsGrid(self.__screen.get_size(), COLORS["WHITE"], (50, 50, 50), 20, 1.5, 10)
+        achievement_grid = AchievementsGrid(self.__screen.get_size(), COLORS["WHITE"], (120, 120, 120), (30, 30, 30), 20, 1.5, 10)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 20, 20), "topright", return_menu_func, (255, 255, 255))
         
         self._resize_objects((fps_text, achievement_grid, return_menu_button), self.__screen.get_size()) # Maybe try to find a better way later

@@ -58,7 +58,7 @@ class LevelsOrganizer:
             btn_event = self._level_button_function(i+1)
             btn = LevelButton(
                 self._button_width,
-                convert_decimal_to_roman(i+1),
+                i+1,
                 btn_event,
                 (255, 255, 255),
                 (0, 0, 0),

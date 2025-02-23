@@ -5,12 +5,13 @@ from scripts import ACHIEVEMENTS, ACHIEVEMENTS_UNLOCKED, FONT, get_file_path, sc
 from os.path import isfile
 
 class AchievementsGrid:
-    def __init__(self, screen_size: tuple[int, int], base_color: tuple[int, int, int], locked_color: tuple[int, int, int], font_size: int, title_font_size_mult: float, gap: int, font: pgft.Font = FONT) -> None:
+    def __init__(self, screen_size: tuple[int, int], base_color: tuple[int, int, int], locked_color: tuple[int, int, int], bgcolor: tuple[int, int, int], font_size: int, title_font_size_mult: float, gap: int, font: pgft.Font = FONT) -> None:
         self._achievements = ACHIEVEMENTS
         self._achievements_unlocked = ACHIEVEMENTS_UNLOCKED
         self._size = screen_size
         self._base_color = base_color
         self._locked_color = locked_color
+        self._bgcolor = bgcolor
         self._gap = gap
         self._font = font
         self._font_sizes = [ font_size, font_size * title_font_size_mult ]
@@ -86,6 +87,8 @@ class AchievementsGrid:
 
         surf = pg.Surface((max_width, self._gap * 2 + max(title_surf.height + description_surf.height + self._gap, img_size)))
 
+        pg.draw.rect(surf, self._bgcolor, surf.get_rect(topleft=(0, 0)), border_radius=self._gap)
+
         img_rect = pg.Rect((0, 0), (img_size, img_size))
         img_rect.midleft = (self._gap, round(surf.height / 2))
         
@@ -116,7 +119,8 @@ class AchievementsGrid:
             text_surf, text_rect = font.render(text, fgcolor, size=size)
             text_rect.topleft = (0, 0)
 
-            surf = pg.Surface(text_surf.size)
+            surf = pg.Surface(text_surf.size, pg.SRCALPHA)
+            surf.fill((0, 0, 0, 0))
             surf.blit(text_surf, text_rect)
             return surf
         else:
@@ -157,7 +161,8 @@ class AchievementsGrid:
 
                 actual_word += 1
             
-            surf = pg.Surface((actual_width, actual_height))
+            surf = pg.Surface((actual_width, actual_height), pg.SRCALPHA)
+            surf.fill((0, 0, 0, 0))
             y_pos = 0
             
             for i in range(len(surf_group)):

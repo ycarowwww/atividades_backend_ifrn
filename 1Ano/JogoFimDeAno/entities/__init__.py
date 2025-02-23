@@ -11,3 +11,4 @@ from .limiter import *
 from .organizer import *
 from .lines import *
 from .achievements import *
+from .perfection_levels import *
