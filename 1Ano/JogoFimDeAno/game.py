@@ -1,12 +1,12 @@
 import pygame as pg
 import pygame.freetype as pgft
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, ImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, CircularImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer, MouseHandler
 from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game, perfection levels bug: button pressed before the level restart
+# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game, perfection levels bug: button pressed before the level restart, collision when restart bug
 
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
@@ -77,8 +77,8 @@ class Game:
     def main_menu(self) -> None:
         def game_bt_func(): self.__current_window = WindowsKeys.SETGAMEMODE # Some "Game" Class function to edit these properties
         def settings_bt_func(): self.__current_window = WindowsKeys.SETTINGS
-        game_settings = ImageButton((70, 70), (300, 350), "center", settings_bt_func, get_file_path("../images/gear.svg"), 10, 3, 96, (255, 255, 255))
-        game_start = ImageButton((50, 50), (500, 350), "center", game_bt_func, get_file_path("../images/triangle.svg"), 20, 3, 96, (255, 255, 255))
+        game_settings = CircularImageButton((300, 350), "center", "gear.svg", (74, 74), 0, 3, (255, 255, 255), 0.1, (100, 100, 100), settings_bt_func)
+        game_start = CircularImageButton((500, 350), "center", "triangle.svg", (60, 60), 10, 3, (255, 255, 255), 0.1, (100, 100, 100), game_bt_func)
         game_title = Text("DUET", self.__FONT, (255, 255, 255), (400, 150), "center", 70)
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         player_background = Player((400, 250), 2, 20)
@@ -117,12 +117,16 @@ class Game:
             player_background.draw(self.__screen)
 
             game_title.draw(self.__screen)
+            game_start.update(dt)
+            game_settings.update(dt)
             game_start.draw(self.__screen)
             game_settings.draw(self.__screen)
 
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
+            
+            MouseHandler.update_cursor()
             
             pg.display.flip()
 
@@ -281,6 +285,8 @@ class Game:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
             
+            MouseHandler.update_cursor()
+            
             pg.display.flip()
 
     def main_game_level(self) -> None:
@@ -338,6 +344,7 @@ class Game:
                     player.reset_movements()
                     obstacle_manager.reset()
                     perfection_drawer.reset(obstacle_manager.get_actual_level())
+                    perfection_drawer.check_movements()
                 
                 if event.type == CustomEventList.RANDOMGAMEEND:
                     self.__current_window = WindowsKeys.MAINMENU
@@ -398,6 +405,8 @@ class Game:
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
+            
+            MouseHandler.update_cursor()
             
             pg.display.flip()
 
@@ -472,6 +481,8 @@ class Game:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
             
+            MouseHandler.update_cursor()
+            
             pg.display.flip()
 
     def set_level(self) -> None:
@@ -534,6 +545,8 @@ class Game:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
             
+            MouseHandler.update_cursor()
+
             pg.display.flip()
 
     def show_achievements(self) -> None:
@@ -580,6 +593,8 @@ class Game:
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
+            
+            MouseHandler.update_cursor()
             
             pg.display.flip()
 
@@ -640,6 +655,8 @@ class Game:
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
+            
+            MouseHandler.update_cursor()
             
             pg.display.flip()
 

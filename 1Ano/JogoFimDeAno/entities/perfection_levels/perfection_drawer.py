@@ -44,6 +44,13 @@ class PerfectionDrawer:
         text_rect.center = self._center
         return text_surf, text_rect
 
+    def check_movements(self) -> None:
+        keys = pg.key.get_pressed()
+        mouse = pg.mouse.get_pressed()
+
+        if mouse[0] or keys[pg.K_a] or keys[pg.K_d] or keys[pg.K_SPACE] or keys[pg.K_LSHIFT]:
+            self.update_movements()
+
     def update_movements(self) -> None:
         if self._movements > 0 and self._is_perfect:
             self._movements -= 1
