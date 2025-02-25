@@ -80,11 +80,11 @@ class HorizontalMovingObstacle(Obstacle):
         else:
             self._x = self._positions_x[1]
 
-        if (abs(self._y - self._player_attrs[0][1]) / self._player_attrs[1] - 1) % 2 < 1 / 2: # Interpolation between the two x's
+        t = (abs(self._y - self._player_attrs[0][1]) / self._player_attrs[1] - 1) % 2
+        if 0 < t < 1: # Interpolation between the two x's | 1 is the percentage to start the movement
             x1 = self._x # Bug: Weird Movement -> Fix Later
             x2 = self._positions_x[0] if self._x == self._positions_x[1] else self._positions_x[1]
-            t = (abs(self._y - self._player_attrs[0][1]) / self._player_attrs[1] - 1) % 2
-            self._x = (x1 - x2) / (1 / 2) * (t - 1 / 2) + x1
+            self._x = (x1 - x2) / (1) * (t - 1) + x1
         
         self._rect.centerx = round(self._x)
 

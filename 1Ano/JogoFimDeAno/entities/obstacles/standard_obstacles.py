@@ -25,5 +25,8 @@ def get_obstacle_list(player_center: tuple[int, int], player_normal_distance: in
             ]),
         InvisibleObstacle(player_center[0] + player_normal_distance, 0, player_normal_distance * 2, height, speed, 2, color),
         InvisibleObstacle(player_center[0] - player_normal_distance, 0, player_normal_distance * 2, height, speed, 2, color),
-        HorizontalMovingObstacle(player_center[0] + player_normal_distance, player_center[0] - player_normal_distance, 0, player_normal_distance * 2, height, speed, 2, color, player_center, player_normal_distance)
+        HorizontalMovingObstacle(player_center[0] + player_normal_distance, player_center[0] - player_normal_distance, 0, player_normal_distance * 2, height, speed, 2, color, player_center, player_normal_distance),
+        HorizontalMovingObstacle(player_center[0] - player_normal_distance, player_center[0] + player_normal_distance, 0, player_normal_distance * 2, height, speed, 2, color, player_center, player_normal_distance),
+        HorizontalMovingObstacle(player_center[0] + player_normal_distance / 2 + 20, player_center[0] - player_normal_distance / 2 - 20, 0, player_normal_distance - 20, player_normal_distance * 0.8, speed, 2, color, player_center, player_normal_distance),
+        HorizontalMovingObstacle(player_center[0] - player_normal_distance / 2 - 20, player_center[0] + player_normal_distance / 2 + 20, 0, player_normal_distance - 20, player_normal_distance * 0.8, speed, 2, color, player_center, player_normal_distance)
     ]
