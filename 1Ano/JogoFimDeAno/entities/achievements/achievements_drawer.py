@@ -37,14 +37,17 @@ class AchievementsDrawer:
     
     def update_by_event(self, event: pg.Event) -> None:
         if event.type == pg.VIDEORESIZE:
-            self._size = event.size
-            self._gap = scale_dimension(self._saves[1], event.size)
-            self._font_sizes = tuple(scale_dimension(i, event.size) for i in self._saves[0])
-            self._create_surface()
+            self.resize(event.size)
         
         if event.type == CustomEventList.ACHIEVEMENTUNLOCKED:
             self._current_id = event.id
             self._current_remaining_time = 3
+            self._create_surface()
+        
+    def resize(self, new_resolution: tuple[int, int]) -> None:
+            self._size = new_resolution
+            self._gap = scale_dimension(self._saves[1], new_resolution)
+            self._font_sizes = tuple(scale_dimension(i, new_resolution) for i in self._saves[0])
             self._create_surface()
     
     def _create_surface(self) -> None:

@@ -1,7 +1,7 @@
 import pygame as pg
 import pygame.freetype as pgft
 from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, ButtonGroup, CircularImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer, MouseHandler
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, get_obstacle_list, get_3p_obstacle_list, ButtonGroup, CircularImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer, MouseHandler
 from enum import IntEnum, auto
 from time import time
 from typing import Any
@@ -57,7 +57,7 @@ class Game:
             WindowsKeys.SHOWACHIEVEMENTS : self.show_achievements
         }
 
-        self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
+        self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]], get_obstacle_list]
         self.__start_level = 0
         self.__show_fps = True
         self.__delta_time = DeltaTimeCalculator()
@@ -138,7 +138,7 @@ class Game:
         player.set_circle_colors(self._rnd_mode_settings[1])
         pause_button = PauseButton((50, 50), (BASE_RESOLUTION[0] - 10, 10), "topright", EventPauser.toggle_timers, (255, 255, 255), 15)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
-        obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3)
+        obstacle_manager = RandomObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), 3, self._rnd_mode_settings[2])
         remaining_lives = 0
         heart_img = pg.image.load(get_file_path("../images/heart.svg")).convert_alpha() # Improve this later
         lives_count = Organizer([ heart_img for _ in range(obstacle_manager.get_remaining_lives()) ], [ 40 for _ in range(obstacle_manager.get_remaining_lives()) ], OrganizerDirection.HORIZONTAL, OrganizerOrientation.MIDDLE, 10, "topleft", (10, 10))
@@ -306,7 +306,7 @@ class Game:
         show_warn = False
         player_collided = False
 
-        self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text, perfection_drawer), self.__screen.get_size())
+        self._resize_objects((pause_button, return_menu_button, collision_count, fps_text, player, warn_text, perfection_drawer, self.__achievements_drawer), self.__screen.get_size())
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
 
         while self.__current_window == WindowsKeys.MAINGAMELEVEL:
@@ -414,10 +414,10 @@ class Game:
         def return_menu_func():
             self.__current_window = WindowsKeys.MAINMENU
         def game_bt_func():
-            self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]]]
+            self._rnd_mode_settings = [2, [COLORS["RED"], COLORS["BLUE"]], get_obstacle_list]
             self.__current_window = WindowsKeys.MAINGAMERANDOM
         def game_bt_func_3p():
-            self._rnd_mode_settings = [3, [COLORS["RED"], COLORS["BLUE"], COLORS["GREEN"]]]
+            self._rnd_mode_settings = [3, [COLORS["RED"], COLORS["BLUE"], COLORS["GREEN"]], get_3p_obstacle_list]
             self.__current_window = WindowsKeys.MAINGAMERANDOM
         def game_lvl_func(): 
             self.__current_window = WindowsKeys.SETLEVEL

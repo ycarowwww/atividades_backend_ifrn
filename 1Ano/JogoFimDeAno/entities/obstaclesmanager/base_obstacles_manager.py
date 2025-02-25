@@ -3,9 +3,10 @@ from ..eventhandler import CustomEventHandler, CustomEventList
 from ..obstacles import Obstacle, RotatingObstacle, InvisibleObstacle, get_obstacle_list
 from ..player import Player
 from scripts import OBSTACLES_HEIGHT, COLORS, BASE_RESOLUTION
+from typing import Callable
 
 class BaseObstaclesManager:
-    def __init__(self, player_center: tuple[int, int], player_normal_distance: int, player_angular_speed: float) -> None:
+    def __init__(self, player_center: tuple[int, int], player_normal_distance: int, player_angular_speed: float, obstacle_list: Callable[..., list[Obstacle]] = get_obstacle_list) -> None:
         self._obstacles: list[Obstacle] = []
         self._last_obstacle: Obstacle = None
         self._amount_obstacles: int = 0
@@ -15,7 +16,7 @@ class BaseObstaclesManager:
         self._start_distance_mult = 8
         self._player_center = player_center
         self._player_normal_distance = player_normal_distance
-        self._possibles_obstacles: list[Obstacle] = get_obstacle_list(self._player_center, self._player_normal_distance, player_angular_speed, self._height, self._speed, self._color)
+        self._possibles_obstacles: list[Obstacle] = obstacle_list(self._player_center, self._player_normal_distance, player_angular_speed, self._height, self._speed, self._color)
         self._base_obstacles_attrs = (self._player_center, self._player_normal_distance, self._speed)
         self._actual_resolution = BASE_RESOLUTION
         self._player_count_collisions = 0

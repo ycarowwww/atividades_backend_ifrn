@@ -1,12 +1,14 @@
 from . import BaseObstaclesManager
+from ..obstacles import Obstacle, get_obstacle_list
 from ..eventhandler import CustomEventHandler, CustomEventList
 from copy import deepcopy
 from random import choice, randint
+from typing import Callable
 
 class RandomObstaclesManager(BaseObstaclesManager):
     """An Obstacle Manager that generates the obstacles with a random generation."""
-    def __init__(self, player_center: tuple[int, int], player_normal_distance: int, player_angular_speed: float, lives: int) -> None:
-        super().__init__(player_center, player_normal_distance, player_angular_speed)
+    def __init__(self, player_center: tuple[int, int], player_normal_distance: int, player_angular_speed: float, lives: int, obstacle_list: Callable[..., list[Obstacle]] = get_obstacle_list) -> None:
+        super().__init__(player_center, player_normal_distance, player_angular_speed, obstacle_list)
         self._lives = lives
         self._actual_score = 0
         self._total_score = 0
