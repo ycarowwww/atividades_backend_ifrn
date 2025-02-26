@@ -1,9 +1,12 @@
+import pygame.mixer as pgmx
 import pygame.freetype as pgft
 from json import load as json_load
 from math import sin, cos, atan2, pi
-from os import path
+from random import choice
+from os import listdir, path
 
 pgft.init() # Needed for the FreeType library initialize
+pgmx.init() # Initialize Song
 
 BASE_RESOLUTION: tuple[int, int] = (800, 600) # Base Resolution of the screen
 
@@ -107,3 +110,19 @@ with open(get_file_path("../data/achievements.json")) as file:
 
 with open(get_file_path("../data/player_achievements_unlocked.json")) as file:
     ACHIEVEMENTS_UNLOCKED: dict[str, bool] = json_load(file)
+
+BACKGROUNDMUSICS: list[str] = [
+    i for i in listdir(get_file_path("../audio/backgroundmusics"))
+]
+
+def play_random_bg_music() -> None:
+    if not pgmx.music.get_busy():
+        music_path = get_file_path(f"../audio/backgroundmusics/{choice(BACKGROUNDMUSICS)}")
+        pgmx.music.load(music_path)
+        pgmx.music.play(1, 0, 500)
+
+def get_music_volume() -> float:
+    return pgmx.music.get_volume()
+
+def set_music_volume(volume: float) -> None:
+    pgmx.music.set_volume(volume)

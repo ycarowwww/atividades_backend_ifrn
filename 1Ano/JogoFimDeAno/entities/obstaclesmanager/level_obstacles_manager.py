@@ -37,6 +37,7 @@ class LevelObstaclesManager(BaseObstaclesManager):
             # Raise custom event
             self._actual_level = 1
             indexes_lvl = LEVELS.get(f"{self._actual_level}")
+            AchievementsHandler.unlock_achievement(2)
 
         CustomEventHandler.post_event(CustomEventList.NEWLEVELWARNING, {"level" : self._actual_level})
         self._actual_level += 1

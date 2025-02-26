@@ -1,7 +1,10 @@
+from os import environ
+environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1" # Hide Pygame Support Message
+
 import pygame as pg
 import pygame.freetype as pgft
-from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path
-from entities import Player, RandomObstaclesManager, LevelObstaclesManager, get_obstacle_list, get_3p_obstacle_list, ButtonGroup, CircularImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, PerfectionDrawer, MouseHandler
+from scripts import BASE_RESOLUTION, INITIAL_MAX_FPS, FONT, COLORS, get_file_path, play_random_bg_music, get_music_volume, set_music_volume
+from entities import Player, RandomObstaclesManager, LevelObstaclesManager, get_obstacle_list, get_3p_obstacle_list, ButtonGroup, CircularImageButton, PauseButton, ReturnButton, TextButton, Text, ScoreText, Organizer, OrganizerDirection, OrganizerOrientation, LevelsOrganizer, Limiter, Line, GradientLine, BackgroundGetter, CustomEventHandler, CustomEventList, EventPauser, AchievementsGrid, AchievementsDrawer, AchievementsHandler, PerfectionDrawer, MouseHandler
 from enum import IntEnum, auto
 from time import time
 from typing import Any
@@ -127,6 +130,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 
@@ -174,7 +178,7 @@ class Game:
         game_end_return_btn = TextButton((400, 550), "center", return_btn_event, "Return", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=30, padding_by_size=(140, 40))
 
         self._resize_objects( # Maybe add this to a list
-            (pause_button, return_menu_button, score_text, best_score_text, collision_count, fps_text, player, warn_text, lives_count, grad_line, game_end_restart_btn, game_end_return_btn), 
+            (pause_button, return_menu_button, score_text, best_score_text, collision_count, fps_text, player, warn_text, lives_count, grad_line, game_end_restart_btn, game_end_return_btn, self.__achievements_drawer), 
             self.__screen.get_size()
         )
         obstacle_manager.resize(self.__screen.get_size(), player.get_center(), player.get_normal_distance())
@@ -187,6 +191,7 @@ class Game:
                 pause_button.update_by_event(event)
                 return_menu_button.update_by_event(event)
                 player.update_by_event(event)
+                self.__achievements_drawer.update_by_event(event)
 
                 if event.type == pg.VIDEORESIZE:
                     obstacle_manager.resize(event.size, player.get_center(), player.get_normal_distance())
@@ -231,6 +236,17 @@ class Game:
                     collisions = obstacle_manager.get_player_collision_count()
                     best_score_text.set_text(f"Best: {best_score}")
                     collision_count.set_text(f"Collisions: {collisions}")
+                    if best_score >= 100:
+                        if len(self._rnd_mode_settings[1]) == 2:
+                            AchievementsHandler.unlock_achievement(3)
+                        elif len(self._rnd_mode_settings[1]) == 3:
+                            AchievementsHandler.unlock_achievement(4)
+
+                        if best_score >= 1000:
+                            if len(self._rnd_mode_settings[1]) == 2:
+                                AchievementsHandler.unlock_achievement(5)
+                            elif len(self._rnd_mode_settings[1]) == 3:
+                                AchievementsHandler.unlock_achievement(6)
                 
                 if game_ended:
                     game_end_restart_btn.update_by_event(event)
@@ -284,8 +300,12 @@ class Game:
             if self.__show_fps:
                 fps_text.set_text(f"FPS: {(dt ** -1):.1f}")
                 fps_text.draw(self.__screen)
+
+            self.__achievements_drawer.update(dt)
+            self.__achievements_drawer.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 
@@ -407,6 +427,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 
@@ -482,6 +503,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 
@@ -546,6 +568,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
 
             pg.display.flip()
 
@@ -595,6 +618,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 
@@ -606,19 +630,25 @@ class Game:
         def set_max_fps(amount: float):
             if amount == 300:
                 self.__MAX_FPS = 0
-                amount_fps_limiter.set_text(f"Max FPS: No Limit")
+                limiter_fps_text.set_text(f"Max FPS: No Limit")
             else:
                 self.__MAX_FPS = amount
-                amount_fps_limiter.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
+                limiter_fps_text.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
+        def set_volume_all(volume: float):
+            set_music_volume(volume)
+            volume_text.set_text(f"Volume: {round(volume * 100)}%")
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
         toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
-        limiter_fps_btn = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 0 else self.__MAX_FPS, set_max_fps)
-        amount_fps_limiter = Text("Max FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        limiter_fps = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 0 else self.__MAX_FPS, set_max_fps)
+        limiter_fps_text = Text("Max FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        volume_limiter = Limiter((165, 50), (225, 400), "topleft", (50, 50, 50), COLORS["WHITE"], 0.0, 1.0, get_music_volume(), set_volume_all)
+        volume_text = Text("", self.__FONT, COLORS["WHITE"], (425, 425), "midleft", 30)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 20, 20), "topright", return_menu_func, (255, 255, 255))
-        set_max_fps(limiter_fps_btn.get_actual_value())
+        set_max_fps(limiter_fps.get_actual_value())
+        set_volume_all(volume_limiter.get_actual_value())
         
-        self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps_btn, amount_fps_limiter, return_menu_button), self.__screen.get_size())
+        self._resize_objects((fps_text, toggle_fps_vsblt_btn, limiter_fps, limiter_fps_text, volume_limiter, volume_text, return_menu_button), self.__screen.get_size())
 
         while self.__current_window == WindowsKeys.SETTINGS:
             for event in pg.event.get():
@@ -630,10 +660,11 @@ class Game:
                         self.__current_window = WindowsKeys.MAINMENU
                 
                 if event.type == pg.VIDEORESIZE:
-                    self._resize_objects((fps_text, background, limiter_fps_btn, amount_fps_limiter, return_menu_button), event.size)
+                    self._resize_objects((fps_text, background, limiter_fps, limiter_fps_text, volume_limiter, volume_text, return_menu_button), event.size)
                     
                 toggle_fps_vsblt_btn.update_by_event(event)
-                limiter_fps_btn.update_by_event(event)
+                limiter_fps.update_by_event(event)
+                volume_limiter.update_by_event(event)
                 return_menu_button.update_by_event(event)
 
             self.__clock.tick(self.__MAX_FPS)
@@ -646,10 +677,13 @@ class Game:
 
             toggle_fps_vsblt_btn.draw(self.__screen)
 
-            amount_fps_limiter.draw(self.__screen)
+            limiter_fps_text.draw(self.__screen)
+            volume_text.draw(self.__screen)
 
-            limiter_fps_btn.update(dt)
-            limiter_fps_btn.draw(self.__screen)
+            limiter_fps.update(dt)
+            limiter_fps.draw(self.__screen)
+            volume_limiter.update(dt)
+            volume_limiter.draw(self.__screen)
             return_menu_button.draw(self.__screen)
 
             if self.__show_fps:
@@ -657,6 +691,7 @@ class Game:
                 fps_text.draw(self.__screen)
             
             MouseHandler.update_cursor()
+            play_random_bg_music()
             
             pg.display.flip()
 

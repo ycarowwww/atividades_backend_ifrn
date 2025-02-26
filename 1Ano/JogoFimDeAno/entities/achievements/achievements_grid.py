@@ -82,8 +82,11 @@ class AchievementsGrid:
         is_unlocked = self._achievements_unlocked[str(achievement_id)]
         text_color = self._base_color if is_unlocked else self._locked_color
 
-        title_surf = self._draw_text(achievement_dict["title"], self._font, text_color, self._font_sizes[1], text_max_width, self._font_sizes[1] // 10)
-        description_surf = self._draw_text(achievement_dict["description"], self._font, text_color, self._font_sizes[0], text_max_width, self._font_sizes[0] // 10)
+        title_text = "?????" if achievement_dict["secret"] and not is_unlocked else achievement_dict["title"]
+        description_text = "??????????" if achievement_dict["secret"] and not is_unlocked else achievement_dict["description"]
+
+        title_surf = self._draw_text(title_text, self._font, text_color, self._font_sizes[1], text_max_width, self._font_sizes[1] // 10)
+        description_surf = self._draw_text(description_text, self._font, text_color, self._font_sizes[0], text_max_width, self._font_sizes[0] // 10)
 
         surf = pg.Surface((max_width, self._gap * 2 + max(title_surf.height + description_surf.height + self._gap, img_size)))
 

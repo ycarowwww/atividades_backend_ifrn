@@ -1,4 +1,5 @@
 from scripts import get_file_path, LEVELS_PERFECTION_UNLOCKED
+from ..achievements import AchievementsHandler
 from json import dump as json_dump
 
 class PerfectionLevelsHandler:
@@ -13,3 +14,6 @@ class PerfectionLevelsHandler:
         LEVELS_PERFECTION_UNLOCKED[str(level)] = True
         with open(get_file_path("../data/player_perfection_levels.json"), "w", encoding="utf-8") as file: # Modern way to write a file.
             json_dump(LEVELS_PERFECTION_UNLOCKED, file, ensure_ascii=False, indent=4)
+        
+        if all(LEVELS_PERFECTION_UNLOCKED.values()):
+            AchievementsHandler.unlock_achievement(7)

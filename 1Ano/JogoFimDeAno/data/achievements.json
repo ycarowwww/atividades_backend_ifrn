@@ -1,56 +1,37 @@
 {
     "1" : {
-        "title" : "First Level!",
-        "description" : "Complete the First Level of the Duet.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "First Level",
+        "description" : "Complete the First Level of Duet.",
+        "secret" : false
     },
     "2" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "All Levels",
+        "description" : "Complete all the levels of Duet.",
+        "secret" : false
     },
     "3" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "100 Points",
+        "description" : "Achieve 100 points at the Random Generation Mode.",
+        "secret" : false
     },
     "4" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "100 Points 3 Circles",
+        "description" : "Achieve 100 points at the 3 Circles Mode.",
+        "secret" : false
     },
     "5" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "1000 Points",
+        "description" : "Achieve 1000 points at the Random Generation Mode.",
+        "secret" : false
     },
     "6" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "1000 Points 3 Circles",
+        "description" : "Achieve 1000 points at the 3 Circles Mode.",
+        "secret" : false
     },
     "7" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
-    },
-    "8" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
-    },
-    "9" : {
-        "title" : "Test Achievement",
-        "description" : "Lorem Ipsum Dolor adjvisaj lorem asdjiv wqiru sa sf dolor jsaicx jami esadjifjsa csoa lore.",
-        "secret" : false,
-        "unlock_event_id" : null
+        "title" : "All Perfect",
+        "description" : "Complete all the Levels in the perfect way.",
+        "secret" : true
     }
 }
