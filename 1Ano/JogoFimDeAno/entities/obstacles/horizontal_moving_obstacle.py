@@ -75,16 +75,17 @@ class HorizontalMovingObstacle(Obstacle):
         self._ink_stain_surface = pg.transform.scale(self._base_ink_stain_surface, self._rect.size)
 
     def _check_current_x(self) -> None:
-        if (self._y - 2 * self._player_attrs[1]) % (4 * self._player_attrs[1]) < 2 * self._player_attrs[1]:
+        if (self._player_attrs[0][1] - self._y + self._player_attrs[1]) % (4 * self._player_attrs[1]) < 2 * self._player_attrs[1]:
             self._x = self._positions_x[0]
         else:
             self._x = self._positions_x[1]
 
-        t = (abs(self._y - self._player_attrs[0][1]) / self._player_attrs[1] - 1) % 2
-        if 0 < t < 1: # Interpolation between the two x's | 1 is the percentage to start the movement
+        start_animation = 0.25 * self._player_attrs[1] # Animation start at this distance to the mod formula
+        t = (self._player_attrs[0][1] - self._y + self._player_attrs[1]) % (2 * self._player_attrs[1])
+        if 0 < t < start_animation: # Interpolation between the two x's | 1 is the percentage to start the movement
             x1 = self._x # Bug: Weird Movement -> Fix Later
             x2 = self._positions_x[0] if self._x == self._positions_x[1] else self._positions_x[1]
-            self._x = (x1 - x2) / (1) * (t - 1) + x1
+            self._x = (x1 - x2) / (start_animation) * (t - start_animation) + x1
         
         self._rect.centerx = round(self._x)
 

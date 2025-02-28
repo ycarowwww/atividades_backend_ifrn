@@ -9,8 +9,6 @@ from enum import IntEnum, auto
 from time import time
 from typing import Any
 
-# More Backgrounds, Lines Background Better, Better Limiter, Animations, def show of some texts (like FPS), game loop maker, "display flex" feature, better way to the levels/infinite modes, mouse, buttons hover, better menus, custom controls, 3 ball mode, multiplier, achievements, level creator, top part, wiki, menu easter egg (triplet), auto level buttons, show status after defeated, grid with levels, perfection levels, statistics player and final game, better end random game ui, moving obstacles, 1000son easter egg, Translate Files, stars at beggining like FNAF when is completing the game, perfection levels bug: button pressed before the level restart, collision when restart bug
-
 class DeltaTimeCalculator:
     """Class that calculates automatically the 'deltatime' to the framerate independence."""
     def __init__(self):
@@ -149,10 +147,10 @@ class Game:
         score = 0
         score_text = ScoreText(score, (60, 60, 60), (255, 255, 255), self.__FONT, 20, (10, 55), "topleft", 10)
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 75), size=15)
-        best_score_text = Text("Best: 0", self.__FONT, (0, 0, 0), (400, 275), "center", 30)
-        collision_count = Text("Collisions: 0", self.__FONT, (0, 0, 0), (400, 325), "center", 30)
+        best_score_text = Text("Melhor Pontuação: 0", self.__FONT, (0, 0, 0), (400, 275), "center", 30)
+        collision_count = Text("Colisões: 0", self.__FONT, (0, 0, 0), (400, 325), "center", 30)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        warn_text = Text("New Generated Obstacles", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
+        warn_text = Text("Novos Obstáculos Gerados", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
         grad_line = GradientLine(
@@ -174,8 +172,8 @@ class Game:
             CustomEventHandler.post_event(CustomEventList.RESETGAME)
         def return_btn_event():
             self.__current_window = WindowsKeys.MAINMENU
-        game_end_restart_btn = TextButton((400, 500), "center", restart_btn_event, "Restart", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=30, padding_by_size=(140, 40))
-        game_end_return_btn = TextButton((400, 550), "center", return_btn_event, "Return", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=30, padding_by_size=(140, 40))
+        game_end_restart_btn = TextButton((400, 500), "center", restart_btn_event, "Reiniciar", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=30, padding_by_size=(140, 40))
+        game_end_return_btn = TextButton((400, 550), "center", return_btn_event, "Retornar", self.__FONT, (255, 255, 255), (60, 60, 60), pgft.STYLE_STRONG, size_font=30, padding_by_size=(140, 40))
 
         self._resize_objects( # Maybe add this to a list
             (pause_button, return_menu_button, score_text, best_score_text, collision_count, fps_text, player, warn_text, lives_count, grad_line, game_end_restart_btn, game_end_return_btn, self.__achievements_drawer), 
@@ -200,7 +198,7 @@ class Game:
                 if event.type == CustomEventList.NEWGENERATIONWARNING:
                     remaining_lives = obstacle_manager.get_remaining_lives()
                     lives_count.change_surfaces([heart_img for _ in range(remaining_lives)], [ 40 for _ in range(remaining_lives) ])
-                    warn_text.set_text("New Generated Obstacles")
+                    warn_text.set_text("Novos Obstáculos Gerados")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
                     EventPauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1)
                     show_warn = True
@@ -212,7 +210,7 @@ class Game:
                     if obstacle_manager.check_player_lost():
                         pg.time.set_timer(CustomEventList.RANDOMGAMEEND, 500, 1)
                         EventPauser.add_event(CustomEventList.RANDOMGAMEEND, 500, 1)
-                        warn_text.set_text("You lost all your Lives!")
+                        warn_text.set_text("Você perdeu todas as suas Vidas!")
                         show_warn = True
                     else: # THIS REALLY NEED TO BE BETTER
                         pg.time.set_timer(CustomEventList.RESETGAME, 500, 1)
@@ -234,8 +232,8 @@ class Game:
                     game_ended = True
                     best_score = obstacle_manager.get_best_score()
                     collisions = obstacle_manager.get_player_collision_count()
-                    best_score_text.set_text(f"Best: {best_score}")
-                    collision_count.set_text(f"Collisions: {collisions}")
+                    best_score_text.set_text(f"Melhor Pontuação: {best_score}")
+                    collision_count.set_text(f"Colisões: {collisions}")
                     if best_score >= 100:
                         if len(self._rnd_mode_settings[1]) == 2:
                             AchievementsHandler.unlock_achievement(3)
@@ -319,10 +317,10 @@ class Game:
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 70, 10), "topright", return_menu_func, (255, 255, 255))
         perfection_drawer = PerfectionDrawer((50, 50), 30, COLORS["GREEN"], COLORS["RED"], COLORS["WHITE"], self.__start_level, difference_expansion=5, repetition_time=1)
         obstacle_manager = LevelObstaclesManager(player.get_center(), player.get_normal_distance(), player.get_angular_speed(), self.__start_level, perfection_drawer)
-        collision_count = Text("Collisions: 0", self.__FONT, (255, 255, 255), (10, 90), size=20)
+        collision_count = Text("Colisões: 0", self.__FONT, (255, 255, 255), (10, 90), size=20)
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 115), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        warn_text = Text("New Level: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
+        warn_text = Text("Nível: 0", self.__FONT, (255, 255, 255), (400, 200), "center", 30)
         show_warn = False
         player_collided = False
 
@@ -344,7 +342,7 @@ class Game:
                     self._resize_objects((collision_count, fps_text, background, warn_text, perfection_drawer), event.size)
                 
                 if event.type == CustomEventList.NEWLEVELWARNING:
-                    warn_text.set_text(f"New Level: {event.level}")
+                    warn_text.set_text(f"Nível: {event.level}")
                     pg.time.set_timer(CustomEventList.DISABLEWARNING, 1000, 1)
                     EventPauser.add_event(CustomEventList.DISABLEWARNING, 1000, 1) # Maybe we can get this better with the "EventHandler"
                     show_warn = True
@@ -415,7 +413,7 @@ class Game:
                 obstacle_manager.draw(self.__screen)
 
                 collisions = obstacle_manager.get_player_collision_count()
-                collision_count.set_text(f"Collisions: {collisions}")
+                collision_count.set_text(f"Colisões: {collisions}")
 
             collision_count.draw(self.__screen)
 
@@ -453,10 +451,10 @@ class Game:
         buttongroup = ButtonGroup(
             (400, 300), 
             [
-                TextButton((0, 0), "center", game_bt_func, "Random Generation", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
-                TextButton((0, 0), "center", game_lvl_func, "Levels", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
-                TextButton((0, 0), "center", game_bt_func_3p, "3 Players Mode", self.__FONT, (0, 255, 0), style=pgft.STYLE_STRONG, size_font=40),
-                TextButton((0, 0), "center", show_achievement_func, "Achievements", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40)
+                TextButton((0, 0), "center", game_bt_func, "Geração Aleatória", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
+                TextButton((0, 0), "center", game_lvl_func, "Níveis", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40),
+                TextButton((0, 0), "center", game_bt_func_3p, "Modo 3 Players", self.__FONT, (0, 255, 0), style=pgft.STYLE_STRONG, size_font=40),
+                TextButton((0, 0), "center", show_achievement_func, "Conquistas", self.__FONT, (255, 255, 255), style=pgft.STYLE_STRONG, size_font=40)
             ],
             25,
             False
@@ -523,7 +521,7 @@ class Game:
         background = BackgroundGetter.random_background(self.__screen.get_size())
         levels_organizer = LevelsOrganizer(400, (600, 0), 75, 3, set_level, self.__FONT)
         division_line = Line((400, 0), (400, 600), 5, 5, COLORS["WHITE"])
-        level_text = Text("Level Selector", self.__FONT, COLORS["WHITE"], (200, 300), "center", 50)
+        level_text = Text("Seletor - Niveis", self.__FONT, COLORS["WHITE"], (200, 300), "center", 50)
         return_menu_button = ReturnButton((50, 50), (20, 20), "topleft", return_menu_func, (255, 255, 255)) # This code repeat a lot of times
 
         self._resize_objects((player_background, fps_text, levels_organizer, division_line, level_text, return_menu_button), self.__screen.get_size())
@@ -630,18 +628,18 @@ class Game:
         def set_max_fps(amount: float):
             if amount == 300:
                 self.__MAX_FPS = 0
-                limiter_fps_text.set_text(f"Max FPS: No Limit")
+                limiter_fps_text.set_text(f"FPS Ilimitado")
             else:
                 self.__MAX_FPS = amount
-                limiter_fps_text.set_text(f"Max FPS: {self.__MAX_FPS:.1f}")
+                limiter_fps_text.set_text(f"Máx. FPS: {self.__MAX_FPS:.1f}")
         def set_volume_all(volume: float):
             set_music_volume(volume)
             volume_text.set_text(f"Volume: {round(volume * 100)}%")
         fps_text = Text("FPS: ", self.__FONT, (100, 100, 100), (10, 10), size=15)
         background = BackgroundGetter.random_background(self.__screen.get_size())
-        toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Toggle FPS Visibility", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
+        toggle_fps_vsblt_btn = TextButton((200, 200), "topleft", toggle_fps_visibility, "Mostrar FPS", self.__FONT, COLORS["WHITE"], (80, 80, 80), size_font=20, padding=(15, 15))
         limiter_fps = Limiter((165, 50), (225, 300), "topleft", (50, 50, 50), COLORS["WHITE"], 1, 300, 300 if self.__MAX_FPS == 0 else self.__MAX_FPS, set_max_fps)
-        limiter_fps_text = Text("Max FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
+        limiter_fps_text = Text("Máx. FPS: ", self.__FONT, COLORS["WHITE"], (425, 325), "midleft", 30)
         volume_limiter = Limiter((165, 50), (225, 400), "topleft", (50, 50, 50), COLORS["WHITE"], 0.0, 1.0, get_music_volume(), set_volume_all)
         volume_text = Text("", self.__FONT, COLORS["WHITE"], (425, 425), "midleft", 30)
         return_menu_button = ReturnButton((50, 50), (BASE_RESOLUTION[0] - 20, 20), "topright", return_menu_func, (255, 255, 255))

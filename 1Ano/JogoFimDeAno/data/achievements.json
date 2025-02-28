@@ -1,37 +1,37 @@
 {
     "1" : {
-        "title" : "First Level",
-        "description" : "Complete the First Level of Duet.",
+        "title" : "Primeiro Nivel",
+        "description" : "Complete o Primeiro nivel do Duet.",
         "secret" : false
     },
     "2" : {
-        "title" : "All Levels",
-        "description" : "Complete all the levels of Duet.",
+        "title" : "Finalizacao",
+        "description" : "Complete todos os niveis do Duet.",
         "secret" : false
     },
     "3" : {
-        "title" : "100 Points",
-        "description" : "Achieve 100 points at the Random Generation Mode.",
+        "title" : "100 Pontos",
+        "description" : "Alcance 100 Pontos no modo de Geracao Aleatoria.",
         "secret" : false
     },
     "4" : {
-        "title" : "100 Points 3 Circles",
-        "description" : "Achieve 100 points at the 3 Circles Mode.",
+        "title" : "100 Pontos 3 Circulos",
+        "description" : "Alcance 100 Pontos no modo de 3 Circulos.",
         "secret" : false
     },
     "5" : {
-        "title" : "1000 Points",
-        "description" : "Achieve 1000 points at the Random Generation Mode.",
+        "title" : "1000 Pontos",
+        "description" : "Alcance 1000 Pontos no modo de Geracao Aleatoria.",
         "secret" : false
     },
     "6" : {
-        "title" : "1000 Points 3 Circles",
-        "description" : "Achieve 1000 points at the 3 Circles Mode.",
+        "title" : "1000 Pontos 3 Circulos",
+        "description" : "Alcance 1000 Pontos no modo de 3 Circulos.",
         "secret" : false
     },
     "7" : {
-        "title" : "All Perfect",
-        "description" : "Complete all the Levels in the perfect way.",
+        "title" : "Perfeicao",
+        "description" : "Complete todos os niveis de forma Perfeita.",
         "secret" : true
     }
 }

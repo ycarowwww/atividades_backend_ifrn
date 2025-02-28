@@ -53,7 +53,7 @@ class AchievementsDrawer:
     def _create_surface(self) -> None:
         if self._current_id == None: return
         
-        warn_surf, warn_rect = self._font.render("Achievement Unlocked!", self._colors[0], size=self._font_sizes[0])
+        warn_surf, warn_rect = self._font.render("Conquista Desbloqueada!", self._colors[0], size=self._font_sizes[0])
         title_surf, title_rect = self._font.render(self._achievements[self._current_id]["title"], self._colors[0], size=self._font_sizes[1])
         img_size = warn_surf.height + title_surf.height + self._gap
 
