@@ -1,6 +1,6 @@
-# atividades_ilp_ifrn
+# atividades_backend_ifrn
 
-Repositório das Atividades da Matéria de **Introdução à Lógica e Programação** do IFRN-CNAT. Também possui algumas atividades da Matéria de **Programação Orientada a Objetos** do 2º ano. Você pode usá-lo para poder ver que atividades são essas e como eu as resolvi.
+Repositório das Atividades das Matérias de **Programação para Backend** do IFRN-CNAT. Também possui algumas atividades da Matéria de **Programação Orientada a Objetos** do 2º ano de 2024 (turma que eu não participei). Você pode usá-lo para poder ver que atividades são essas e como eu as resolvi.
 
 ## Ferramentas Utilizadas
 
