@@ -59,7 +59,10 @@ class UI:
     @staticmethod
     def draw_ball(bingo: Bingo) -> None:
         ball: int = bingo.draw()
-        print(f"Bola Sorteada: {ball}")
+        if ball <= -1:
+            print("Bolas Acabaram...")
+        else:
+            print(f"Bola Sorteada: {ball}")
 
     @staticmethod
     def drawed_balls(bingo: Bingo) -> None:
