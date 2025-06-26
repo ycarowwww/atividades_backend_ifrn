@@ -4,7 +4,7 @@ class Bingo:
     def __init__(self, num: int) -> None:
         self.__num = num
         self.__balls = [ n for n in range(1, self.__num + 1) ]
-        self.__drawed_balls = []
+        self.__drawed_balls: list[int] = []
     
     def draw(self) -> int:
         if len(self.__balls) <= 0: return -1
