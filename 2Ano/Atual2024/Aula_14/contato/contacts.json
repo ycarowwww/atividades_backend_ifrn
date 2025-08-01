@@ -1,0 +1,51 @@
+[
+    {
+        "contact_id": 2,
+        "name": "Maria Julia",
+        "email": "maju123@gmail.com",
+        "number": "87257899",
+        "birthday": "27/03/2009"
+    },
+    {
+        "contact_id": 1,
+        "name": "Ycaro",
+        "email": "ycaro@gmail.com",
+        "number": "19876782",
+        "birthday": "30/03/2009"
+    },
+    {
+        "contact_id": 3,
+        "name": "Maria Clara",
+        "email": "mariaclara@gmail.com",
+        "number": "12987592",
+        "birthday": "30/04/2010"
+    },
+    {
+        "contact_id": 4,
+        "name": "Ermesson",
+        "email": "ermesson@gmail.com",
+        "number": "987654321",
+        "birthday": "29/05/2008"
+    },
+    {
+        "contact_id": 5,
+        "name": "Danilo",
+        "email": "danilo@gmail.com",
+        "number": "912859",
+        "birthday": "12/11/2010"
+    },
+    {
+        "contact_id": 6,
+        "name": "Maria Feitosa",
+        "email": "mariafeitosa12@gmail.com",
+        "number": "92815972",
+        "birthday": "12/05/2011"
+    },
+    {
+        "contact_id": 7,
+        "name": "Erivaldo",
+        "email": "erivaldo.junior@gmail.com",
+        "number": "92801875",
+        "birthday": "16/05/1999"
+    }
+]
