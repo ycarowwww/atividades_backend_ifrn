@@ -1,5 +1,6 @@
 from templates.keep_client_ui import KeepClientUI
 from templates.keep_service_ui import KeepServiceUI
+from templates.keep_schedule_ui import KeepScheduleUI
 import streamlit as st
 
 class IndexUI:
@@ -7,10 +8,11 @@ class IndexUI:
     def menu_admin(cls) -> None:
         st.sidebar.header("Menu de Admin")
 
-        op = st.sidebar.selectbox("Menu", ["Cadastro de Clientes", "Cadastro de Serviços"])
+        op = st.sidebar.selectbox("Menu", ["Cadastro de Clientes", "Cadastro de Serviços", "Cadastro de Horários"])
         
         if op == "Cadastro de Clientes": KeepClientUI.main()
         if op == "Cadastro de Serviços": KeepServiceUI.main()
+        if op == "Cadastro de Horários": KeepScheduleUI.main()
 
     @staticmethod
     def sidebar() -> None:

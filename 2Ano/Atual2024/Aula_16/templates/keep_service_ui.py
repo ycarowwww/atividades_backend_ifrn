@@ -11,7 +11,7 @@ class KeepServiceUI:
             page_icon="🛠️"
         )
 
-        st.header("Cadastro de Serviços")
+        st.header("🛠️ Cadastro de Serviços")
 
         tab1, tab2, tab3, tab4 = st.tabs(["Listar", "Inserir", "Atualizar", "Deletar"])
 
