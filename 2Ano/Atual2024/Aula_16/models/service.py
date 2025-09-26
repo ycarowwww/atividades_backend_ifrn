@@ -125,5 +125,5 @@ class ServiceDAO:
     @classmethod
     def __save_file(cls) -> None:
         with open(cls.__json_file_path, mode="w") as file:
-            json_objects = [ o.to_json() for o in cls.__objects ]
+            json_objects = [ obj.to_json() for obj in cls.__objects ]
             json.dump(json_objects, file, indent=4)

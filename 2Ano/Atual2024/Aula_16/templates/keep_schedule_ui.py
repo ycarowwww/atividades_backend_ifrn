@@ -31,12 +31,14 @@ class KeepScheduleUI:
             if client_name: client_name = client_name.name # Gets the Client's name if the client exists
             service_description = View.get_service(schedule.service_id)
             if service_description: service_description = service_description.description # Gets the Service's description if the service exists
+            professional_name = View.get_professional(schedule.professional_id)
+            if professional_name: professional_name = professional_name.name
 
-            schedules_data.append([ schedule.id, schedule.get_formatted_date(), schedule.confirmed, client_name, service_description ])
+            schedules_data.append([ schedule.id, schedule.get_formatted_date(), schedule.confirmed, client_name, service_description, professional_name ])
         
         data = pd.DataFrame(
             schedules_data,
-            columns=["ID", "Data", "Confirmado", "Cliente", "Serviço"]
+            columns=["ID", "Data", "Confirmado", "Cliente", "Serviço", "Profissional"]
         )
 
         st.dataframe(data)
@@ -53,11 +55,12 @@ class KeepScheduleUI:
         confirmed = st.checkbox("Confirmado", key="confirmed_1")
         client = st.selectbox("Informe o Cliente", View.get_client_list(), index=None)
         service = st.selectbox("Informe o Serviço", View.get_service_list(), index=None)
+        professional = st.selectbox("Informe o Profissional", View.get_professional_list(), index=None)
 
         do_insert = st.button("Inserir Horário")
 
         if do_insert:
-            View.append_schedule(datetime_entered, confirmed, client, service)
+            View.append_schedule(datetime_entered, confirmed, client, service, professional)
             st.success("Horário Inserido com Sucesso!", icon="✔")
             sleep(2)
             st.rerun()
@@ -83,11 +86,12 @@ class KeepScheduleUI:
             confirmed = st.checkbox("Confirmado", schedule_selected.confirmed, "confirmed_2")
             client = st.selectbox("Informe o novo Cliente", View.get_client_list(), index=None)
             service = st.selectbox("Informe o novo Serviço", View.get_service_list(), index=None)
+            professional = st.selectbox("Informe o novo Profissional", View.get_professional_list(), index=None)
 
             do_update = st.button("Atualizar Horário")
 
             if do_update:
-                View.update_schedule(schedule_selected.id, datetime_entered, confirmed, client, service)
+                View.update_schedule(schedule_selected.id, datetime_entered, confirmed, client, service, professional)
                 st.success("Horário Atualizado com Sucesso!", icon="✔")
                 sleep(2)
                 st.rerun()

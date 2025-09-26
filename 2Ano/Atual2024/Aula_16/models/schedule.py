@@ -10,12 +10,13 @@ def get_file_path(file: str) -> str:
     return os.path.join(base_dir, file)
 
 class Schedule:
-    def __init__(self, schedule_id: int, date: datetime, confirmed: bool = False, client_id: int = 0, service_id: int = 0) -> None:
+    def __init__(self, schedule_id: int, date: datetime, confirmed: bool = False, client_id: int = 0, service_id: int = 0, professional_id: int = 0) -> None:
         self.id = schedule_id
         self.date = date
         self.confirmed = confirmed
         self.client_id = client_id
         self.service_id = service_id
+        self.professional_id = professional_id
 
     @property
     def id(self) -> int: return self.__id
@@ -66,6 +67,16 @@ class Schedule:
 
         self.__service_id = new_service_id
 
+    @property
+    def professional_id(self) -> int: return self.__professional_id
+
+    @professional_id.setter
+    def professional_id(self, new_professional_id: int) -> None:
+        if not isinstance(new_professional_id, int): raise TypeError("Professional's ID needs to be an Integer.")
+        if new_professional_id < 0: raise ValueError("Professional's ID needs to be greater than Zero.")
+
+        self.__professional_id = new_professional_id
+
     def get_formatted_date(self) -> str: return self.date.strftime("%d/%m/%Y %H:%M:%S")
 
     def to_json(self) -> dict[str, Any]:
@@ -74,12 +85,13 @@ class Schedule:
             "date": self.date.strftime("%d/%m/%Y %H:%M:%S"),
             "confirmed": self.confirmed,
             "client_id": self.client_id,
-            "service_id": self.service_id
+            "service_id": self.service_id,
+            "professional_id": self.professional_id
         }
     
     @staticmethod
     def from_json(data: dict[str, Any]) -> "Schedule":
-        return Schedule(data["id"], datetime.strptime(data["date"], "%d/%m/%Y %H:%M:%S"), data["confirmed"], data["client_id"], data["service_id"])
+        return Schedule(data["id"], datetime.strptime(data["date"], "%d/%m/%Y %H:%M:%S"), data["confirmed"], data["client_id"], data["service_id"], data["professional_id"])
 
     def __str__(self) -> str:
         available = "Confirmado" if self.confirmed else "Não Confirmado"
@@ -126,6 +138,7 @@ class ScheduleDAO:
         cur_obj.confirmed = obj.confirmed
         cur_obj.client_id = obj.client_id
         cur_obj.service_id = obj.service_id
+        cur_obj.professional_id = obj.professional_id
 
         cls.__save_file()
 
@@ -155,5 +168,5 @@ class ScheduleDAO:
     @classmethod
     def __save_file(cls) -> None:
         with open(cls.__json_file_path, mode="w") as file:
-            json_objects = [ o.to_json() for o in cls.__objects ]
+            json_objects = [ obj.to_json() for obj in cls.__objects ]
             json.dump(json_objects, file, indent=4)
