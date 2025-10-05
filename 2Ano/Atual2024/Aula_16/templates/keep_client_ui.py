@@ -4,6 +4,7 @@ from time import sleep
 from views import View
 
 class KeepClientUI:
+    """Página do Admin para o Gerenciamento dos Clientes."""
     @staticmethod
     def main() -> None:
         st.set_page_config(
@@ -23,11 +24,11 @@ class KeepClientUI:
     @staticmethod
     def list_clients() -> None:
         clients = View.get_client_list()
-        clients_data = [ [ c.id, c.name, c.email, c.phone ] for c in clients ]
+        clients_data = [ [ c.id, c.name, c.email, c.phone, c.password ] for c in clients ]
         
         data = pd.DataFrame(
             clients_data,
-            columns=["ID", "Nome", "Email", "Telefone"]
+            columns=["ID", "Nome", "Email", "Telefone", "Senha"]
         )
 
         st.table(data)
@@ -37,11 +38,12 @@ class KeepClientUI:
         name = st.text_input("Insira o Nome")
         email = st.text_input("Insira o Email")
         phone = st.text_input("Insira o Telefone")
+        password = st.text_input("Insira a Senha", type="password")
 
         do_insert = st.button("Inserir Cliente")
 
         if do_insert:
-            View.append_client(name, email, phone)
+            View.append_client(name, email, phone, password)
             st.success("Cliente Inserido com Sucesso!", icon="✔")
             sleep(2)
             st.rerun()
@@ -60,10 +62,11 @@ class KeepClientUI:
             new_name = st.text_input("Insira o Novo Nome", client_selected.name)
             new_email = st.text_input("Insira o Novo Email", client_selected.email)
             new_phone = st.text_input("Insira o Novo Telefone", client_selected.phone)
+            new_password = st.text_input("Insira a Nova Senha", client_selected.password, type="password")
             do_update = st.button("Atualizar Cliente")
 
             if do_update:
-                View.update_client(client_selected.id, new_name, new_email, new_phone)
+                View.update_client(client_selected.id, new_name, new_email, new_phone, new_password)
                 st.success("Cliente Atualizado com Sucesso!", icon="✔")
                 sleep(2)
                 st.rerun()

@@ -4,6 +4,7 @@ from time import sleep
 from views import View
 
 class KeepServiceUI:
+    """Página do Admin para o Gerenciamento dos Serviços."""
     @staticmethod
     def main() -> None:
         st.set_page_config(

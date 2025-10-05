@@ -1,26 +1,21 @@
-import json
-import os
+from .abc_dao import AbstractDAO
 from typing import Any
 
-def get_file_path(file: str) -> str:
-    """Gets the absolute path of a specific file."""
-    base_dir: str = os.path.dirname(os.path.abspath(__file__))
-
-    return os.path.join(base_dir, file)
-
 class Professional:
-    def __init__(self, prof_id: int, name: str, speciality: str, council: str) -> None:
+    def __init__(self, prof_id: int, name: str, email: str, speciality: str, council: str, password: str) -> None:
         self.id = prof_id
         self.name = name
+        self.email = email
         self.speciality = speciality
         self.council = council
+        self.password = password
     
     @property
     def id(self) -> int: return self.__id
 
     @id.setter
     def id(self, prof_id: int) -> None:
-        if not isinstance(prof_id, int): raise TypeError("ID needs to be an INT.") # type: ignore
+        if not isinstance(prof_id, int): raise TypeError("ID needs to be an INT.")
         if prof_id < 0: raise ValueError("ID can't be negative.")
 
         self.__id = prof_id
@@ -34,6 +29,16 @@ class Professional:
         if name == "": raise ValueError("Name can't be empty.")
 
         self.__name = name
+
+    @property
+    def email(self) -> str: return self.__email
+
+    @email.setter
+    def email(self, email: str) -> None:
+        email = email.strip()
+        if email == "": raise ValueError("Email can't be empty.")
+
+        self.__email = email
 
     @property
     def speciality(self) -> str: return self.__speciality
@@ -55,91 +60,37 @@ class Professional:
 
         self.__council = council
 
-    def __str__(self) -> None:
+    @property
+    def password(self) -> str:
+        return self.__password
+    
+    @password.setter
+    def password(self, new_password: str) -> None:
+        new_password = new_password.strip()
+        if new_password == "": raise ValueError("Password can't be empty.")
+        
+        self.__password = new_password
+
+    def __str__(self) -> str:
         return f"Profissional {self.id} : {self.name} - {self.speciality} e {self.council}"
 
     def to_json(self) -> dict[str, Any]:
-        """Converts Professional's data to a JSON format."""
+        """Converte os dados do Objeto para JSON."""
         return {
             "prof_id": self.id,
             "name": self.name,
+            "email": self.email,
             "speciality": self.speciality,
-            "council": self.council
+            "council": self.council,
+            "password": self.password
         }
 
     @staticmethod
     def from_json(data: dict[str, Any]) -> "Professional":
-        """Reads JSON format data and converts it to a real Professional object."""
-        return Professional(data["prof_id"], data["name"], data["speciality"], data["council"])
+        """Ler dados JSON e converte para um Objeto dessa Classe."""
+        return Professional(data["prof_id"], data["name"], data["email"], data["speciality"], data["council"], data["password"])
 
-class ProfessionalDAO:
-    __objects: list[Professional] = []
-    __json_file_path: str = get_file_path("../data/professionals.json")
-
-    @classmethod
-    def append(cls, obj: Professional) -> None:
-        cls.__open_file()
-        
-        new_id: int = 1
-        while cls.get_professional(new_id) is not None:
-            new_id += 1
-        
-        obj.id = new_id
-        cls.__objects.append(obj)
-
-        cls.__save_file()
-    
-    @classmethod
-    def get_professionals(cls) -> list[Professional]: 
-        cls.__open_file()
-        return cls.__objects
-
-    @classmethod
-    def get_professional(cls, searched_id: int) -> Professional | None:
-        cls.__open_file()
-
-        for professional in cls.__objects:
-            if professional.id == searched_id:
-                return professional
-
-    @classmethod
-    def update(cls, obj: Professional) -> None:
-        cls.__open_file()
-
-        cur_obj = cls.get_professional(obj.id)
-        if cur_obj is None: raise ValueError("Passed Professional doesn't exist on database.")
-
-        cur_obj.name = obj.name
-        cur_obj.speciality = obj.speciality
-        cur_obj.council = obj.council
-
-        cls.__save_file()
-
-    @classmethod
-    def remove(cls, obj: Professional) -> None:
-        cls.__open_file()
-        
-        cur_obj = cls.get_professional(obj.id)
-        if cur_obj is None: raise ValueError("Passed Professional doesn't exist on database.")
-
-        cls.__objects.remove(cur_obj)
-
-        cls.__save_file()
-
-    @classmethod
-    def __open_file(cls) -> None:
-        cls.__objects = []
-
-        if os.path.exists(cls.__json_file_path):
-            with open(cls.__json_file_path, mode="r") as file:
-                data: list[dict[str, Any]] = json.load(file)
-
-                for professional in data:
-                    new_obj = Professional.from_json(professional)
-                    cls.__objects.append(new_obj)
-
-    @classmethod
-    def __save_file(cls) -> None:
-        with open(cls.__json_file_path, mode="w") as file:
-            json_objects = [ obj.to_json() for obj in cls.__objects ]
-            json.dump(json_objects, file, indent=4)
+class ProfessionalDAO(AbstractDAO):
+    _objects: list[Professional] = []
+    _json_file_path_str: str = "../data/professionals.json"
+    _from_json_method = Professional.from_json

@@ -1,12 +1,11 @@
 from .abc_dao import AbstractDAO
 from typing import Any
 
-class Client:
-    def __init__(self, client_id: int, name: str, email: str, phone: str, password: str) -> None:
-        self.id = client_id
+class Admin:
+    def __init__(self, admin_id: int, name: str, email: str, password: str) -> None:
+        self.id = admin_id
         self.name = name
         self.email = email
-        self.phone = phone
         self.password = password
     
     @property
@@ -40,16 +39,6 @@ class Client:
         self.__email = email
 
     @property
-    def phone(self) -> str: return self.__phone
-
-    @phone.setter
-    def phone(self, phone: str) -> None:
-        phone = phone.strip()
-        if phone == "": raise ValueError("Phone can't be empty.")
-
-        self.__phone = phone
-
-    @property
     def password(self) -> str:
         return self.__password
     
@@ -61,7 +50,7 @@ class Client:
         self.__password = new_password
 
     def __str__(self) -> str:
-        return f"Cliente {self.id} : {self.name} -> {self.email} | {self.phone}"
+        return f"Admin {self.id} : {self.name} -> {self.email}"
 
     def to_json(self) -> dict[str, Any]:
         """Converte os dados do Objeto para JSON."""
@@ -69,16 +58,15 @@ class Client:
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "phone": self.phone,
             "password": self.password
         }
 
     @staticmethod
-    def from_json(data: dict[str, Any]) -> "Client":
+    def from_json(data: dict[str, Any]) -> "Admin":
         """Ler dados JSON e converte para um Objeto dessa Classe."""
-        return Client(data["id"], data["name"], data["email"], data["phone"], data["password"])
+        return Admin(data["id"], data["name"], data["email"], data["password"])
 
-class ClientDAO(AbstractDAO):
-    _objects: list[Client] = []
-    _json_file_path_str: str = "../data/clients.json"
-    _from_json_method = Client.from_json
+class AdminDAO(AbstractDAO):
+    _objects: list[Admin] = []
+    _json_file_path_str: str = "../data/admins.json"
+    _from_json_method = Admin.from_json
