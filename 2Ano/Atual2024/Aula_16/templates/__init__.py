@@ -9,6 +9,7 @@ from .profile_admin_ui import *
 from .profile_professional_ui import *
 from .schedule_client_ui import *
 from .schedule_professional_ui import *
+from .set_service_client_ui import *
 
 # Arquivos '__init__.py' servem para poder realizar um "import" mais ou menos assim:
 # from templates import *

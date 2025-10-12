@@ -14,12 +14,10 @@ class ScheduleProfessionalUI:
         st.header("⏰ Meus Horários")
 
         user_id: int = st.session_state["user_id"]
-        prof_data = View.get_professional(user_id)
 
-        schedules = View.get_schedule_list()
+        schedules = View.get_schedules_by_professional(user_id)
         schedules_data: list[list] = []
         for schedule in schedules:
-            if schedule.professional_id != prof_data.id: continue # Pega apenas os horários que pertencem ao Profissional atual.
             client_name = View.get_client(schedule.client_id)
             if client_name: client_name = client_name.name # Pega o nome do Cliente se ele existir.
             service_description = View.get_service(schedule.service_id)

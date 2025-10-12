@@ -24,7 +24,10 @@ class View:
     
     # Métodos - Cliente.
     @staticmethod
-    def get_client_list() -> list[Client]: return View.get_all(ClientDAO)
+    def get_client_list() -> list[Client]:
+        items: list[Client] = View.get_all(ClientDAO)
+        items.sort(key=lambda i: i.id)
+        return items
 
     @staticmethod
     def get_client(client_id: int) -> Optional[Client]: return View.get_id(ClientDAO, client_id)
@@ -43,7 +46,10 @@ class View:
     
     # Métodos - Serviço.
     @staticmethod
-    def get_service_list() -> list[Service]: return View.get_all(ServiceDAO)
+    def get_service_list() -> list[Service]: 
+        items: list[Service] = View.get_all(ServiceDAO)
+        items.sort(key=lambda i: i.id)
+        return items
 
     @staticmethod
     def get_service(service_id: int) -> Optional[Service]: return View.get_id(ServiceDAO, service_id)
@@ -62,7 +68,10 @@ class View:
     
     # Métodos - Horário.
     @staticmethod
-    def get_schedule_list() -> list[Schedule]: return View.get_all(ScheduleDAO)
+    def get_schedule_list() -> list[Schedule]: 
+        items: list[Schedule] = View.get_all(ScheduleDAO)
+        items.sort(key=lambda i: i.date)
+        return items
 
     @staticmethod
     def get_schedule(schedule_id: int) -> Optional[Schedule]: return View.get_id(ScheduleDAO, schedule_id)
@@ -87,7 +96,10 @@ class View:
     
     # Métodos - Profissional.
     @staticmethod
-    def get_professional_list() -> list[Professional]: return View.get_all(ProfessionalDAO)
+    def get_professional_list() -> list[Professional]: 
+        items: list[Professional] = View.get_all(ProfessionalDAO)
+        items.sort(key=lambda i: i.id)
+        return items
 
     @staticmethod
     def get_professional(prof_id: int) -> Optional[Professional]: return View.get_id(ProfessionalDAO, prof_id)
@@ -106,7 +118,10 @@ class View:
 
     # Métodos - Admin.
     @staticmethod
-    def get_admin_list() -> list[Admin]: return View.get_all(AdminDAO)
+    def get_admin_list() -> list[Admin]: 
+        items: list[Admin] = View.get_all(AdminDAO)
+        items.sort(key=lambda i: i.id)
+        return items
 
     @staticmethod
     def get_admin(admin_id: int) -> Optional[Admin]: return View.get_id(AdminDAO, admin_id)
@@ -122,6 +137,46 @@ class View:
     @staticmethod
     def remove_admin(admin_id: int) -> None:
         View.delete(AdminDAO, Admin(admin_id, "_", "_", "_"))
+
+    # Filtração.
+    @staticmethod
+    def get_schedules_to_setting(prof_id: int) -> list[Schedule]:
+        """Retorna os horários permitidos para serem agendados."""
+        schedules: list[Schedule] = []
+        today_time = datetime.now()
+        
+        for schedule in View.get_schedule_list():
+            if (schedule.professional_id == prof_id
+                    and schedule.date >= today_time
+                    and schedule.client_id == 0
+                    and schedule.confirmed == False):
+                schedules.append(schedule)
+
+        return schedules
+
+    @staticmethod
+    def get_schedules_by_client(client_id: int) -> list[Schedule]:
+        """Retornar os Horários de um Cliente específico."""
+        wanted_schedules: list[Schedule] = []
+        schedules = View.get_schedule_list()
+
+        for schedule in schedules:
+            if schedule.client_id == client_id:
+                wanted_schedules.append(schedule)
+
+        return wanted_schedules
+
+    @staticmethod
+    def get_schedules_by_professional(prof_id: int) -> list[Schedule]:
+        """Retornar os Horários de um Profissional específico."""
+        wanted_schedules: list[Schedule] = []
+        schedules = View.get_schedule_list()
+
+        for schedule in schedules:
+            if schedule.professional_id == prof_id:
+                wanted_schedules.append(schedule)
+
+        return wanted_schedules
 
     # Autenticação.
     @staticmethod
