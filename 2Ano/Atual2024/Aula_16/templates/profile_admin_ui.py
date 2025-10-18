@@ -17,7 +17,7 @@ class AdminProfileUI:
         admin_data = View.get_admin(user_id)
 
         new_name = st.text_input("Informe o Novo Nome", admin_data.name)
-        new_email = st.text_input("Informe o Novo E-mail", admin_data.email)
+        new_email = st.text_input("Informe o Novo E-mail", admin_data.email, disabled=True)
         new_password = st.text_input("Informe a Nova Senha", admin_data.password, type="password")
         do_update = st.button("Atualizar")
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Type, Optional
 from models import *
 
@@ -93,6 +93,12 @@ class View:
     @staticmethod
     def remove_schedule(schedule_id: int) -> None:
         View.delete(ScheduleDAO, Schedule(schedule_id, datetime(1900, 1, 2)))
+    
+    @staticmethod
+    def append_multiple_schedules(date_beginning: datetime, date_ending: datetime, interval_minutes: int, professional: Professional) -> None:
+        while date_beginning <= date_ending:
+            View.append_schedule(date_beginning, False, None, None, professional)
+            date_beginning += timedelta(minutes=interval_minutes)
     
     # Métodos - Profissional.
     @staticmethod

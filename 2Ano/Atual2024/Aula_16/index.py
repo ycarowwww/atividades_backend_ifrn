@@ -26,10 +26,12 @@ class IndexUI:
     def menu_professional() -> None:
         st.sidebar.header("Menu de Profissional")
 
-        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários"])
+        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários", "Abrir Agenda", "Confirmar Serviço"])
 
         if op == "Visualizar Perfil": ProfessionalProfileUI.main()
         elif op == "Visualizar Horários": ScheduleProfessionalUI.main()
+        elif op == "Abrir Agenda": SetScheduleProfessionalUI.main()
+        elif op == "Confirmar Serviço": ConfirmScheduleProfessionalUI.main()
     
     @staticmethod
     def menu_admin() -> None:

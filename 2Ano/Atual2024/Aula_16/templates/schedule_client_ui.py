@@ -7,11 +7,11 @@ class ScheduleClientUI:
     @staticmethod
     def main() -> None:
         st.set_page_config(
-            page_title="Visualizar Horários",
+            page_title="Visualizar Serviços",
             page_icon="⏰"
         )
         
-        st.header("⏰ Meus Horários")
+        st.header("⏰ Meus Serviços")
 
         user_id: int = st.session_state["user_id"]
 
