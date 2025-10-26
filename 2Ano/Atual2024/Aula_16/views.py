@@ -34,14 +34,23 @@ class View:
 
     @staticmethod
     def append_client(name: str, email: str, phone: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.add(ClientDAO, Client(0, name, email, phone, password))
     
     @staticmethod
     def update_client(client_id: int, name: str, email: str, phone: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.update(ClientDAO, Client(client_id, name, email, phone, password))
     
     @staticmethod
     def remove_client(client_id: int) -> None:
+        if len(View.get_schedules_by_client(client_id)) > 0:
+            raise ValueError("Client has scheduled appointments")
+        
         View.delete(ClientDAO, Client(client_id, "_", "_", "_", "_"))
     
     # Métodos - Serviço.
@@ -56,14 +65,23 @@ class View:
 
     @staticmethod
     def append_service(description: str, value: float) -> None:
+        if View.check_service_description(description):
+            raise ValueError("This description is already being used")
+        
         View.add(ServiceDAO, Service(0, description, value))
 
     @staticmethod
     def update_service(service_id: int, description: str, value: float) -> None:
+        if View.check_service_description(description):
+            raise ValueError("This description is already being used")
+        
         View.update(ServiceDAO, Service(service_id, description, value))
 
     @staticmethod
     def remove_service(service_id: int) -> None:
+        if View.check_service_schedules(service_id):
+            raise ValueError("This service is being used in some schedules")
+        
         View.delete(ServiceDAO, Service(service_id, "_", 0))
     
     # Métodos - Horário.
@@ -81,18 +99,29 @@ class View:
         client_id = client.id if isinstance(client, Client) else 0
         service_id = service.id if isinstance(service, Service) else 0
         professional_id = professional.id if isinstance(professional, Professional) else 0
-        View.add(ScheduleDAO, Schedule(0, date, confirmed, client_id, service_id, professional_id))
+        schedule = Schedule(0, date, confirmed, client_id, service_id, professional_id)
+        if View.check_schedule(schedule):
+            raise ValueError("There is already a schedule for the same professional at the same time")
+        
+        View.add(ScheduleDAO, schedule)
 
     @staticmethod
     def update_schedule(schedule_id: int, date: datetime, confirmed: bool, client: Optional[Client], service: Optional[Service], professional: Optional[Professional]) -> None:
         client_id = client.id if isinstance(client, Client) else 0
         service_id = service.id if isinstance(service, Service) else 0
         professional_id = professional.id if isinstance(professional, Professional) else 0
-        View.update(ScheduleDAO, Schedule(schedule_id, date, confirmed, client_id, service_id, professional_id))
+        schedule = Schedule(schedule_id, date, confirmed, client_id, service_id, professional_id)
+        if View.check_schedule(schedule):
+            raise ValueError("There is already a schedule for the same professional at the same time")
+        
+        View.update(ScheduleDAO, schedule)
 
     @staticmethod
     def remove_schedule(schedule_id: int) -> None:
-        View.delete(ScheduleDAO, Schedule(schedule_id, datetime(1900, 1, 2)))
+        if View.get_schedule(schedule_id).client_id != 0:
+            raise ValueError("Schedule has already been scheduled")
+        
+        View.delete(ScheduleDAO, Schedule(schedule_id, datetime(2025, 1, 2)))
     
     @staticmethod
     def append_multiple_schedules(date_beginning: datetime, date_ending: datetime, interval_minutes: int, professional: Professional) -> None:
@@ -112,14 +141,23 @@ class View:
 
     @staticmethod
     def append_professional(name: str, email: str, speciality: str, council: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.add(ProfessionalDAO, Professional(0, name, email, speciality, council, password))
 
     @staticmethod
     def update_professional(prof_id: int, name: str, email: str, speciality: str, council: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.update(ProfessionalDAO, Professional(prof_id, name, email, speciality, council, password))
 
     @staticmethod
     def remove_professional(prof_id: int) -> None:
+        if len(View.get_schedules_by_professional(prof_id)) > 0:
+            raise ValueError("Professional has scheduled appointments")
+        
         View.delete(ProfessionalDAO, Professional(prof_id, "_", "_", "_", "_", "_"))
 
     # Métodos - Admin.
@@ -134,10 +172,16 @@ class View:
 
     @staticmethod
     def append_admin(name: str, email: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.add(AdminDAO, Admin(0, name, email, password))
     
     @staticmethod
     def update_admin(admin_id: int, name: str, email: str, password: str) -> None:
+        if View.check_email(email):
+            raise ValueError("E-mail is already being used")
+        
         View.update(AdminDAO, Admin(admin_id, name, email, password))
     
     @staticmethod
@@ -183,6 +227,59 @@ class View:
                 wanted_schedules.append(schedule)
 
         return wanted_schedules
+
+    @staticmethod
+    def check_schedule(schedule: Schedule) -> bool:
+        """Retornar se um horário igual já existe para o profissional do horário"""
+        if schedule.professional_id == 0: return False
+
+        prof_schedules = View.get_schedules_by_professional(schedule.professional_id)
+
+        for sch in prof_schedules:
+            if sch.date == schedule.date and sch.id != schedule.id:
+                return True
+        
+        return False
+        
+    @staticmethod
+    def check_email(email: str) -> bool:
+        """Retorna se o email já está sendo utilizado."""
+        clients = View.get_client_list()
+        professionals = View.get_professional_list()
+        admins = View.get_admin_list()
+
+        for client in clients:
+            if client.email == email: return True
+
+        for professional in professionals:
+            if professional.email == email: return True
+
+        for admin in admins:
+            if admin.email == email: return True
+        
+        return False
+
+    @staticmethod
+    def check_service_description(description: str) -> bool:
+        """Retorna se um serviço com a mesma descrição já existe."""
+        services = View.get_service_list()
+
+        for service in services:
+            if service.description == description:
+                return True
+        
+        return False
+
+    @staticmethod
+    def check_service_schedules(service_id: int) -> bool:
+        """Retorna se o serviço está sendo utilizado em algum horário."""
+        schedules = View.get_schedule_list()
+
+        for schedule in schedules:
+            if schedule.service_id == service_id:
+                return True
+            
+        return False
 
     # Autenticação.
     @staticmethod

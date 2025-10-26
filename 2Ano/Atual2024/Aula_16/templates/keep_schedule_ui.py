@@ -61,8 +61,11 @@ class KeepScheduleUI:
         do_insert = st.button("Inserir Horário")
 
         if do_insert:
-            View.append_schedule(datetime_entered, confirmed, client, service, professional)
-            st.success("Horário Inserido com Sucesso!", icon="✔")
+            try:
+                View.append_schedule(datetime_entered, confirmed, client, service, professional)
+                st.success("Horário Inserido com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()
 
@@ -108,8 +111,11 @@ class KeepScheduleUI:
             do_update = st.button("Atualizar Horário")
 
             if do_update:
-                View.update_schedule(schedule_selected.id, datetime_entered, confirmed, client, service, professional)
-                st.success("Horário Atualizado com Sucesso!", icon="✔")
+                try:
+                    View.update_schedule(schedule_selected.id, datetime_entered, confirmed, client, service, professional)
+                    st.success("Horário Atualizado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()
 
@@ -127,7 +133,10 @@ class KeepScheduleUI:
             do_removal = st.button("Deletar Horário", type="primary")
 
             if do_removal:
-                View.remove_schedule(schedule_selected.id)
-                st.success("Horário Deletado com Sucesso!", icon="✔")
+                try:
+                    View.remove_schedule(schedule_selected.id)
+                    st.success("Horário Deletado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()

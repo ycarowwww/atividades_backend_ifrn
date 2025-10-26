@@ -44,8 +44,11 @@ class KeepProfessionalUI:
         do_insert = st.button("Inserir Profissional")
 
         if do_insert:
-            View.append_professional(name, email, speciality, council, password)
-            st.success("Profissional Inserido com Sucesso!", icon="✔")
+            try:
+                View.append_professional(name, email, speciality, council, password)
+                st.success("Profissional Inserido com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()
 
@@ -68,8 +71,11 @@ class KeepProfessionalUI:
             do_update = st.button("Atualizar Profissional")
 
             if do_update:
-                View.update_professional(professional_selected.id, new_name, new_email, new_speciality, new_council, new_password)
-                st.success("Profissional Atualizado com Sucesso!", icon="✔")
+                try:
+                    View.update_professional(professional_selected.id, new_name, new_email, new_speciality, new_council, new_password)
+                    st.success("Profissional Atualizado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()
 
@@ -87,7 +93,10 @@ class KeepProfessionalUI:
             do_removal = st.button("Deletar Profissional", type="primary")
 
             if do_removal:
-                View.remove_professional(professional_selected.id)
-                st.success("Profissional Deletado com Sucesso!", icon="✔")
+                try:
+                    View.remove_professional(professional_selected.id)
+                    st.success("Profissional Deletado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()

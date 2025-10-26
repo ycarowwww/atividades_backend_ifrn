@@ -35,7 +35,10 @@ class SetScheduleProfessionalUI:
         set_schedule = st.button("Abrir Agenda")
 
         if set_schedule:
-            View.append_multiple_schedules(beginning_datetime, ending_datetime, interval, prof_data)
-            st.success("Horário Agendado com Sucesso!", icon="✔")
+            try:
+                View.append_multiple_schedules(beginning_datetime, ending_datetime, interval, prof_data)
+                st.success("Horário Agendado com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(1)
             st.rerun()

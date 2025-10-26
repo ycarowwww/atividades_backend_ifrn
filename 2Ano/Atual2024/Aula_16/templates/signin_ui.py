@@ -20,7 +20,10 @@ class SigninUI:
         do_signin = st.button("Criar")
 
         if do_signin:
-            View.append_client(name, email, phone, password)
-            st.success("Conta Cliente criada com Sucesso!", icon="✔")
+            try:
+                View.append_client(name, email, phone, password)
+                st.success("Conta Cliente criada com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()

@@ -25,7 +25,10 @@ class ConfirmScheduleProfessionalUI:
         do_confirmation = st.button("Confirmar" if not schedule.confirmed else "Desmarcar")
 
         if do_confirmation:
-            View.update_schedule(schedule.id, schedule.date, not schedule.confirmed, schedule_client, View.get_service(schedule.service_id), prof_data)
-            st.success(f"Horário {'Confirmado' if not schedule.confirmed else 'Desmarcado'} com Sucesso!", icon="✔")
+            try:
+                View.update_schedule(schedule.id, schedule.date, not schedule.confirmed, schedule_client, View.get_service(schedule.service_id), prof_data)
+                st.success(f"Horário {'Confirmado' if not schedule.confirmed else 'Desmarcado'} com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()

@@ -41,8 +41,11 @@ class KeepServiceUI:
         do_insert = st.button("Inserir Serviço")
 
         if do_insert:
-            View.append_service(description, value)
-            st.success("Serviço Inserido com Sucesso!", icon="✔")
+            try:
+                View.append_service(description, value)
+                st.success("Serviço Inserido com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()
 
@@ -62,8 +65,11 @@ class KeepServiceUI:
             do_update = st.button("Atualizar Cliente")
 
             if do_update:
-                View.update_service(service_selected.id, description, value)
-                st.success("Serviço Atualizado com Sucesso!", icon="✔")
+                try:
+                    View.update_service(service_selected.id, description, value)
+                    st.success("Serviço Atualizado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()
 
@@ -81,7 +87,10 @@ class KeepServiceUI:
             do_removal = st.button("Deletar Serviço", type="primary")
 
             if do_removal:
-                View.remove_service(service_selected.id)
-                st.success("Serviço Deletado com Sucesso!", icon="✔")
+                try:
+                    View.remove_service(service_selected.id)
+                    st.success("Serviço Deletado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()

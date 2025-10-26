@@ -29,10 +29,18 @@ class SetServiceClientUI:
         prof = st.selectbox("Informe o Profissional", profs_list)
         schedule = st.selectbox("Informe o Horário", View.get_schedules_to_setting(prof.id))
         service = st.selectbox("Informe o Serviço", services_list)
+        
+        if len(View.get_schedules_to_setting(prof.id)) <= 0:
+            st.write("Nenhum Horário Disponível para esse Profissional.")
+            return
+        
         set_schedule = st.button("Agendar")
 
         if set_schedule:
-            View.update_schedule(schedule.id, schedule.date, schedule.confirmed, client_data, service, prof)
-            st.success("Horário Agendado com Sucesso!", icon="✔")
+            try:
+                View.update_schedule(schedule.id, schedule.date, schedule.confirmed, client_data, service, prof)
+                st.success("Horário Agendado com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(1)
             st.rerun()

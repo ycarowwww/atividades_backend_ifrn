@@ -23,7 +23,10 @@ class ClientProfileUI:
         do_update = st.button("Atualizar")
 
         if do_update:
-            View.update_client(client_data.id, new_name, new_email, new_phone, new_password)
-            st.success("Seus Dados foram Atualizados com Sucesso!", icon="✔")
+            try:
+                View.update_client(client_data.id, new_name, new_email, new_phone, new_password)
+                st.success("Seus Dados foram Atualizados com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()

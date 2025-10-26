@@ -27,7 +27,7 @@ class Schedule:
     @date.setter
     def date(self, new_date: datetime) -> None:
         if not isinstance(new_date, datetime): raise TypeError("Date needs to be a Datetime.")
-        if new_date < datetime(1900, 1, 1): raise ValueError("Date too long ago.")
+        if new_date < datetime(2025, 1, 1): raise ValueError("Date too long ago.")
 
         self.__date = new_date
 

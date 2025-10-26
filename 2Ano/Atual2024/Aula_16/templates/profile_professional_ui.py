@@ -24,7 +24,10 @@ class ProfessionalProfileUI:
         do_update = st.button("Atualizar")
 
         if do_update:
-            View.update_professional(prof_data.id, new_name, new_email, new_speciality, new_council, new_password)
-            st.success("Seus Dados foram Atualizados com Sucesso!", icon="✔")
+            try:
+                View.update_professional(prof_data.id, new_name, new_email, new_speciality, new_council, new_password)
+                st.success("Seus Dados foram Atualizados com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()

@@ -43,8 +43,11 @@ class KeepClientUI:
         do_insert = st.button("Inserir Cliente")
 
         if do_insert:
-            View.append_client(name, email, phone, password)
-            st.success("Cliente Inserido com Sucesso!", icon="✔")
+            try:
+                View.append_client(name, email, phone, password)
+                st.success("Cliente Inserido com Sucesso!", icon="✔")
+            except Exception as e:
+                st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
             sleep(2)
             st.rerun()
 
@@ -66,8 +69,11 @@ class KeepClientUI:
             do_update = st.button("Atualizar Cliente")
 
             if do_update:
-                View.update_client(client_selected.id, new_name, new_email, new_phone, new_password)
-                st.success("Cliente Atualizado com Sucesso!", icon="✔")
+                try:
+                    View.update_client(client_selected.id, new_name, new_email, new_phone, new_password)
+                    st.success("Cliente Atualizado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()
 
@@ -85,7 +91,10 @@ class KeepClientUI:
             do_removal = st.button("Deletar Cliente", type="primary")
 
             if do_removal:
-                View.remove_client(client_selected.id)
-                st.success("Cliente Deletado com Sucesso!", icon="✔")
+                try:
+                    View.remove_client(client_selected.id)
+                    st.success("Cliente Deletado com Sucesso!", icon="✔")
+                except Exception as e:
+                    st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
                 sleep(2)
                 st.rerun()
