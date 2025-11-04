@@ -41,7 +41,11 @@ class View:
     
     @staticmethod
     def update_client(client_id: int, name: str, email: str, phone: str, password: str) -> None:
-        if View.check_email(email):
+        old_client = View.get_client(client_id)
+        users_type = View.get_users_type()
+        verif_excep = {} if old_client is None else { users_type.CLIENT : [ old_client.email ] }
+
+        if View.check_email(email, verif_excep):
             raise ValueError("E-mail is already being used")
         
         View.update(ClientDAO, Client(client_id, name, email, phone, password))
@@ -148,7 +152,11 @@ class View:
 
     @staticmethod
     def update_professional(prof_id: int, name: str, email: str, speciality: str, council: str, password: str) -> None:
-        if View.check_email(email):
+        old_prof = View.get_professional(prof_id)
+        users_type = View.get_users_type()
+        verif_excep = {} if old_prof is None else { users_type.PROFESSIONAL : [ old_prof.email ] }
+
+        if View.check_email(email, verif_excep):
             raise ValueError("E-mail is already being used")
         
         View.update(ProfessionalDAO, Professional(prof_id, name, email, speciality, council, password))
@@ -179,7 +187,11 @@ class View:
     
     @staticmethod
     def update_admin(admin_id: int, name: str, email: str, password: str) -> None:
-        if View.check_email(email):
+        old_admin = View.get_admin(admin_id)
+        users_type = View.get_users_type()
+        verif_excep = {} if old_admin is None else { users_type.ADMIN : [ old_admin.email ] }
+
+        if View.check_email(email, verif_excep):
             raise ValueError("E-mail is already being used")
         
         View.update(AdminDAO, Admin(admin_id, name, email, password))
@@ -242,20 +254,24 @@ class View:
         return False
         
     @staticmethod
-    def check_email(email: str) -> bool:
+    def check_email(email: str, exceptions: dict[UsersTypeIDs, list[str]] = {}) -> bool:
         """Retorna se o email já está sendo utilizado."""
         clients = View.get_client_list()
         professionals = View.get_professional_list()
         admins = View.get_admin_list()
+        users_types = View.get_users_type()
 
         for client in clients:
-            if client.email == email: return True
+            if client.email == email and client.email not in exceptions.get(users_types.CLIENT, []): 
+                return True
 
         for professional in professionals:
-            if professional.email == email: return True
+            if professional.email == email and professional.email not in exceptions.get(users_types.PROFESSIONAL, []): 
+                return True
 
         for admin in admins:
-            if admin.email == email: return True
+            if admin.email == email and admin.email not in exceptions.get(users_types.ADMIN, []): 
+                return True
         
         return False
 
