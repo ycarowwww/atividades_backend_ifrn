@@ -33,29 +33,38 @@ class View:
     def get_client(client_id: int) -> Optional[Client]: return View.get_id(ClientDAO, client_id)
 
     @staticmethod
-    def append_client(name: str, email: str, phone: str, password: str) -> None:
+    def append_client(name: str, email: str, phone: str, password: str, profile_photo: Optional[bytes] = None) -> None:
         if View.check_email(email):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.add(ClientDAO, Client(0, name, email, phone, password))
+        View.add(ClientDAO, Client(0, name, email, phone, password, profile_photo))
     
     @staticmethod
-    def update_client(client_id: int, name: str, email: str, phone: str, password: str) -> None:
+    def update_client(client_id: int, name: str, email: str, phone: str, password: str, profile_photo: Optional[bytes] = None) -> None:
         old_client = View.get_client(client_id)
         users_type = View.get_users_type()
         verif_excep = {} if old_client is None else { users_type.CLIENT : [ old_client.email ] }
 
         if View.check_email(email, verif_excep):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.update(ClientDAO, Client(client_id, name, email, phone, password))
+        View.update(ClientDAO, Client(client_id, name, email, phone, password, profile_photo))
     
     @staticmethod
     def remove_client(client_id: int) -> None:
         if len(View.get_schedules_by_client(client_id)) > 0:
-            raise ValueError("Client has scheduled appointments")
+            raise ValueError("Cliente está com horários agendados")
+        with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+            profile_photo = photo.read()
+        View.remove_notifications(client_id, View.get_users_type().CLIENT)
         
-        View.delete(ClientDAO, Client(client_id, "_", "_", "_", "_"))
+        View.delete(ClientDAO, Client(client_id, "_", "_", "_", "_", profile_photo))
     
     # Métodos - Serviço.
     @staticmethod
@@ -70,23 +79,31 @@ class View:
     @staticmethod
     def append_service(description: str, value: float) -> None:
         if View.check_service_description(description):
-            raise ValueError("This description is already being used")
+            raise ValueError("Esta descrição já está sendo utilizada")
         
         View.add(ServiceDAO, Service(0, description, value))
 
     @staticmethod
     def update_service(service_id: int, description: str, value: float) -> None:
-        if View.check_service_description(description):
-            raise ValueError("This description is already being used")
+        old_service = View.get_service(service_id)
+        exceptions = [] if old_service is None else [ old_service.description ]
+        
+        if View.check_service_description(description, exceptions):
+            raise ValueError("Esta descrição já está sendo utilizada")
         
         View.update(ServiceDAO, Service(service_id, description, value))
 
     @staticmethod
     def remove_service(service_id: int) -> None:
         if View.check_service_schedules(service_id):
-            raise ValueError("This service is being used in some schedules")
+            raise ValueError("Este serviço está sendo utilizado em alguns horários")
         
         View.delete(ServiceDAO, Service(service_id, "_", 0))
+
+        for prof in View.get_professional_list(): # Remove esse serviço de todos os profissionais.
+            if service_id in prof.services_id:
+                prof.services_id.remove(service_id)
+                View.update_professional(prof.id, prof.name, prof.email, prof.speciality, prof.council, prof.password, prof.services_id, prof.profile_photo)
     
     # Métodos - Horário.
     @staticmethod
@@ -105,7 +122,7 @@ class View:
         professional_id = professional.id if isinstance(professional, Professional) else 0
         schedule = Schedule(0, date, confirmed, client_id, service_id, professional_id)
         if View.check_schedule(schedule):
-            raise ValueError("There is already a schedule for the same professional at the same time")
+            raise ValueError("Já existe um mesmo horário para o mesmo profissional")
         
         View.add(ScheduleDAO, schedule)
 
@@ -116,19 +133,22 @@ class View:
         professional_id = professional.id if isinstance(professional, Professional) else 0
         schedule = Schedule(schedule_id, date, confirmed, client_id, service_id, professional_id)
         if View.check_schedule(schedule):
-            raise ValueError("There is already a schedule for the same professional at the same time")
+            raise ValueError("Já existe um mesmo horário para o mesmo profissional")
         
         View.update(ScheduleDAO, schedule)
 
     @staticmethod
     def remove_schedule(schedule_id: int) -> None:
         if View.get_schedule(schedule_id).client_id != 0:
-            raise ValueError("Schedule has already been scheduled")
+            raise ValueError("Horário já foi agendado")
         
         View.delete(ScheduleDAO, Schedule(schedule_id, datetime(2025, 1, 2)))
     
     @staticmethod
     def append_multiple_schedules(date_beginning: datetime, date_ending: datetime, interval_minutes: int, professional: Professional) -> None:
+        if interval_minutes <= 0:
+            raise ValueError("Intervalo precisa ser maior que 0.")
+        
         while date_beginning <= date_ending:
             View.append_schedule(date_beginning, False, None, None, professional)
             date_beginning += timedelta(minutes=interval_minutes)
@@ -144,29 +164,38 @@ class View:
     def get_professional(prof_id: int) -> Optional[Professional]: return View.get_id(ProfessionalDAO, prof_id)
 
     @staticmethod
-    def append_professional(name: str, email: str, speciality: str, council: str, password: str) -> None:
+    def append_professional(name: str, email: str, speciality: str, council: str, password: str, services_id: list[int], profile_photo: Optional[bytes] = None) -> None:
         if View.check_email(email):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.add(ProfessionalDAO, Professional(0, name, email, speciality, council, password))
+        View.add(ProfessionalDAO, Professional(0, name, email, speciality, council, password, services_id, profile_photo))
 
     @staticmethod
-    def update_professional(prof_id: int, name: str, email: str, speciality: str, council: str, password: str) -> None:
+    def update_professional(prof_id: int, name: str, email: str, speciality: str, council: str, password: str, services_id: list[int], profile_photo: Optional[bytes] = None) -> None:
         old_prof = View.get_professional(prof_id)
         users_type = View.get_users_type()
         verif_excep = {} if old_prof is None else { users_type.PROFESSIONAL : [ old_prof.email ] }
 
         if View.check_email(email, verif_excep):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.update(ProfessionalDAO, Professional(prof_id, name, email, speciality, council, password))
+        View.update(ProfessionalDAO, Professional(prof_id, name, email, speciality, council, password, services_id, profile_photo))
 
     @staticmethod
     def remove_professional(prof_id: int) -> None:
         if len(View.get_schedules_by_professional(prof_id)) > 0:
-            raise ValueError("Professional has scheduled appointments")
+            raise ValueError("Profissional já agendou alguns horários.")
+        with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+            profile_photo = photo.read()
+        View.remove_notifications(prof_id, View.get_users_type().PROFESSIONAL)
         
-        View.delete(ProfessionalDAO, Professional(prof_id, "_", "_", "_", "_", "_"))
+        View.delete(ProfessionalDAO, Professional(prof_id, "_", "_", "_", "_", "_", [], profile_photo))
 
     # Métodos - Admin.
     @staticmethod
@@ -179,26 +208,62 @@ class View:
     def get_admin(admin_id: int) -> Optional[Admin]: return View.get_id(AdminDAO, admin_id)
 
     @staticmethod
-    def append_admin(name: str, email: str, password: str) -> None:
+    def append_admin(name: str, email: str, password: str, profile_photo: Optional[bytes] = None) -> None:
         if View.check_email(email):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.add(AdminDAO, Admin(0, name, email, password))
+        View.add(AdminDAO, Admin(0, name, email, password, profile_photo))
     
     @staticmethod
-    def update_admin(admin_id: int, name: str, email: str, password: str) -> None:
+    def update_admin(admin_id: int, name: str, email: str, password: str, profile_photo: Optional[bytes] = None) -> None:
         old_admin = View.get_admin(admin_id)
         users_type = View.get_users_type()
         verif_excep = {} if old_admin is None else { users_type.ADMIN : [ old_admin.email ] }
 
         if View.check_email(email, verif_excep):
-            raise ValueError("E-mail is already being used")
+            raise ValueError("E-mail já está sendo utilizado")
+        if profile_photo is None:
+            with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+                profile_photo = photo.read()
         
-        View.update(AdminDAO, Admin(admin_id, name, email, password))
+        View.update(AdminDAO, Admin(admin_id, name, email, password, profile_photo))
     
     @staticmethod
     def remove_admin(admin_id: int) -> None:
-        View.delete(AdminDAO, Admin(admin_id, "_", "_", "_"))
+        with open(get_file_path("../images/no_photo.png"), "rb") as photo:
+            profile_photo = photo.read()
+
+        View.delete(AdminDAO, Admin(admin_id, "_", "_", "_", profile_photo))
+
+    # Notificação.
+    @staticmethod
+    def get_notifications(receiver_id: int, receiver_type: UsersTypeIDs) -> list[Notification]:
+        notifications: list[Notification] = []
+        all_notifications: list[Notification] = View.get_all(NotificationDAO)
+        all_notifications.sort(key=lambda n: n.date_sent)
+
+        for notif in all_notifications:
+            if notif.receiver_id == receiver_id and notif.receiver_type == receiver_type:
+                notifications.append(notif)
+        
+        return notifications
+    
+    @staticmethod
+    def append_notification(message: str, date_sent: datetime, receiver_id: int, receiver_type: UsersTypeIDs) -> None:
+        if receiver_id == 0: return # Nenhum Objeto tem ID igual à 0.
+        
+        new_notification = Notification(0, message, date_sent, receiver_id, receiver_type)
+        View.add(NotificationDAO, new_notification)
+
+    @staticmethod
+    def remove_notifications(receiver_id: int, receiver_type: UsersTypeIDs) -> None:
+        notifications = View.get_notifications(receiver_id, receiver_type)
+
+        for notif in notifications:
+            View.delete(NotificationDAO, notif)
 
     # Filtração.
     @staticmethod
@@ -276,12 +341,12 @@ class View:
         return False
 
     @staticmethod
-    def check_service_description(description: str) -> bool:
+    def check_service_description(description: str, exceptions: list[str] = []) -> bool:
         """Retorna se um serviço com a mesma descrição já existe."""
         services = View.get_service_list()
 
         for service in services:
-            if service.description == description:
+            if service.description == description and service.description not in exceptions:
                 return True
         
         return False

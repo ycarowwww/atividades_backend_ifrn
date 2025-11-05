@@ -16,8 +16,8 @@ class Schedule:
 
     @id.setter
     def id(self, new_id: int) -> None:
-        if not isinstance(new_id, int): raise TypeError("ID needs to be an Integer.")
-        if new_id < 0: raise ValueError("ID needs to be greater than Zero.")
+        if not isinstance(new_id, int): raise TypeError("ID precisa ser um Inteiro.")
+        if new_id < 0: raise ValueError("ID não pode ser negativo.")
 
         self.__id = new_id
 
@@ -26,8 +26,8 @@ class Schedule:
 
     @date.setter
     def date(self, new_date: datetime) -> None:
-        if not isinstance(new_date, datetime): raise TypeError("Date needs to be a Datetime.")
-        if new_date < datetime(2025, 1, 1): raise ValueError("Date too long ago.")
+        if not isinstance(new_date, datetime): raise TypeError("Data precisa ser um Datetime.")
+        if new_date < datetime(2025, 1, 1): raise ValueError("Data muito antiga.")
 
         self.__date = new_date
 
@@ -36,7 +36,7 @@ class Schedule:
 
     @confirmed.setter
     def confirmed(self, new_confirmed: bool) -> None:
-        if not isinstance(new_confirmed, bool): raise TypeError("Confirmed needs to be a Boolean.")
+        if not isinstance(new_confirmed, bool): raise TypeError("'Confirmado' precisa ser um booleano.")
 
         self.__confirmed = new_confirmed
 
@@ -45,8 +45,8 @@ class Schedule:
 
     @client_id.setter
     def client_id(self, new_client_id: int) -> None:
-        if not isinstance(new_client_id, int): raise TypeError("Client's ID needs to be an Integer.")
-        if new_client_id < 0: raise ValueError("Client's ID needs to be greater than Zero.")
+        if not isinstance(new_client_id, int): raise TypeError("ID do Cliente precisa ser um Inteiro.")
+        if new_client_id < 0: raise ValueError("ID do Cliente não pode ser negativo.")
 
         self.__client_id = new_client_id
 
@@ -55,8 +55,8 @@ class Schedule:
 
     @service_id.setter
     def service_id(self, new_service_id: int) -> None:
-        if not isinstance(new_service_id, int): raise TypeError("Service's ID needs to be an Integer.")
-        if new_service_id < 0: raise ValueError("Service's ID needs to be greater than Zero.")
+        if not isinstance(new_service_id, int): raise TypeError("ID do Serviço precisa ser um Inteiro.")
+        if new_service_id < 0: raise ValueError("ID do Serviço não pode ser negativo.")
 
         self.__service_id = new_service_id
 
@@ -65,8 +65,8 @@ class Schedule:
 
     @professional_id.setter
     def professional_id(self, new_professional_id: int) -> None:
-        if not isinstance(new_professional_id, int): raise TypeError("Professional's ID needs to be an Integer.")
-        if new_professional_id < 0: raise ValueError("Professional's ID needs to be greater than Zero.")
+        if not isinstance(new_professional_id, int): raise TypeError("ID do Profissional precisa ser um Inteiro.")
+        if new_professional_id < 0: raise ValueError("ID do Profissional não pode ser negativo.")
 
         self.__professional_id = new_professional_id
 

@@ -1,13 +1,8 @@
+from .utils_fileio import get_file_path
 from abc import ABC
 import json
 import os
 from typing import Any, Callable, Optional
-
-def get_file_path(file: str) -> str:
-    """Retorna o caminho absoluto de um arquivo."""
-    base_dir: str = os.path.dirname(os.path.abspath(__file__))
-
-    return os.path.join(base_dir, file)
 
 class AbstractDAO(ABC):
     """Classe Abstrata que padroniza todos os DAOs do programa."""
@@ -53,7 +48,7 @@ class AbstractDAO(ABC):
         cls._open_file()
 
         cur_obj = cls.get_id(obj.id)
-        if cur_obj is None: raise ValueError("Passed Object doesn't exist on database.")
+        if cur_obj is None: raise ValueError("Objeto passado não existe no Banco de Dados.")
 
         cls._objects.remove(cur_obj)
         cls._objects.append(obj)
@@ -65,7 +60,7 @@ class AbstractDAO(ABC):
         cls._open_file()
         
         cur_obj = cls.get_id(obj.id)
-        if cur_obj is None: raise ValueError("Passed Object doesn't exist on database.")
+        if cur_obj is None: raise ValueError("Objeto passado não existe no Banco de Dados.")
 
         cls._objects.remove(cur_obj)
 

@@ -16,22 +16,26 @@ class IndexUI:
     def menu_client() -> None:
         st.sidebar.header("Menu de Cliente")
 
-        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários", "Agendar Horário"])
+        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários", "Agendar Horário", "Cancelar Horário", "Minhas Notificações"])
 
         if op == "Visualizar Perfil": ClientProfileUI.main()
         elif op == "Visualizar Horários": ScheduleClientUI.main()
         elif op == "Agendar Horário": SetServiceClientUI.main()
+        elif op == "Cancelar Horário": CancelServiceClientUI.main()
+        elif op == "Minhas Notificações": NotificationsClientUI.main()
     
     @staticmethod
     def menu_professional() -> None:
         st.sidebar.header("Menu de Profissional")
 
-        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários", "Abrir Agenda", "Confirmar Serviço"])
+        op = st.sidebar.selectbox("Menu", ["Visualizar Perfil", "Visualizar Horários", "Abrir Agenda", "Cancelar Agenda", "Confirmar Serviço", "Minhas Notificações"])
 
         if op == "Visualizar Perfil": ProfessionalProfileUI.main()
         elif op == "Visualizar Horários": ScheduleProfessionalUI.main()
         elif op == "Abrir Agenda": SetScheduleProfessionalUI.main()
+        elif op == "Cancelar Agenda": CancelScheduleProfessionalUI.main()
         elif op == "Confirmar Serviço": ConfirmScheduleProfessionalUI.main()
+        elif op == "Minhas Notificações": NotificationsProfessionalUI.main()
     
     @staticmethod
     def menu_admin() -> None:

@@ -16,6 +16,7 @@ class SetScheduleProfessionalUI:
 
         user_id: int = st.session_state["user_id"]
         prof_data = View.get_professional(user_id)
+        if prof_data is None: return
 
         date_entered = st.date_input("Informe a data do Serviço", date.today())
         col1, col2, col3 = st.columns(3) # Inputs para o tempo da data (o "date_input" não oferece a hora, apenas a data).
@@ -35,6 +36,12 @@ class SetScheduleProfessionalUI:
         set_schedule = st.button("Abrir Agenda")
 
         if set_schedule:
+            if beginning_datetime > ending_datetime:
+                st.warning("Horários Inválidos", icon="⚠")
+                sleep(1)
+                st.rerun()
+                return
+            
             try:
                 View.append_multiple_schedules(beginning_datetime, ending_datetime, interval, prof_data)
                 st.success("Horário Agendado com Sucesso!", icon="✔")

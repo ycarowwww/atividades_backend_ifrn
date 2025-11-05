@@ -35,6 +35,9 @@ class KeepClientUI:
 
     @staticmethod
     def insert_client() -> None:
+        profile_photo = st.file_uploader("Insira a Foto de Perfil", ["png", "jpg", "jpeg"])
+        if profile_photo: 
+            st.image(profile_photo, "Foto de Perfil Selecionada")
         name = st.text_input("Insira o Nome")
         email = st.text_input("Insira o Email")
         phone = st.text_input("Insira o Telefone")
@@ -43,8 +46,10 @@ class KeepClientUI:
         do_insert = st.button("Inserir Cliente")
 
         if do_insert:
+            profile_photo = profile_photo if profile_photo is None else profile_photo.read()
+            
             try:
-                View.append_client(name, email, phone, password)
+                View.append_client(name, email, phone, password, profile_photo)
                 st.success("Cliente Inserido com Sucesso!", icon="✔")
             except Exception as e:
                 st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
@@ -56,12 +61,16 @@ class KeepClientUI:
         clients = View.get_client_list()
 
         if len(clients) <= 0:
-            st.write("Nenhum Cliente Registrado.")
+            st.warning("Nenhum Cliente Registrado.", icon="⚠")
         else:
             client_selected = st.selectbox(
                 "Selecione um Cliente para Atualizar",
                 clients
             )
+            st.image(client_selected.profile_photo, "Foto de Perfil Atual")
+            new_profile_photo = st.file_uploader("Insira a Nova Foto de Perfil", ["png", "jpg", "jpeg"])
+            actual_photo_if_any = st.checkbox("Deixar Foto Atual caso nenhuma Selecionada", True)
+            if new_profile_photo: st.image(new_profile_photo, "Foto de Perfil Selecionada")
             new_name = st.text_input("Insira o Novo Nome", client_selected.name)
             new_email = st.text_input("Insira o Novo Email", client_selected.email)
             new_phone = st.text_input("Insira o Novo Telefone", client_selected.phone)
@@ -69,8 +78,13 @@ class KeepClientUI:
             do_update = st.button("Atualizar Cliente")
 
             if do_update:
+                if new_profile_photo is None and actual_photo_if_any:
+                    new_profile_photo = client_selected.profile_photo
+                elif new_profile_photo is not None:
+                    new_profile_photo = new_profile_photo.read()
+                
                 try:
-                    View.update_client(client_selected.id, new_name, new_email, new_phone, new_password)
+                    View.update_client(client_selected.id, new_name, new_email, new_phone, new_password, new_profile_photo)
                     st.success("Cliente Atualizado com Sucesso!", icon="✔")
                 except Exception as e:
                     st.error(f"Um Erro Ocorreu: {e}", icon="🚨")
@@ -82,7 +96,7 @@ class KeepClientUI:
         clients = View.get_client_list()
 
         if len(clients) <= 0:
-            st.write("Nenhum Cliente Registrado.")
+            st.warning("Nenhum Cliente Registrado.", icon="⚠")
         else:
             client_selected = st.selectbox(
                 "Selecione um Cliente para Deletar",

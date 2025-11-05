@@ -12,8 +12,8 @@ class Service:
 
     @id.setter
     def id(self, service_id: int) -> None:
-        if not isinstance(service_id, int): raise TypeError("ID needs to be an INT.")
-        if service_id < 0: raise ValueError("ID can't be negative.")
+        if not isinstance(service_id, int): raise TypeError("ID precisa ser um Inteiro.")
+        if service_id < 0: raise ValueError("ID não pode ser negativo.")
 
         self.__id = service_id
 
@@ -23,7 +23,7 @@ class Service:
     @description.setter
     def description(self, description: str) -> None:
         description = description.strip()
-        if description == "": raise ValueError("Description can't be empty.")
+        if description == "": raise ValueError("Descrição não pode ser vazia.")
 
         self.__description = description
 
@@ -32,7 +32,7 @@ class Service:
 
     @value.setter
     def value(self, value: float) -> None:
-        if not isinstance(value, (int, float)): raise TypeError("Value needs to be a Number.")
+        if not isinstance(value, (int, float)): raise TypeError("Valor precisa ser um número.")
 
         self.__value = value
 

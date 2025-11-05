@@ -78,7 +78,7 @@ class KeepScheduleUI:
         professionals = View.get_professional_list()
 
         if len(schedules) <= 0:
-            st.write("Nenhum Horário Registrado.")
+            st.warning("Nenhum Horário Registrado.", icon="⚠")
         else:
             schedule_selected = st.selectbox(
                 "Selecione um Horário para Atualizar",
@@ -124,7 +124,7 @@ class KeepScheduleUI:
         schedules = View.get_schedule_list()
 
         if len(schedules) <= 0:
-            st.write("Nenhum Horário Registrado.")
+            st.warning("Nenhum Horário Registrado.", icon="⚠")
         else:
             schedule_selected = st.selectbox(
                 "Selecione um Horário para Deletar",

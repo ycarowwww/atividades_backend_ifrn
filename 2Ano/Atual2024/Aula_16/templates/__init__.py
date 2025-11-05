@@ -12,6 +12,10 @@ from .schedule_professional_ui import *
 from .set_service_client_ui import *
 from .set_schedule_professional_ui import *
 from .confirm_schedule_professional_ui import *
+from .cancel_service_client_ui import *
+from .cancel_schedule_professional_ui import *
+from .notifications_client_ui import *
+from .notifications_professional_ui import *
 
 # Arquivos '__init__.py' servem para poder realizar um "import" mais ou menos assim:
 # from templates import *

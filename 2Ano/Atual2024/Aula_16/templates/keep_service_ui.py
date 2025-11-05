@@ -54,7 +54,7 @@ class KeepServiceUI:
         services = View.get_service_list()
 
         if len(services) <= 0:
-            st.write("Nenhum Serviço Registrado.")
+            st.warning("Nenhum Serviço Registrado.", icon="⚠")
         else:
             service_selected = st.selectbox(
                 "Selecione um Serviço para Atualizar",
@@ -78,7 +78,7 @@ class KeepServiceUI:
         services = View.get_service_list()
 
         if len(services) <= 0:
-            st.write("Nenhum Serviço Registrado.")
+            st.warning("Nenhum Serviço Registrado.", icon="⚠")
         else:
             service_selected = st.selectbox(
                 "Selecione um Serviço para Deletar",
