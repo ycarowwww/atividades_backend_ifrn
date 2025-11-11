@@ -62,7 +62,7 @@ class KeepServiceUI:
             )
             description = st.text_input("Insira a Descrição", service_selected.description)
             value = st.number_input("Insira o Valor", value=service_selected.value, step=0.1)
-            do_update = st.button("Atualizar Cliente")
+            do_update = st.button("Atualizar Serviço")
 
             if do_update:
                 try:
