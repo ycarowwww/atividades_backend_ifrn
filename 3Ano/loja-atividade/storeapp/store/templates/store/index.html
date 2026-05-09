@@ -1,0 +1,41 @@
+{% extends "store/base.html" %}
+
+{% block title %}Lista de Produtos{% endblock %}
+
+{% block body %}
+<body class="bg-blue-300">
+    <ul class="list-none grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-3">
+        {% for product in products %}
+        <li class="w-full bg-white p-3 rounded-md shadow-sm relative">
+            {% if product.is_featured %}
+            <span class="material-symbols-outlined absolute text-yellow-500 text-shadow-sm top-3 right-3">star</span> <!-- Featured -->
+            {% endif %}
+
+            <img class="w-full aspect-[3/2] object-cover rounded-md" src="{{ product.image.url }}" alt="{{ product.name }}">
+
+            <div class="flex gap-x-2 flex-wrap py-2"> <!-- Categories -->
+                {% for category in product.categories.all %}
+                <p class="bg-gray-600 text-white text-sm px-2 py-1 rounded-md shadow-sm">{{ category.name }}</p>
+                {% endfor %}
+            </div>
+
+            <h2 class="font-bold text-2xl sm:text-xl mt-2">{{ product.name }}</h2> <!-- Title -->
+            <p class="text-sm text-gray-700 mb-2">{{ product.manufacturer.name }}</p> <!-- Manufacturer -->
+
+            <div class="flex flex-wrap justify-between items-center">
+                <div> <!-- prices -->
+                    {% if product.promotion is None %}
+                    <p class="text-2xl font-bold before:content-['R$']">{{ product.price }}</p>
+                    {% else %}
+                    <p class="text-gray-700 line-through before:content-['R$']">{{ product.price }}</p>
+                    <p class="text-2xl font-bold before:content-['R$']">{{ product.promotion }}</p>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'product' product.id %}" class="bg-blue-600 text-white p-3 rounded-md shadow-sm hover:bg-blue-700 hover:cursor-pointer flex justify-center align-center"><span class="material-symbols-outlined">shopping_cart</span></a> <!-- Buy Button -->
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+{% endblock %}
