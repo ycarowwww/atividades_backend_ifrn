@@ -1,0 +1,12 @@
+.product_item {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.product_item span {
+    width: min(90dvw, 300px);
+    font-size: 1.2rem;
+}

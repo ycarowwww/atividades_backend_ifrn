@@ -1,0 +1,66 @@
+.generic_button {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    padding: .4rem .8rem;
+    border-radius: .4rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, .5);
+    transition: background-color .3s ease;
+    cursor: pointer;
+}
+
+.details-button {
+    color: white;
+    background-color: #0d6cf2;
+}
+
+.details-button:hover {
+    background-color: #0758cb;
+}
+
+.add-button {
+    color: white;
+    background-color: #08c61b;
+}
+
+.add-button:hover {
+    background-color: #028c0d;
+}
+
+.favorite-button {
+    color: black;
+    background-color: #f2d00d;
+}
+
+.favorite-button:hover {
+    background-color: #f2b90d;
+}
+
+.edit-button {
+    color: white;
+    background-color: #404040;
+}
+
+.edit-button:hover {
+    background-color: #101010;
+}
+
+.delete-button {
+    color: white;
+    background-color: #f20d0d;
+}
+
+.delete-button:hover {
+    background-color: #c80202;
+}
+
+.return-button {
+    color: black;
+    background-color: #C0C0C0;
+}
+
+.return-button:hover {
+    background-color: #909090;
+}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Deletar Produto
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/generic_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/delete_product.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>Deletar Produto: {{ form.instance.name }}</h1>
+
+    <form method="post" action="{% url 'delete_product' form.instance.pk %}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        
+        <div class="form-buttons">
+            <button class="generic_button delete-button" type="submit">Deletar</button>
+            <a class="generic_button return-button" href="{% url 'products' %}">Retornar</a>
+        </div>
+    </form>
+{% endblock %}

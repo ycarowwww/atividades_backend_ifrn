@@ -1,0 +1,69 @@
+h1 {
+    margin-bottom: .5rem;
+}
+
+form {
+    width: min(100%, 600px);
+}
+
+form p + p {
+    margin-top: .2rem;
+}
+
+form p:has(input[type="text"]), 
+form p:has(input[type="number"]), 
+form p:has(input[type="file"]), 
+form p:has(select) { /* "form.as_p" does this structure */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+form p:has(input[type="file"]) img {
+    grid-column: 2 / 3;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: .5rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, .5);
+}
+
+form p:has(input[type="checkbox"]) {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row-reverse;
+    gap: .2rem;
+}
+
+form :where(input[type="text"], input[type="number"], select) {
+    font-size: 1.1rem;
+    padding: .2rem;
+    border: 1px solid black;
+    border-radius: .2rem;
+    background-color: white;
+    transition: background .3s ease;
+}
+
+form :where(input[type="text"], input[type="number"], select):focus {
+    background-color: #d4ebf7;
+}
+
+form img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin-top: .5rem;
+}
+
+.form-buttons .generic_button {
+    width: 100%;
+}

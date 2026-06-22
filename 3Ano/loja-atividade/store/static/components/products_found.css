@@ -1,0 +1,9 @@
+.products_found {
+    color: hsl(145, 50%, 40%);
+    font-size: 1.1rem;
+    padding: .75rem 1rem;
+    border-radius: .5rem;
+    margin-block: 1.5rem;
+    background-color: hsl(140, 50%, 90%);
+    box-shadow: 0 0 1px rgba(0, 0, 0, .5);
+}

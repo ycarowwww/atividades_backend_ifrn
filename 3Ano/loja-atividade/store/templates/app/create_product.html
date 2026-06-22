@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Adicionar Produto
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/generic_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/create_product.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>Adicionar Produto</h1>
+
+    <form method="post" action="{% url 'create_product' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        
+        <div class="form-buttons">
+            <button class="generic_button add-button" type="submit">Adicionar</button>
+            <a class="generic_button return-button" href="{% url 'products' %}">Retornar</a>
+        </div>
+    </form>
+{% endblock %}

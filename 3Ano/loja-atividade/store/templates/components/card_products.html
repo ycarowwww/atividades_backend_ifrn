@@ -1,0 +1,10 @@
+{% url 'view_product' product.pk as details_link %}
+{% url 'edit_product' product.pk as edit_link %}
+{% url 'delete_product' product.pk as delete_link %}
+
+<li class="product_item">
+    <span>{{ product.name }}</span>
+    {% include "components/generic_button.html" with btn_link=details_link btn_classes="details-button" text="Ver" only %}
+    {% include "components/generic_button.html" with btn_link=edit_link btn_classes="edit-button" text="Editar" only %}
+    {% include "components/generic_button.html" with btn_link=delete_link btn_classes="delete-button" text="Apagar" only %}
+</li>

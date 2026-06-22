@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Visualizar Produto
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/generic_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/view_product.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>Visualizar: {{ form.instance.name }}</h1>
+
+    <div class="product_info">
+        {{ form.as_p }}
+        
+        <a class="generic_button return-button" href="{% url 'products' %}">Retornar</a>
+    </div>
+{% endblock %}
