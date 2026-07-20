@@ -1,0 +1,1 @@
+O ".venv" do Python é da versão "3.14.2" e o Django é o mais recente. Nome e Senha do Admin são "admin".

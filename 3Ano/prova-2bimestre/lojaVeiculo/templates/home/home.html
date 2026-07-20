@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Loja de Veículos{% endblock %}
+
+{% block content %}
+<h1>Buscar Veículos</h1>
+
+<form method="get">
+    <input type="text" name="fabricante" id="fabricante" placeholder="Fabricante">
+    <input type="number" name="ano" id="ano" placeholder="Ano">
+    <button type="submit">Buscar</button>
+</form>
+
+<hr>
+
+<h1>Relação de Veículos</h1>
+
+<ul>
+    {% for v in veiculos %}
+    <li>{{ v.Veiculo }}: {{ v.fabricante }} - {{ v.ano }}</li>
+    {% empty %}
+    <li>Nenhum Veículo Encontrado</li>
+    {% endfor %}
+</ul>
+{% endblock %}
