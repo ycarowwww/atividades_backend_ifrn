@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Excluir Categoria
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/generic_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/category_delete.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>Excluir Categoria</h1>
+
+    <p>Tem certeza que deseja excluir a categoria <strong>{{ category.name }}</strong>?</p>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        <div class="form-buttons">
+            <button class="generic_button delete-button" type="submit">Excluir</button>
+            <a class="generic_button return-button" href="{% url 'categories' %}">Retornar</a>
+        </div>
+    </form>
+{% endblock %}

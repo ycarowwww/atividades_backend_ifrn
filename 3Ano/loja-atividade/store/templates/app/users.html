@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Usuários
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/users_found.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/users.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="top-user">
+        {% include "components/users_found.html" with amount=users|length only %}
+    </div>
+
+    <table class="table-users">
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Email</th>
+                <th>Aniversário</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.user.username }}</td>
+                    <td>{{ user.user.email }}</td>
+                    <td>{{ user.user.birthday }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

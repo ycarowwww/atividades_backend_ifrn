@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Fabricantes
+{% endblock %}
+
+{% block static %}
+    <link rel="stylesheet" href="{% static 'components/header.css' %}">
+    <link rel="stylesheet" href="{% static 'components/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'components/generic_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'app/categories.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="top-list">
+        {% url 'create_manufacturer' as create_manufacturer_link %}
+        {% include "components/generic_button.html" with btn_link=create_manufacturer_link btn_classes="add-button" text="Novo Fabricante" only %}
+        <p class="list-found">Fabricantes Encontrados: <strong>{{ manufacturers|length }}</strong>.</p>
+    </div>
+
+    <table class="table-list">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for manufacturer in manufacturers %}
+                <tr>
+                    <td>{{ manufacturer.name }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a class="generic_button edit-button" href="{% url 'edit_manufacturer' manufacturer.pk %}">Editar</a>
+                            <a class="generic_button delete-button" href="{% url 'delete_manufacturer' manufacturer.pk %}">Excluir</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">Nenhum fabricante cadastrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

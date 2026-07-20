@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Manufacturer, Product
+from .models import Category, Manufacturer, Product, UserModel
 
 class CategoryAndManufacturerAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -17,3 +17,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 admin.site.register([Category, Manufacturer], CategoryAndManufacturerAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(UserModel)

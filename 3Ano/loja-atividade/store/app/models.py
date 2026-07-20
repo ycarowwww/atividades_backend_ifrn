@@ -1,7 +1,39 @@
 import os
 from django.db import models
-from django.db.models.signals import pre_save, post_delete
+from django.contrib.auth.models import User
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
+
+PROFILE = (
+    (1, 'Admin'),
+    (2, 'Usuario')
+)
+
+class UserModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile = models.IntegerField(choices=PROFILE, default=2)
+    birthday = models.DateField(default=None, null=True, blank=True)
+    created_in = models.DateTimeField(auto_now_add=True)
+    changed_in = models.DateTimeField(auto_now=True)
+    token = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f'{self.user.username}'
+    
+    @receiver(post_save, sender=User)
+    def create_user_usuario(sender, instance, created, **kwargs):
+        try:
+            if created:
+                UserModel.objects.create(user=instance)
+        except:
+            pass
+
+    @receiver(post_save, sender=User)
+    def save_user_usuario(sender, instance, **kwargs):
+        try:
+            instance.usuario.save()
+        except:
+            pass
 
 class Manufacturer(models.Model):
     name = models.CharField(null=False, max_length=127)

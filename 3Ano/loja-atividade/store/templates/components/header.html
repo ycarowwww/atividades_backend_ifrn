@@ -1,9 +1,10 @@
 <header>
     <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="#">Categoria</a></li>
-        <li><a href="#">Fabricante</a></li>
+        <li><a href="{% url 'categories' %}">Categoria</a></li>
+        <li><a href="{% url 'manufacturers' %}">Fabricante</a></li>
         <li><a href="{% url 'products' %}">Produto</a></li>
+        <li><a href="{% url 'users' %}">Usuário</a></li>
         <li><a href="#">Entrar</a></li>
         <li><a href="#">Registrar</a></li>
     </ul>
