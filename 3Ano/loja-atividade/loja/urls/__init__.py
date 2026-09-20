@@ -5,3 +5,4 @@ from .FabricanteUrls import *
 from .UsuarioUrls import *
 from .AuthUrls import *
 from .CarrinhoUrls import *
+from .FavoritoUrls import *

@@ -17,7 +17,17 @@
                 {% for item in itens %}
                     <div class="row">
                         <a class="col-md-4">{{ item.produto.Produto }}</a>
-                        <a class="col-md-2">{{ item.quantidade }}</a>
+                        <div class="col-md-2">
+                            <form method="post" action="{% url 'diminuir_carrinhoitem' item.id %}" style="display: inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="width: min-content;"><i class="fa fa-minus"></i></button>
+                            </form>
+                            <span class="mx-2">{{ item.quantidade }}</span>
+                            <form method="post" action="{% url 'aumentar_carrinhoitem' item.id %}" style="display: inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="width: min-content;"><i class="fa fa-plus"></i></button>
+                            </form>
+                        </div>
                         <a class="col-md-2">R$ {{ item.preco|floatformat:2 }}</a>
                         <a class="col-md-2">R$ {{ item.total }}</a>
                         <a class="col-md-2">

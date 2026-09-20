@@ -31,6 +31,7 @@ urlpatterns = (
         path("usuario/", include("loja.urls.UsuarioUrls")),
         path("", include("loja.urls.AuthUrls")),
         path("carrinho/", include("loja.urls.CarrinhoUrls")),
+        path("favoritos/", include("loja.urls.FavoritoUrls")),
     ]
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

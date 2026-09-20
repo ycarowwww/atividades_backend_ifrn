@@ -39,13 +39,33 @@
                                  style="background-image: url('/media/{{ prod.image }}')"></div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ prod.Produto }}</h5>
-                                <a href="{% url 'details_produto' prod.id %}"
-                                   class="btn btn-primary btn-card">
-                                    <i class="fa fa-search"></i> Ver
-                                </a>
-                                <button class="btn btn-warning btn-card">
-                                    <i class="fa fa-heart"></i> Favoritar
-                                </button>
+
+                                <div class="d-flex flex-wrap" style="gap: .25rem;">
+                                    <a href="{% url 'details_produto' prod.id %}"
+                                        class="btn btn-primary btn-card">
+                                        <i class="fa fa-search"></i> Ver
+                                    </a>
+                                    <form method="post"
+                                    action="{% url 'alternar_favorito' prod.id %}"
+                                    style="display: inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'listar_favoritos' %}">
+                                        <button type="submit" class="btn btn-warning btn-card">
+                                            <i class="fa fa-heart"></i>
+                                            {% if not request.user.is_authenticated %}
+                                                Favoritar
+                                            {% elif request.user in prod.favoritos.all %}
+                                                Remover
+                                            {% else %}
+                                                Favoritar
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    <a href="{% url 'create_carrinhoitem' prod.id %}"
+                                        class="btn btn-primary btn-card m-0">
+                                        <i class="fa fa-plus"></i> Comprar
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
